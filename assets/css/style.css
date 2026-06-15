@@ -916,8 +916,8 @@ body {
 .email-note span { color: #8B6914; }
 
 .ticket-share-row {
-    width: 100%;
-    max-width: 340px;
+    width: 380px;
+    max-width: 94vw;
     margin: -0.25rem auto 1.75rem;
     display: flex;
     flex-direction: column;
@@ -1251,15 +1251,17 @@ body {
    ============================================================ */
 
 .ticket-card {
-    width: 100%;
+    width: 380px;
     background: #f8f4ec;
-    border: 1px solid #d8cdb4;
+    border: 1px solid #b8a888;
     border-radius: 4px;
     padding: 2rem 1.75rem;
     text-align: center;
     color: #1a0e00;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.14);
     animation: fadeInUp 0.5s ease both;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Header */
@@ -1285,19 +1287,19 @@ body {
     font-size: 0.58rem;
     letter-spacing: 2.5px;
     text-transform: uppercase;
-    color: #6b4c2a;
+    color: #4a2e0a;
 }
 .tc-choir-text strong {
     font-size: 0.72rem;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #2c1500;
+    color: #1a0800;
     font-weight: 800;
 }
 
 /* Dividers */
-.tc-rule    { height: 1px; background: #c8b898; margin: 0.85rem 0; }
-.tc-rule-sm { height: 1px; background: #c8b898; margin: 0.45rem 0; }
+.tc-rule    { height: 1px; background: #9a8060; margin: 0.85rem 0; }
+.tc-rule-sm { height: 1px; background: #9a8060; margin: 0.45rem 0; }
 
 /* Undangan cursive */
 .tc-undangan {
@@ -1311,7 +1313,7 @@ body {
 /* Event title */
 .tc-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-size: 3.2rem;
     font-weight: 900;
     color: #1a0800;
     line-height: 1;
@@ -1322,7 +1324,7 @@ body {
     font-size: 0.65rem;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #6b4c2a;
+    color: #4a2e0a;
     font-weight: 700;
     margin-bottom: 0.3rem;
 }
@@ -1330,7 +1332,7 @@ body {
     font-size: 0.58rem;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #9a7a55;
+    color: #6b4c2a;
 }
 
 /* Date + Detail row */
@@ -1352,7 +1354,7 @@ body {
     font-size: 0.58rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #6b4c2a;
+    color: #4a2e0a;
     font-weight: 700;
 }
 .tc-day {
@@ -1368,12 +1370,12 @@ body {
     display: block;
     font-size: 0.65rem;
     letter-spacing: 1.5px;
-    color: #6b4c2a;
+    color: #4a2e0a;
     font-weight: 700;
 }
 .tc-vline {
     width: 1px;
-    background: #c8b898;
+    background: #9a8060;
     align-self: stretch;
     flex-shrink: 0;
 }
@@ -1388,7 +1390,7 @@ body {
     font-size: 0.6rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #9a7a55;
+    color: #4a2e0a;
     font-weight: 700;
     margin-bottom: 0.1rem;
 }
@@ -1403,7 +1405,7 @@ body {
     font-size: 0.55rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #9a7a55;
+    color: #4a2e0a;
     margin-bottom: 0.1rem;
 }
 .tc-peserta-name {
