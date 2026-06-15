@@ -1,20 +1,52 @@
 <?php
 session_start();
-// No-cache headers
+require_once 'config/db.php';
+
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
-if (empty($_SESSION['ticket'])) {
+$t            = null;
+$ticket_codes = [];
+$jumlah_tiket = 0;
+$isNew        = isset($_GET['new']);
+$token        = trim($_GET['token'] ?? '');
+
+/* ---------- Load via token + DB ---------- */
+if ($token && $pdo) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM registrations WHERE kode_tiket = ? LIMIT 1");
+        $stmt->execute([$token]);
+        $row  = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $jumlah_tiket = (int)$row['jumlah_tiket'];
+            $batch        = substr($row['kode_tiket'], 7, 4);
+            for ($i = 0; $i < $jumlah_tiket; $i++) {
+                $ticket_codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            }
+            $t = [
+                'kode_utama'   => $row['kode_tiket'],
+                'ticket_codes' => $ticket_codes,
+                'nama'         => $row['nama'],
+                'email'        => $row['email'],
+                'jumlah_tiket' => $jumlah_tiket,
+            ];
+        }
+    } catch (Exception $e) { /* fall through to session */ }
+}
+
+/* ---------- Fallback: session ---------- */
+if (!$t && !empty($_SESSION['ticket'])) {
+    $t            = $_SESSION['ticket'];
+    $ticket_codes = $t['ticket_codes'];
+    $jumlah_tiket = (int)$t['jumlah_tiket'];
+}
+unset($_SESSION['ticket']); // always clear
+
+if (!$t) {
     header('Location: index.php');
     exit;
 }
-
-// Ambil data lalu clear session — tidak bisa kembali ke halaman ini setelah refresh
-$t             = $_SESSION['ticket'];
-$ticket_codes  = $t['ticket_codes'];
-$jumlah_tiket  = (int)$t['jumlah_tiket'];
-unset($_SESSION['ticket']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -26,78 +58,90 @@ unset($_SESSION['ticket']);
     <link href="assets/css/style.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="ticket-page">
 
-    <!-- Success Header -->
+    <!-- Header -->
     <div class="ticket-success-header">
-        <div class="success-icon">✓</div>
+        <?php if ($isNew): ?>
+        <div class="success-icon">&#10003;</div>
         <h2>Reservasi Berhasil!</h2>
         <p>Tiket dikirim ke <span style="color:#8B6914;"><?= htmlspecialchars($t['email']) ?></span></p>
+        <?php else: ?>
+        <h2>Tiket Anda</h2>
+        <p>Selamat datang kembali, <span style="color:#8B6914;"><?= htmlspecialchars($t['nama']) ?></span></p>
+        <?php endif; ?>
     </div>
 
-    <!-- Download wrap — semua tiket dirender di sini -->
-    <div id="ticketDownloadWrap">
+    <!-- Ticket cards -->
+    <?php foreach ($ticket_codes as $i => $kode): ?>
 
-        <?php foreach ($ticket_codes as $i => $kode): ?>
-        <div class="ticket-card">
+    <div class="ticket-card" id="card-<?= $i ?>">
 
-            <!-- Header: Logo + Choir -->
-            <div class="tc-top">
-                <img src="logo.png" alt="Vita Voxa Choir" class="tc-logo">
-                <div class="tc-choir-text">
-                    <span>PADUAN SUARA</span>
-                    <strong>VITA VOXA CHOIR</strong>
-                    <span>JAKARTA</span>
-                </div>
+        <div class="tc-top">
+            <img src="logo.png" alt="Vita Voxa Choir" class="tc-logo">
+            <div class="tc-choir-text">
+                <span>PADUAN SUARA</span>
+                <strong>VITA VOXA CHOIR</strong>
+                <span>JAKARTA</span>
             </div>
-
-            <div class="tc-rule"></div>
-
-            <p class="tc-undangan">Undangan</p>
-            <h2 class="tc-title">FOAS 13</h2>
-            <p class="tc-subtitle">MENSANA IN CORPORE SANO</p>
-            <p class="tc-presents">FESTIVAL OF ARTS &amp; SONGS &nbsp;·&nbsp; VITA VOXA CHOIR</p>
-
-            <div class="tc-rule"></div>
-
-            <!-- Tanggal + Detail -->
-            <div class="tc-info-row">
-                <div class="tc-date">
-                    <span class="tc-month">NOVEMBER</span>
-                    <span class="tc-day">7</span>
-                    <span class="tc-year">2026</span>
-                </div>
-                <div class="tc-vline"></div>
-                <div class="tc-detail">
-                    <p class="tc-dayname">SABTU</p>
-                    <p class="tc-time">19.00 WIB</p>
-                    <div class="tc-rule-sm"></div>
-                    <p class="tc-peserta-label">PEMESAN</p>
-                    <p class="tc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
-                </div>
-            </div>
-
-            <div class="tc-rule"></div>
-
-            <!-- QR Code -->
-            <div class="tc-qr-section">
-                <p class="tc-ticket-num">Tiket <?= $i + 1 ?> dari <?= $jumlah_tiket ?></p>
-                <div class="tc-qr-wrap">
-                    <div id="qr-<?= $i ?>"></div>
-                </div>
-                <p class="tc-qr-code"><?= htmlspecialchars($kode) ?></p>
-            </div>
-
         </div>
-        <?php endforeach; ?>
+
+        <div class="tc-rule"></div>
+
+        <p class="tc-undangan">Undangan</p>
+        <h2 class="tc-title">FOAS 13</h2>
+        <p class="tc-subtitle">MENSANA IN CORPORE SANO</p>
+        <p class="tc-presents">FESTIVAL OF ARTS &amp; SONGS &nbsp;&middot;&nbsp; VITA VOXA CHOIR</p>
+
+        <div class="tc-rule"></div>
+
+        <div class="tc-info-row">
+            <div class="tc-date">
+                <span class="tc-month">NOVEMBER</span>
+                <span class="tc-day">7</span>
+                <span class="tc-year">2026</span>
+            </div>
+            <div class="tc-vline"></div>
+            <div class="tc-detail">
+                <p class="tc-dayname">SABTU</p>
+                <p class="tc-time">19.00 WIB</p>
+                <div class="tc-rule-sm"></div>
+                <p class="tc-peserta-label">PEMESAN</p>
+                <p class="tc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
+            </div>
+        </div>
+
+        <div class="tc-rule"></div>
+
+        <div class="tc-qr-section">
+            <p class="tc-ticket-num">Tiket <?= $i + 1 ?> dari <?= $jumlah_tiket ?></p>
+            <div class="tc-qr-wrap">
+                <div id="qr-<?= $i ?>"></div>
+            </div>
+            <p class="tc-qr-code"><?= htmlspecialchars($kode) ?></p>
+        </div>
 
     </div>
-    <!-- /ticketDownloadWrap -->
+
+    <!-- Share + sent badge per tiket -->
+    <div class="ticket-share-row">
+        <button class="btn-share-wa" id="share-btn-<?= $i ?>" onclick="shareToWA(<?= $i ?>, '<?= htmlspecialchars($kode, ENT_QUOTES) ?>')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.345.223-.643.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Share ke WhatsApp
+        </button>
+        <span class="wa-sent-badge" id="sent-<?= $i ?>">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            Sudah dibagikan ke WhatsApp
+        </span>
+    </div>
+
+    <?php endforeach; ?>
 
     <!-- Actions -->
     <div class="ticket-actions">
-        <button class="btn-download" onclick="downloadTicket()">⬇ Simpan Semua Tiket</button>
+        <button class="btn-download" onclick="downloadPDF()">Simpan Semua Tiket sebagai PDF</button>
         <a href="index.php" class="btn-new-reg">Kembali ke Beranda</a>
     </div>
 
@@ -107,34 +151,106 @@ unset($_SESSION['ticket']);
     </p>
 
     <script>
-        const codes = <?= json_encode($ticket_codes) ?>;
-        codes.forEach(function(code, i) {
-            new QRCode(document.getElementById('qr-' + i), {
-                text: code,
-                width:  130,
-                height: 130,
-                colorDark:  '#1a0800',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        });
+    var codes = <?= json_encode($ticket_codes) ?>;
 
-        function downloadTicket() {
-            const wrap = document.getElementById('ticketDownloadWrap');
-            html2canvas(wrap, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false
-            }).then(function(canvas) {
-                const link = document.createElement('a');
-                link.download = 'tiket-foas13-<?= addslashes($t['nama']) ?>.png';
+    // Generate QR codes
+    codes.forEach(function(code, i) {
+        new QRCode(document.getElementById('qr-' + i), {
+            text: code,
+            width:  130,
+            height: 130,
+            colorDark:  '#1a0800',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    });
+
+    // Restore WA sent status from localStorage
+    codes.forEach(function(code, i) {
+        if (localStorage.getItem('wa_' + code)) showWaSent(i);
+    });
+
+    function showWaSent(i) {
+        var btn   = document.getElementById('share-btn-' + i);
+        var badge = document.getElementById('sent-' + i);
+        if (btn)   btn.style.display   = 'none';
+        if (badge) badge.style.display = 'flex';
+    }
+
+    async function shareToWA(idx, code) {
+        var btn  = document.getElementById('share-btn-' + idx);
+        var orig = btn.innerHTML;
+        btn.innerHTML = 'Menyiapkan...';
+        btn.disabled  = true;
+
+        try {
+            var card   = document.querySelectorAll('.ticket-card')[idx];
+            var canvas = await html2canvas(card, {
+                scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false
+            });
+
+            var shared = false;
+            if (navigator.share && navigator.canShare) {
+                var blob = await new Promise(function(r) { canvas.toBlob(r, 'image/png'); });
+                var file = new File([blob], 'tiket-foas13-' + (idx + 1) + '.png', { type: 'image/png' });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Tiket FOAS 13',
+                        text:  'Tiket ' + (idx + 1) + ' dari <?= $jumlah_tiket ?> — FOAS 13 Vita Voxa Choir'
+                    });
+                    shared = true;
+                }
+            }
+            if (!shared) {
+                // Fallback: download PNG
+                var link = document.createElement('a');
+                link.download = 'tiket-foas13-' + (idx + 1) + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-            });
+            }
+
+            localStorage.setItem('wa_' + code, '1');
+            showWaSent(idx);
+        } catch (e) {
+            // User cancelled or error — restore button
+            btn.innerHTML = orig;
+            btn.disabled  = false;
         }
-    </script>
-    <script>
+    }
+
+    async function downloadPDF() {
+        var btn  = document.querySelector('.btn-download');
+        var orig = btn.textContent;
+        btn.textContent = 'Menyiapkan PDF...';
+        btn.disabled = true;
+
+        try {
+            var jsPDF  = window.jspdf.jsPDF;
+            var pdf    = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            var cards  = document.querySelectorAll('.ticket-card');
+            var pageW  = pdf.internal.pageSize.getWidth();
+            var pageH  = pdf.internal.pageSize.getHeight();
+
+            for (var i = 0; i < cards.length; i++) {
+                if (i > 0) pdf.addPage();
+                var canvas  = await html2canvas(cards[i], {
+                    scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false
+                });
+                var imgData = canvas.toDataURL('image/png');
+                var imgH    = (canvas.height * pageW) / canvas.width;
+                var yOff    = imgH < pageH ? (pageH - imgH) / 2 : 0;
+                pdf.addImage(imgData, 'PNG', 0, yOff, pageW, Math.min(imgH, pageH));
+            }
+            pdf.save('tiket-foas13-<?= addslashes($t['nama']) ?>.pdf');
+        } catch (e) {
+            alert('Gagal membuat PDF. Coba lagi.');
+        }
+
+        btn.textContent = orig;
+        btn.disabled = false;
+    }
+
     var _lt = 0;
     document.addEventListener('touchend', function(e) {
         var now = Date.now();

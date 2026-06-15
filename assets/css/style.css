@@ -914,6 +914,49 @@ body {
 }
 .email-note span { color: #8B6914; }
 
+.ticket-share-row {
+    width: 100%;
+    max-width: 340px;
+    margin: -0.25rem auto 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+.btn-share-wa {
+    width: 100%;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+}
+.btn-share-wa:hover, .btn-share-wa:active { background: #1da851; }
+.btn-share-wa:disabled { background: #aaa; cursor: not-allowed; }
+.wa-sent-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: #1a7a40;
+    background: #e6f9ee;
+    border: 1.5px solid #a8e6be;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    width: 100%;
+}
+
 /* ============================================================
    MULTI-QR TICKET GRID
    ============================================================ */

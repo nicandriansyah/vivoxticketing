@@ -132,5 +132,5 @@ if (function_exists('mail')) {
     @mail($email, $subject, $body, "From: noreply@vitavoxachoir.com\r\nContent-Type: text/plain; charset=UTF-8");
 }
 
-header('Location: ticket.php');
+header('Location: ticket.php?token=' . urlencode($kode_utama) . '&new=1');
 exit;
