@@ -705,6 +705,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.75rem;
+    color: #4caf50;
     margin: 0 auto 1.25rem;
 }
 .ticket-success-header h2 {

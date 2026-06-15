@@ -178,45 +178,58 @@ if (!$t) {
     }
 
     async function shareToWA(idx, code) {
-        var btn  = document.getElementById('share-btn-' + idx);
-        var orig = btn.innerHTML;
+        var btn     = document.getElementById('share-btn-' + idx);
+        var origHTML = btn.innerHTML;
         btn.innerHTML = 'Menyiapkan...';
         btn.disabled  = true;
 
         try {
             var card   = document.querySelectorAll('.ticket-card')[idx];
             var canvas = await html2canvas(card, {
-                scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false
+                scale: 2, useCORS: true, allowTaint: true,
+                backgroundColor: '#f8f4ec', logging: false
             });
 
-            var shared = false;
-            if (navigator.share && navigator.canShare) {
-                var blob = await new Promise(function(r) { canvas.toBlob(r, 'image/png'); });
-                var file = new File([blob], 'tiket-foas13-' + (idx + 1) + '.png', { type: 'image/png' });
-                if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Tiket FOAS 13',
-                        text:  'Tiket ' + (idx + 1) + ' dari <?= $jumlah_tiket ?> — FOAS 13 Vita Voxa Choir'
-                    });
-                    shared = true;
+            var fileName = 'tiket-foas13-' + (idx + 1) + '.jpg';
+            var blob = await new Promise(function(resolve) {
+                canvas.toBlob(resolve, 'image/jpeg', 0.92);
+            });
+            var file = new File([blob], fileName, { type: 'image/jpeg' });
+
+            // Try Web Share API (mobile share sheet — user picks WhatsApp)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: 'Tiket FOAS 13' });
+                } catch (shareErr) {
+                    if (shareErr.name === 'AbortError') {
+                        // User cancelled share — restore button, don't mark as sent
+                        btn.innerHTML = origHTML;
+                        btn.disabled  = false;
+                        return;
+                    }
+                    // Other error — fall through to download
+                    downloadBlob(blob, fileName);
                 }
-            }
-            if (!shared) {
-                // Fallback: download PNG
-                var link = document.createElement('a');
-                link.download = 'tiket-foas13-' + (idx + 1) + '.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+            } else {
+                // Fallback: download JPG, user shares manually
+                downloadBlob(blob, fileName);
             }
 
             localStorage.setItem('wa_' + code, '1');
             showWaSent(idx);
         } catch (e) {
-            // User cancelled or error — restore button
-            btn.innerHTML = orig;
+            btn.innerHTML = origHTML;
             btn.disabled  = false;
         }
+    }
+
+    function downloadBlob(blob, fileName) {
+        var url  = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
     }
 
     async function downloadPDF() {
@@ -226,25 +239,26 @@ if (!$t) {
         btn.disabled = true;
 
         try {
-            var jsPDF  = window.jspdf.jsPDF;
-            var pdf    = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            var cards  = document.querySelectorAll('.ticket-card');
-            var pageW  = pdf.internal.pageSize.getWidth();
-            var pageH  = pdf.internal.pageSize.getHeight();
+            var jsPDF = window.jspdf.jsPDF;
+            var pdf   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            var cards = document.querySelectorAll('.ticket-card');
+            var pageW = pdf.internal.pageSize.getWidth();
+            var pageH = pdf.internal.pageSize.getHeight();
 
             for (var i = 0; i < cards.length; i++) {
                 if (i > 0) pdf.addPage();
                 var canvas  = await html2canvas(cards[i], {
-                    scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false
+                    scale: 2, useCORS: true, allowTaint: true,
+                    backgroundColor: '#f8f4ec', logging: false
                 });
-                var imgData = canvas.toDataURL('image/png');
+                var imgData = canvas.toDataURL('image/jpeg', 0.92);
                 var imgH    = (canvas.height * pageW) / canvas.width;
                 var yOff    = imgH < pageH ? (pageH - imgH) / 2 : 0;
-                pdf.addImage(imgData, 'PNG', 0, yOff, pageW, Math.min(imgH, pageH));
+                pdf.addImage(imgData, 'JPEG', 0, yOff, pageW, Math.min(imgH, pageH));
             }
             pdf.save('tiket-foas13-<?= addslashes($t['nama']) ?>.pdf');
         } catch (e) {
-            alert('Gagal membuat PDF. Coba lagi.');
+            alert('Gagal membuat PDF: ' + e.message);
         }
 
         btn.textContent = orig;
