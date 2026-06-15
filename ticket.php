@@ -134,5 +134,13 @@ unset($_SESSION['ticket']);
             });
         }
     </script>
+    <script>
+    var _lt = 0;
+    document.addEventListener('touchend', function(e) {
+        var now = Date.now();
+        if (now - _lt < 300) { e.preventDefault(); }
+        _lt = now;
+    }, { passive: false });
+    </script>
 </body>
 </html>

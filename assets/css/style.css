@@ -18,6 +18,10 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+    touch-action: manipulation; /* iOS Safari: disable double-tap zoom */
+}
+
 body {
     font-family: 'Inter', sans-serif;
     font-size: 18px;
@@ -25,6 +29,7 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    touch-action: manipulation;
 }
 
 /* ============================================================

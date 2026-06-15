@@ -246,5 +246,13 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 </div>
 
 <script src="assets/js/form.js"></script>
+<script>
+var _lt = 0;
+document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    if (now - _lt < 300) { e.preventDefault(); }
+    _lt = now;
+}, { passive: false });
+</script>
 </body>
 </html>

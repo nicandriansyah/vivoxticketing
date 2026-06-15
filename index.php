@@ -39,5 +39,15 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
         <a href="form.php" class="btn-reserve">Reservasi Tiket</a>
     </div>
 
+
+<script>
+// Prevent double-tap zoom on iOS Safari
+var _lt = 0;
+document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    if (now - _lt < 300) { e.preventDefault(); }
+    _lt = now;
+}, { passive: false });
+</script>
 </body>
 </html>
