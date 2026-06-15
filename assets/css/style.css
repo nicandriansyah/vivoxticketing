@@ -666,14 +666,15 @@ body {
 .review-rows { padding: 0.5rem 1.25rem; }
 .review-row {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: flex-start;
-    padding: 0.7rem 0;
+    gap: 0.2rem;
+    padding: 0.75rem 0;
     font-size: 1.05rem;
 }
 .review-row:not(:last-child) { border-bottom: 1px solid #efefef; }
-.review-label { color: #888; min-width: 140px; }
-.review-value { color: #1a1a1a; text-align: right; font-weight: 600; }
+.review-label { color: #888; font-size: 0.85rem; }
+.review-value { color: #1a1a1a; font-weight: 600; }
 
 /* ============================================================
    TICKET PAGE
@@ -1370,11 +1371,12 @@ body {
     margin-bottom: 0.15rem;
 }
 .tc-ticket-num {
-    font-size: 0.65rem;
-    color: #6b4c2a;
+    font-size: 1rem;
+    color: #1a0800;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
+    text-align: center;
 }
 
 /* QR section */
@@ -1393,10 +1395,11 @@ body {
     line-height: 0;
 }
 .tc-qr-code {
-    font-family: 'Courier New', monospace;
-    font-size: 0.62rem;
-    color: #8a6a45;
-    letter-spacing: 1px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #0d0d0d;
+    letter-spacing: 2px;
+    font-weight: 700;
 }
 
 /* ============================================================

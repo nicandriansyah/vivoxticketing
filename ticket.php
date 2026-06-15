@@ -75,7 +75,6 @@ unset($_SESSION['ticket']);
                     <div class="tc-rule-sm"></div>
                     <p class="tc-peserta-label">PEMESAN</p>
                     <p class="tc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
-                    <p class="tc-ticket-num">Tiket <?= $i + 1 ?> dari <?= $jumlah_tiket ?></p>
                 </div>
             </div>
 
@@ -83,6 +82,7 @@ unset($_SESSION['ticket']);
 
             <!-- QR Code -->
             <div class="tc-qr-section">
+                <p class="tc-ticket-num">Tiket <?= $i + 1 ?> dari <?= $jumlah_tiket ?></p>
                 <div class="tc-qr-wrap">
                     <div id="qr-<?= $i ?>"></div>
                 </div>
