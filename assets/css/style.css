@@ -909,70 +909,222 @@ body {
    MULTI-QR TICKET GRID
    ============================================================ */
 
+/* ============================================================
+   CONCERT INVITATION TICKET CARD
+   ============================================================ */
+
 .ticket-summary-card {
     width: 100%;
-    max-width: 640px;
-    background: linear-gradient(135deg, #1a1410 0%, #0d0d0d 100%);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 16px;
-    padding: 1.75rem 2rem;
-    position: relative;
-    overflow: hidden;
+    max-width: 480px;
+    background: #f8f4ec;
+    border: 1px solid #d8cdb4;
+    border-radius: 4px;
+    padding: 2.25rem 2rem;
+    text-align: center;
+    color: #1a0e00;
     animation: fadeInUp 0.5s ease 0.1s both;
-    box-shadow: 0 0 60px rgba(201,168,76,0.08);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.1);
 }
-.ticket-summary-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+
+/* Top: logo + choir name */
+.tsc-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
-.summary-choir-name {
+.tsc-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+.tsc-choir-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.5;
+}
+.tsc-choir-text span {
+    font-size: 0.6rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+}
+.tsc-choir-text strong {
     font-size: 0.75rem;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--gold);
+    color: #2c1500;
+    font-weight: 800;
+}
+
+/* Divider */
+.tsc-rule {
+    height: 1px;
+    background: #c8b898;
+    margin: 1rem 0;
+}
+
+/* "Undangan" cursive */
+.tsc-undangan {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.25rem;
+    color: #3d2000;
     margin-bottom: 0.25rem;
+    line-height: 1.2;
 }
-.summary-event-title {
+
+/* Event title */
+.tsc-title {
     font-family: 'Playfair Display', serif;
-    font-size: 2.75rem;
-    font-weight: 700;
+    font-size: clamp(3rem, 10vw, 4rem);
+    font-weight: 900;
+    color: #1a0800;
     line-height: 1;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.2rem;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
 }
-.summary-event-sub {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
+
+/* Tagline */
+.tsc-subtitle {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
 }
-.summary-meta {
+
+/* "Vita Voxa Choir Presents" */
+.tsc-presents {
+    font-size: 0.62rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    margin-bottom: 0.5rem;
+}
+
+/* Date + Details row */
+.tsc-info-row {
     display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    border-top: 1px solid var(--border);
-    padding-top: 1rem;
-    margin-top: 0.5rem;
+    align-items: stretch;
+    text-align: left;
+    gap: 0;
 }
-.summary-meta-item label {
+
+.tsc-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 1.5rem;
+    min-width: 90px;
+}
+.tsc-month {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+.tsc-day {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 3.75rem;
+    font-weight: 900;
+    color: #1a0800;
+    line-height: 1;
+    margin: 0.1rem 0;
+}
+.tsc-year {
     display: block;
     font-size: 0.7rem;
     letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #999;
-    margin-bottom: 3px;
+    color: #6b4c2a;
+    font-weight: 700;
 }
-.summary-meta-item span {
-    font-size: 1.05rem;
+
+.tsc-vline {
+    width: 1px;
+    background: #c8b898;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+.tsc-detail {
+    flex: 1;
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.tsc-dayname {
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+}
+.tsc-time {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a0800;
+    margin-bottom: 0.5rem;
+}
+.tsc-rule-sm {
+    height: 1px;
+    background: #c8b898;
+    margin: 0.5rem 0;
+}
+.tsc-peserta-label {
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    margin-bottom: 0.15rem;
+}
+.tsc-peserta-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a0800;
+    margin-bottom: 0.1rem;
+    line-height: 1.2;
+}
+.tsc-peserta-tiket {
+    font-size: 0.7rem;
+    color: #6b4c2a;
     font-weight: 600;
-    color: #1a1a1a;
+    letter-spacing: 0.5px;
+}
+
+/* Arwah section */
+.tsc-arwah {
+    text-align: center;
+    padding-top: 0.25rem;
+}
+.tsc-arwah-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    margin-bottom: 0.2rem;
+}
+.tsc-arwah-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a0800;
+    margin-bottom: 0.15rem;
+}
+.tsc-arwah-years {
+    font-size: 0.78rem;
+    color: #8a6a45;
 }
 
 /* QR Grid */

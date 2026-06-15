@@ -17,7 +17,7 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiket FOAS 13 — <?= htmlspecialchars($t['nama']) ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -28,54 +28,72 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
     <div class="ticket-success-header">
         <div class="success-icon">✓</div>
         <h2>Reservasi Berhasil!</h2>
-        <p>Tiket dikirim ke <span style="color:#c9a84c;"><?= htmlspecialchars($t['email']) ?></span></p>
+        <p>Tiket dikirim ke <span style="color:#8B6914;"><?= htmlspecialchars($t['email']) ?></span></p>
     </div>
 
     <!-- Semua yang di-screenshot untuk download -->
     <div id="ticketDownloadWrap">
 
-        <!-- Summary Card -->
+        <!-- Concert Invitation Card -->
         <div class="ticket-summary-card">
-            <p class="summary-choir-name">Vita Voxa Choir</p>
-            <h2 class="summary-event-title">FOAS 13</h2>
-            <p class="summary-event-sub">Festival of Arts &amp; Songs</p>
 
-            <div class="summary-meta">
-                <div class="summary-meta-item">
-                    <label>Pemesan</label>
-                    <span><?= htmlspecialchars($t['nama']) ?></span>
+            <!-- Top: Logo + Choir Name -->
+            <div class="tsc-top">
+                <img src="logo.png" alt="Vita Voxa Choir" class="tsc-logo">
+                <div class="tsc-choir-text">
+                    <span>PADUAN SUARA</span>
+                    <strong>VITA VOXA CHOIR</strong>
+                    <span>JAKARTA</span>
                 </div>
-                <div class="summary-meta-item">
-                    <label>Tanggal</label>
-                    <span>Sabtu, 7 November</span>
-                </div>
-                <div class="summary-meta-item">
-                    <label>Jam</label>
-                    <span>19.00 WIB</span>
-                </div>
-                <div class="summary-meta-item">
-                    <label>Jumlah Tiket</label>
-                    <span><?= $jumlah_tiket ?> tiket</span>
-                </div>
-                <?php if ($t['upload_arwah'] && $t['nama_arwah']): ?>
-                <div class="summary-meta-item">
-                    <label>Mendoakan</label>
-                    <span>
-                        <?= htmlspecialchars($t['nama_arwah']) ?>
-                        <small style="display:block; font-size:.8rem; color:#888; font-weight:400;">
-                            <?= $t['tahun_lahir'] ?> – <?= $t['tahun_wafat'] ?>
-                            · <?= $hubunganLabel[$t['hubungan']] ?? '' ?>
-                        </small>
-                    </span>
-                </div>
-                <?php endif; ?>
             </div>
+
+            <div class="tsc-rule"></div>
+
+            <!-- Undangan -->
+            <p class="tsc-undangan">Undangan</p>
+
+            <!-- Event Title -->
+            <h2 class="tsc-title">FOAS 13</h2>
+            <p class="tsc-subtitle">MENSANA IN CORPORE SANO</p>
+            <p class="tsc-presents">FESTIVAL OF ARTS &amp; SONGS · VITA VOXA CHOIR</p>
+
+            <div class="tsc-rule"></div>
+
+            <!-- Date + Event Details -->
+            <div class="tsc-info-row">
+                <div class="tsc-date">
+                    <span class="tsc-month">NOVEMBER</span>
+                    <span class="tsc-day">7</span>
+                    <span class="tsc-year">2026</span>
+                </div>
+                <div class="tsc-vline"></div>
+                <div class="tsc-detail">
+                    <p class="tsc-dayname">SABTU</p>
+                    <p class="tsc-time">19.00 WIB</p>
+                    <div class="tsc-rule-sm"></div>
+                    <p class="tsc-peserta-label">PEMESAN</p>
+                    <p class="tsc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
+                    <p class="tsc-peserta-tiket"><?= $jumlah_tiket ?> Tiket</p>
+                </div>
+            </div>
+
+            <?php if ($t['upload_arwah'] && $t['nama_arwah']): ?>
+            <div class="tsc-rule"></div>
+            <div class="tsc-arwah">
+                <p class="tsc-arwah-label">MENDOAKAN</p>
+                <p class="tsc-arwah-name"><?= htmlspecialchars($t['nama_arwah']) ?></p>
+                <p class="tsc-arwah-years">
+                    <?= $t['tahun_lahir'] ?> – <?= $t['tahun_wafat'] ?>
+                    &nbsp;·&nbsp;
+                    <?= htmlspecialchars($hubunganLabel[$t['hubungan']] ?? '') ?>
+                </p>
+            </div>
+            <?php endif; ?>
+
         </div>
 
         <!-- QR Code Grid -->
-        <p class="qr-section-title">
-            QR Code — <?= $jumlah_tiket ?> Tiket
-        </p>
+        <p class="qr-section-title">QR Code — <?= $jumlah_tiket ?> Tiket</p>
 
         <div class="qr-grid">
             <?php foreach ($ticket_codes as $i => $kode): ?>
@@ -100,11 +118,10 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
 
     <p class="email-note">
         Tiket juga dikirimkan ke <span><?= htmlspecialchars($t['email']) ?></span><br>
-        <small style="font-size:.8rem; color:#555;">Cek folder Spam jika tidak menemukan email</small>
+        <small style="font-size:.8rem; color:#aaa;">Cek folder Spam jika tidak menemukan email</small>
     </p>
 
     <script>
-        // Generate QR untuk setiap tiket
         const codes = <?= json_encode($ticket_codes) ?>;
         codes.forEach(function(code, i) {
             new QRCode(document.getElementById('qr-' + i), {
@@ -117,13 +134,12 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
             });
         });
 
-        // Download seluruh wrap sebagai satu gambar
         function downloadTicket() {
             const wrap = document.getElementById('ticketDownloadWrap');
             html2canvas(wrap, {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: '#0d0d0d',
+                backgroundColor: '#ffffff',
                 logging: false
             }).then(function(canvas) {
                 const link = document.createElement('a');
