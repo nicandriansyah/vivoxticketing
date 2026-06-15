@@ -137,11 +137,11 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
                             <div class="form-group mb-3">
                                 <label class="form-label">Tahun Lahir <span class="required">*</span></label>
-                                <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024" autocomplete="off">
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" maxlength="4" autocomplete="off">
                             </div>
                             <div class="form-group mb-3">
                                 <label class="form-label">Tahun Wafat <span class="required">*</span></label>
-                                <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025" autocomplete="off">
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" maxlength="4" autocomplete="off">
                             </div>
 
                             <div class="form-group mb-1">
