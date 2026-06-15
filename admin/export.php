@@ -1,0 +1,57 @@
+<?php
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../config/db.php';
+
+if (!$pdo) {
+    http_response_code(500);
+    exit('Database tidak tersedia.');
+}
+
+$q = trim($_GET['q'] ?? '');
+$where = '';
+$params = [];
+if ($q !== '') {
+    $where  = "WHERE nama LIKE ? OR email LIKE ? OR kode_tiket LIKE ? OR no_hp LIKE ?";
+    $like   = "%$q%";
+    $params = [$like, $like, $like, $like];
+}
+
+$stmt = $pdo->prepare("SELECT * FROM registrations $where ORDER BY id DESC");
+$stmt->execute($params);
+
+$filename = 'registrasi-foas13-' . date('Ymd-His') . '.csv';
+header('Content-Type: text/csv; charset=UTF-8');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+$out = fopen('php://output', 'w');
+// BOM agar Excel membaca UTF-8 dengan benar
+fwrite($out, "\xEF\xBB\xBF");
+
+fputcsv($out, [
+    'ID', 'Tanggal', 'Kode Tiket Utama', 'Nama', 'No WhatsApp', 'Email',
+    'Jumlah Tiket', 'Sumbangan', 'Upload Arwah', 'Nama Arwah',
+    'Tahun Lahir', 'Tahun Wafat', 'Hubungan', 'Email Terkirim'
+]);
+
+$hubunganMap = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
+
+while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    fputcsv($out, [
+        $r['id'],
+        $r['created_at'],
+        $r['kode_tiket'],
+        $r['nama'],
+        $r['no_hp'],
+        $r['email'],
+        $r['jumlah_tiket'],
+        (float)$r['sumbangan_amount'],
+        $r['upload_arwah'] ? 'Ya' : 'Tidak',
+        $r['nama_arwah'],
+        $r['tahun_lahir'],
+        $r['tahun_wafat'],
+        $hubunganMap[$r['hubungan_arwah']] ?? '',
+        $r['email_sent'] ? 'Ya' : 'Tidak',
+    ]);
+}
+fclose($out);
+exit;

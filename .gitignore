@@ -3,3 +3,4 @@
 .claude/
 config/db.local.php
 config/mail.local.php
+config/admin.local.php

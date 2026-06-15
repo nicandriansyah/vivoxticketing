@@ -151,38 +151,8 @@ $scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https
 $basePath  = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
 $ticketUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $basePath . '/ticket.php?token=' . urlencode($kode_utama);
 
-$rows = '';
-foreach ($ticket_codes as $i => $kode) {
-    $rows .= '<tr><td style="padding:6px 14px;border:1px solid #e0d8c4;font-size:14px;color:#6b4c2a;">Tiket ' . ($i + 1) . '</td>'
-           . '<td style="padding:6px 14px;border:1px solid #e0d8c4;font-family:Consolas,monospace;font-weight:700;letter-spacing:1px;color:#1a0800;">' . htmlspecialchars($kode) . '</td></tr>';
-}
-
-$subject  = 'Tiket FOAS 13 — Vita Voxa Choir';
-$htmlBody = '
-<div style="background:#f4efe4;padding:24px;font-family:Arial,Helvetica,sans-serif;color:#2c1500;">
-  <div style="max-width:560px;margin:0 auto;background:#fffdf8;border:1px solid #e0d8c4;border-radius:8px;overflow:hidden;">
-    <div style="background:#1a0800;padding:24px;text-align:center;">
-      <div style="color:#e8c66e;font-size:13px;letter-spacing:3px;">VITA VOXA CHOIR &middot; JAKARTA</div>
-      <div style="color:#fff;font-size:30px;font-weight:900;letter-spacing:1px;margin-top:6px;">FOAS 13</div>
-      <div style="color:#c9a84c;font-size:11px;letter-spacing:2px;margin-top:4px;">MENSANA IN CORPORE SANO</div>
-    </div>
-    <div style="padding:28px 26px;">
-      <p style="font-size:16px;margin:0 0 14px;">Halo <strong>' . htmlspecialchars($nama) . '</strong>,</p>
-      <p style="font-size:15px;line-height:1.6;margin:0 0 18px;">Reservasi tiket Anda untuk <strong>FOAS 13</strong> telah <strong style="color:#1a7a40;">berhasil</strong>. Berikut detail tiket Anda:</p>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:20px;">' . $rows . '</table>
-      <p style="font-size:14px;line-height:1.6;margin:0 0 6px;"><strong>Acara:</strong> Sabtu, 7 November 2026 &middot; 19.00 WIB</p>
-      <p style="font-size:14px;line-height:1.6;margin:0 0 22px;"><strong>Jumlah:</strong> ' . $jumlah_tiket . ' tiket</p>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="' . htmlspecialchars($ticketUrl) . '" style="display:inline-block;background:#c9a84c;color:#1a0800;text-decoration:none;font-weight:700;padding:13px 30px;border-radius:8px;font-size:15px;">Lihat &amp; Simpan Tiket Saya</a>
-      </div>
-      <p style="font-size:13px;color:#888;line-height:1.6;margin:18px 0 0;">Simpan email ini. Anda bisa membuka tiket kapan saja melalui tautan di atas, lalu menyimpannya sebagai gambar/PDF atau membagikannya ke WhatsApp.</p>
-      <p style="font-size:13px;color:#888;line-height:1.6;margin:14px 0 0;">Tunjukkan QR code tiket saat memasuki venue.</p>
-    </div>
-    <div style="background:#f4efe4;padding:16px;text-align:center;font-size:12px;color:#9a7a55;">Sampai jumpa di FOAS 13!<br>&mdash; Vita Voxa Choir</div>
-  </div>
-</div>';
-
-$mailResult = sendSmtpMail($email, $nama, $subject, $htmlBody);
+$htmlBody   = buildTicketEmailHtml($nama, $ticket_codes, $jumlah_tiket, $ticketUrl);
+$mailResult = sendSmtpMail($email, $nama, 'Tiket FOAS 13 — Vita Voxa Choir', $htmlBody);
 $emailSent  = ($mailResult === true) ? 1 : 0;
 
 // Update flag email_sent di DB
