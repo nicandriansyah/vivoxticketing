@@ -245,6 +245,12 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     </form>
 </div>
 
+<!-- Photo Preview Modal -->
+<div id="photoModal" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:1.5rem;">
+    <img id="photoModalImg" src="" style="max-width:90vw;max-height:88vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="position:absolute;top:1rem;right:1.2rem;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;" onclick="document.getElementById('photoModal').style.display='none'">✕</div>
+</div>
+
 <script src="assets/js/form.js"></script>
 <script>
 var _lt = 0;

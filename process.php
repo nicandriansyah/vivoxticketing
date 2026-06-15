@@ -46,29 +46,40 @@ if ($upload_arwah && isset($_FILES['foto_arwah']) && $_FILES['foto_arwah']['erro
     }
 }
 
-/* ---------- Generate Ticket Codes (satu per tiket) ---------- */
-function generateCode(): string {
-    return 'FOAS13-' . strtoupper(bin2hex(random_bytes(4)));
+/* ---------- Generate Ticket Codes ---------- */
+// Format: FOAS13-XXXXNNN  (XXXX = batch acak, NNN = nomor urut 001, 002, ...)
+function generateBatchId(): string {
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $id = '';
+    for ($i = 0; $i < 4; $i++) {
+        $id .= $chars[random_int(0, strlen($chars) - 1)];
+    }
+    return $id;
 }
 
-// Generate N unique codes sesuai jumlah tiket
+$batch = generateBatchId();
 $ticket_codes = [];
 for ($i = 0; $i < $jumlah_tiket; $i++) {
-    $ticket_codes[] = generateCode();
+    $ticket_codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
 }
-$kode_utama = $ticket_codes[0]; // dipakai sebagai primary key di DB
+$kode_utama = $ticket_codes[0];
 
 /* ---------- Save to DB ---------- */
 if ($pdo) {
-    // Pastikan kode-kode unik
-    foreach ($ticket_codes as &$kode) {
-        do {
-            $stmt = $pdo->prepare("SELECT id FROM registrations WHERE kode_tiket = ?");
-            $stmt->execute([$kode]);
-            if ($stmt->fetch()) $kode = generateCode(); else break;
-        } while (true);
-    }
-    unset($kode);
+    // Jika ada kode yang bentrok, ganti seluruh batch dengan batch ID baru
+    do {
+        $ph   = implode(',', array_fill(0, count($ticket_codes), '?'));
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM registrations WHERE kode_tiket IN ($ph)");
+        $stmt->execute($ticket_codes);
+        if ((int)$stmt->fetchColumn() > 0) {
+            $batch = generateBatchId();
+            for ($j = 0; $j < $jumlah_tiket; $j++) {
+                $ticket_codes[$j] = 'FOAS13-' . $batch . str_pad($j + 1, 3, '0', STR_PAD_LEFT);
+            }
+        } else {
+            break;
+        }
+    } while (true);
     $kode_utama = $ticket_codes[0];
 
     $stmt = $pdo->prepare("

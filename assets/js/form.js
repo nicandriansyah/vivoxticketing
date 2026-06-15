@@ -242,7 +242,7 @@ function buildReview() {
     <div class="review-group">
         <div class="review-group-title">Data Arwah yang Didoakan</div>
         <div class="review-rows">
-            ${hasPhoto ? `<div class="review-row" ${rr}><span class="review-label" ${rl}>Foto</span><span class="review-value" ${rv}><img src="${previewSrc}" style="max-width:80px;max-height:80px;border-radius:8px;object-fit:cover;margin-top:4px;"></span></div>` : ''}
+            ${hasPhoto ? `<div style="text-align:center;padding:0.75rem 0;width:100%;"><img src="${previewSrc}" onclick="openPhotoModal(this.src)" style="max-width:130px;max-height:130px;border-radius:10px;object-fit:cover;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.18);" title="Klik untuk perbesar"></div>` : ''}
             <div class="review-row" ${rr}><span class="review-label" ${rl}>Nama Arwah</span><span class="review-value" ${rv}>${esc(get('nama_arwah'))}</span></div>
             <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Lahir</span><span class="review-value" ${rv}>${esc(get('tahun_lahir'))}</span></div>
             <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Wafat</span><span class="review-value" ${rv}>${esc(get('tahun_wafat'))}</span></div>
@@ -267,6 +267,14 @@ function esc(str) {
 }
 function formatNum(n) {
     return parseInt(n).toLocaleString('id-ID');
+}
+
+/* ---------- Photo Modal ---------- */
+
+function openPhotoModal(src) {
+    var modal = document.getElementById('photoModal');
+    document.getElementById('photoModalImg').src = src;
+    modal.style.display = 'flex';
 }
 
 /* ---------- Format Sumbangan ---------- */
