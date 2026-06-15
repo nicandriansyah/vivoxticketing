@@ -12,7 +12,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reservasi Tiket — FOAS 13</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=2" rel="stylesheet">
+    <link href="assets/css/style.css?v=3" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">

@@ -25,9 +25,14 @@ if (file_exists($localCfg)) require_once $localCfg;
 function sendSmtpMail(string $toEmail, string $toName, string $subject, string $htmlBody) {
     global $MAIL_HOST, $MAIL_PORT, $MAIL_SECURE, $MAIL_USER, $MAIL_PASS, $MAIL_FROM, $MAIL_FROM_NAME;
 
+    // Transcript handshake SMTP untuk debugging (lihat $GLOBALS['smtp_transcript'])
+    $GLOBALS['smtp_transcript'] = '';
+    $log = function ($text) { $GLOBALS['smtp_transcript'] .= $text; };
+
     if (empty($MAIL_PASS)) return 'SMTP password not configured';
 
     $remote = ($MAIL_SECURE === 'ssl' ? 'ssl://' : '') . $MAIL_HOST . ':' . $MAIL_PORT;
+    $log("CONNECT $remote\n");
     $ctx = stream_context_create([
         'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true],
     ]);
@@ -38,19 +43,25 @@ function sendSmtpMail(string $toEmail, string $toName, string $subject, string $
     stream_set_timeout($fp, 15);
 
     // Read a (possibly multiline) SMTP reply; verify expected code.
-    $read = function () use ($fp) {
+    $read = function () use ($fp, $log) {
         $data = '';
         while ($line = fgets($fp, 515)) {
             $data .= $line;
             // last line has a space at position 3 (e.g. "250 OK"), continuation has "-"
             if (isset($line[3]) && $line[3] === ' ') break;
         }
+        $log('S: ' . $data);
         return $data;
     };
     $expect = function (string $resp, string $code) {
         return strncmp($resp, $code, 3) === 0;
     };
-    $write = function (string $cmd) use ($fp) { fwrite($fp, $cmd . "\r\n"); };
+    $write = function (string $cmd) use ($fp, $log) {
+        // Jangan log isi base64 kredensial
+        $shown = (strlen($cmd) > 40 && ctype_print($cmd) && strpos($cmd, ' ') === false) ? '(base64 hidden)' : $cmd;
+        $log('C: ' . $shown . "\n");
+        fwrite($fp, $cmd . "\r\n");
+    };
 
     $fail = function (string $msg) use ($fp) {
         @fclose($fp);

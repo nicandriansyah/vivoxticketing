@@ -25,9 +25,18 @@ $result = sendSmtpMail(
     '<h2>Test berhasil!</h2><p>Konfigurasi SMTP Vita Voxa Choir sudah jalan.</p>'
 );
 
+echo "From   : $MAIL_FROM\n";
+echo "To     : $to\n\n";
+
 if ($result === true) {
-    echo "BERHASIL — email terkirim ke $to\n";
-    echo "Cek inbox (dan folder Spam).\n";
+    echo "HASIL: SMTP menerima pesan (kode 250).\n";
+    echo "PENTING: 'diterima server' BELUM tentu 'masuk inbox'.\n";
+    echo "Cek inbox & folder Spam/Junk. Kalau tidak ada sama sekali (terutama Gmail),\n";
+    echo "berarti masalah autentikasi domain (SPF/DKIM/DMARC) — set di cPanel Email Deliverability.\n";
 } else {
-    echo "GAGAL: $result\n";
+    echo "HASIL: GAGAL — $result\n";
 }
+
+echo "\n=== Transcript SMTP ===\n";
+echo $GLOBALS['smtp_transcript'] ?? '(kosong)';
+echo "\n";
