@@ -171,9 +171,9 @@ if (!$t) {
     });
 
     function showWaSent(i) {
-        var btn   = document.getElementById('share-btn-' + i);
+        // Tampilkan badge penanda, TAPI tombol tetap terlihat & bisa diklik
+        // supaya bisa dibagikan ulang berkali-kali.
         var badge = document.getElementById('sent-' + i);
-        if (btn)   btn.style.display   = 'none';
         if (badge) badge.style.display = 'flex';
     }
 
@@ -234,9 +234,11 @@ if (!$t) {
             localStorage.setItem('wa_' + code, '1');
             showWaSent(idx);
         } catch (e) {
-            btn.innerHTML = origHTML;
-            btn.disabled  = false;
+            // abaikan error, lanjut pulihkan tombol
         }
+        // Selalu pulihkan tombol agar bisa dibagikan lagi
+        btn.innerHTML = origHTML;
+        btn.disabled  = false;
     }
 
     function downloadBlob(blob, fileName) {
