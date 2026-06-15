@@ -90,18 +90,38 @@ function sendSmtpMail(string $toEmail, string $toName, string $subject, string $
     $write('DATA');
     if (!$expect($read(), '354')) return $fail('DATA rejected');
 
-    $boundary = '=_' . bin2hex(random_bytes(12));
+    $boundary  = '=_alt_' . bin2hex(random_bytes(12));
+    $fromDomain = substr(strrchr($MAIL_FROM, '@'), 1) ?: 'localhost';
+    $messageId  = '<' . bin2hex(random_bytes(16)) . '@' . $fromDomain . '>';
+
+    // Plain-text alternative (strip HTML) — multipart/alternative is far less
+    // likely to be flagged as spam than HTML-only.
+    $textBody = preg_replace('/<a [^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/i', '$2: $1', $htmlBody);
+    $textBody = preg_replace('/<(br|tr|\/div|\/p|\/h[1-6])[^>]*>/i', "\n", $textBody);
+    $textBody = html_entity_decode(strip_tags($textBody), ENT_QUOTES, 'UTF-8');
+    $textBody = trim(preg_replace("/[ \t]*\n{3,}/", "\n\n", $textBody));
+
     $headers  = 'From: ' . encodeHeader($MAIL_FROM_NAME) . ' <' . $MAIL_FROM . ">\r\n";
     $headers .= 'To: ' . encodeHeader($toName) . ' <' . $toEmail . ">\r\n";
+    $headers .= 'Reply-To: ' . encodeHeader($MAIL_FROM_NAME) . ' <' . $MAIL_FROM . ">\r\n";
     $headers .= 'Subject: ' . encodeHeader($subject) . "\r\n";
-    $headers .= 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Message-ID: ' . $messageId . "\r\n";
     $headers .= 'Date: ' . date('r') . "\r\n";
-    $headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
-    $headers .= 'Content-Transfer-Encoding: base64' . "\r\n";
+    $headers .= 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Content-Type: multipart/alternative; boundary="' . $boundary . "\"\r\n";
 
+    $body  = '--' . $boundary . "\r\n";
+    $body .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: base64\r\n\r\n";
+    $body .= chunk_split(base64_encode($textBody)) . "\r\n";
+    $body .= '--' . $boundary . "\r\n";
+    $body .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: base64\r\n\r\n";
+    $body .= chunk_split(base64_encode($htmlBody)) . "\r\n";
+    $body .= '--' . $boundary . "--\r\n";
+
+    $message = $headers . "\r\n" . $body;
     // Dot-stuffing: any line starting with "." must be doubled
-    $bodyEnc = chunk_split(base64_encode($htmlBody));
-    $message = $headers . "\r\n" . $bodyEnc;
     $message = preg_replace('/^\./m', '..', $message);
 
     fwrite($fp, $message . "\r\n.\r\n");
