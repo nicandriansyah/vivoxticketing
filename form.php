@@ -135,15 +135,13 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                                 <input type="text" name="nama_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah" autocomplete="off">
                             </div>
 
-                            <div style="display:flex; gap:1rem;">
-                                <div class="form-group mb-3" style="flex:1;">
-                                    <label class="form-label">Tahun Lahir <span class="required">*</span></label>
-                                    <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024" autocomplete="off">
-                                </div>
-                                <div class="form-group mb-3" style="flex:1;">
-                                    <label class="form-label">Tahun Wafat <span class="required">*</span></label>
-                                    <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025" autocomplete="off">
-                                </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Tahun Lahir <span class="required">*</span></label>
+                                <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024" autocomplete="off">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Tahun Wafat <span class="required">*</span></label>
+                                <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025" autocomplete="off">
                             </div>
 
                             <div class="form-group mb-1">
@@ -193,7 +191,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                             <p class="bank-account">1234 5678</p>
                             <p class="bank-holder">Vita Voxa Choir</p>
                         </div>
-                        <button type="button" class="btn-copy" onclick="copyRekening()">Salin</button>
+                        <button type="button" class="btn-copy btn-copy-full" onclick="copyRekening()">Salin Nomor Rekening</button>
                     </div>
 
                     <div class="offering-note">
@@ -206,7 +204,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                         <label class="form-label">Nominal Sumbangan <small style="color:#666;">(opsional)</small></label>
                         <div style="display:flex;">
                             <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">Rp</span>
-                            <input type="number" name="sumbangan_amount" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="0" min="0" autocomplete="off">
+                            <input type="text" inputmode="numeric" name="sumbangan_amount" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="0" autocomplete="off" oninput="formatSumbangan(this)">
                         </div>
                         <small class="text-muted-gold">Kosongkan jika tidak ingin memberikan sumbangan</small>
                     </div>

@@ -232,10 +232,13 @@ function buildReview() {
     </div>`;
 
     if (checked) {
+        const previewSrc = document.getElementById('previewImg') ? document.getElementById('previewImg').src : '';
+        const hasPhoto = previewSrc && !previewSrc.endsWith('#') && previewSrc !== window.location.href;
         html += `
     <div class="review-group">
         <div class="review-group-title">Data Arwah yang Didoakan</div>
         <div class="review-rows">
+            ${hasPhoto ? `<div class="review-row"><span class="review-label">Foto</span><span class="review-value"><img src="${previewSrc}" style="max-width:80px; max-height:80px; border-radius:8px; object-fit:cover;"></span></div>` : ''}
             <div class="review-row"><span class="review-label">Nama Arwah</span><span class="review-value">${esc(get('nama_arwah'))}</span></div>
             <div class="review-row"><span class="review-label">Tahun Lahir</span><span class="review-value">${esc(get('tahun_lahir'))}</span></div>
             <div class="review-row"><span class="review-label">Tahun Wafat</span><span class="review-value">${esc(get('tahun_wafat'))}</span></div>
@@ -248,7 +251,7 @@ function buildReview() {
     <div class="review-group">
         <div class="review-group-title">Persembahan</div>
         <div class="review-rows">
-            <div class="review-row"><span class="review-label">Sumbangan</span><span class="review-value">${sumbangan ? 'Rp ' + formatNum(sumbangan) : 'Tidak ada'}</span></div>
+            <div class="review-row"><span class="review-label">Sumbangan</span><span class="review-value">${sumbangan ? 'Rp ' + esc(sumbangan) : 'Tidak ada'}</span></div>
         </div>
     </div>`;
 
@@ -260,4 +263,12 @@ function esc(str) {
 }
 function formatNum(n) {
     return parseInt(n).toLocaleString('id-ID');
+}
+
+/* ---------- Format Sumbangan ---------- */
+
+function formatSumbangan(el) {
+    const raw = el.value.replace(/[^0-9]/g, '');
+    if (raw === '') { el.value = ''; return; }
+    el.value = parseInt(raw, 10).toLocaleString('id-ID');
 }

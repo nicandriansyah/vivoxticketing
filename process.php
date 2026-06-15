@@ -13,7 +13,7 @@ $no_hp          = trim(htmlspecialchars($_POST['no_hp']        ?? ''));
 $email          = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
 $jumlah_tiket   = max(1, min(5, (int)($_POST['jumlah_tiket']  ?? 1)));
 $upload_arwah   = isset($_POST['upload_arwah']) ? 1 : 0;
-$sumbangan      = max(0, (float)($_POST['sumbangan_amount']    ?? 0));
+$sumbangan      = max(0, (float)preg_replace('/[^0-9]/', '', $_POST['sumbangan_amount'] ?? '0'));
 
 $nama_arwah     = trim(htmlspecialchars($_POST['nama_arwah']   ?? ''));
 $tahun_lahir    = (int)($_POST['tahun_lahir']                  ?? 0) ?: null;
@@ -117,7 +117,9 @@ $body    = "Halo $nama,\n\n"
          . "Sampai jumpa di FOAS 13!\n"
          . "— Vita Voxa Choir";
 
-@mail($email, $subject, $body, "From: noreply@vitavoxachoir.com\r\nContent-Type: text/plain; charset=UTF-8");
+if (function_exists('mail')) {
+    @mail($email, $subject, $body, "From: noreply@vitavoxachoir.com\r\nContent-Type: text/plain; charset=UTF-8");
+}
 
 header('Location: ticket.php');
 exit;

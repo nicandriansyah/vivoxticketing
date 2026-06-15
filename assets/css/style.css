@@ -581,8 +581,9 @@ body {
 
 .bank-card {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
     background: #f8f8f8;
     border: 1.5px solid rgba(201,168,76,0.3);
     border-radius: 12px;
@@ -601,9 +602,8 @@ body {
     font-size: 1.1rem;
     color: #fff;
     letter-spacing: -1px;
-    flex-shrink: 0;
 }
-.bank-details { flex: 1; }
+.bank-details { width: 100%; }
 .bank-name   { font-size: 0.85rem; color: #888; margin: 0; }
 .bank-account{ font-size: 1.6rem; font-weight: 700; color: #1a1a1a; letter-spacing: 3px; margin: 4px 0; }
 .bank-holder { font-size: 0.95rem; color: #8B6914; margin: 0; font-weight: 600; }
@@ -618,6 +618,7 @@ body {
     transition: background 0.2s;
     white-space: nowrap;
 }
+.btn-copy-full { width: 100%; padding: 0.65rem 1rem; font-size: 0.95rem; }
 .btn-copy:hover { background: rgba(201,168,76,0.1); }
 .btn-copy.copied { background: rgba(201,168,76,0.2); color: var(--gold-light); }
 
