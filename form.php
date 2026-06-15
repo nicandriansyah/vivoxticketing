@@ -52,7 +52,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
         </div>
     </div>
 
-    <form id="registrasiForm" method="POST" action="process.php" enctype="multipart/form-data" autocomplete="off">
+    <form id="registrasiForm" method="POST" action="process.php" enctype="multipart/form-data" autocomplete="off" novalidate>
 
         <!-- ================================================
              STEP 1: Data Diri
