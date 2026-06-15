@@ -916,8 +916,8 @@ body {
 .email-note span { color: #8B6914; }
 
 .ticket-share-row {
-    width: 380px;
-    max-width: 94vw;
+    width: 100%;
+    max-width: 380px;
     margin: -0.25rem auto 1.75rem;
     display: flex;
     flex-direction: column;
@@ -1251,7 +1251,8 @@ body {
    ============================================================ */
 
 .ticket-card {
-    width: 380px;
+    width: 100%;
+    max-width: 380px;
     background: #f8f4ec;
     border: 1px solid #b8a888;
     border-radius: 4px;
