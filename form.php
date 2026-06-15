@@ -25,13 +25,6 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
 <div class="form-wrapper">
 
-    <!-- Header kecil -->
-    <div style="text-align:center; padding: 1.5rem 0 0;">
-        <a href="index.php" style="text-decoration:none;">
-            <span style="font-size:0.7rem; letter-spacing:3px; color:#c9a84c; text-transform:uppercase;">← FOAS 13</span>
-        </a>
-    </div>
-
     <!-- Step Indicators -->
     <div class="progress-container">
         <div class="step-indicators">
@@ -251,7 +244,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <div style="position:absolute;top:1rem;right:1.2rem;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;" onclick="document.getElementById('photoModal').style.display='none'">✕</div>
 </div>
 
-<script src="assets/js/form.js"></script>
+<script src="assets/js/form.js?v=3"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {

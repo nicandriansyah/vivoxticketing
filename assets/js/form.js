@@ -114,6 +114,19 @@ function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/* ---------- Cegah Enter/Return men-submit form ---------- */
+// Di Safari/iOS tombol "Masuk" (Return) pada keyboard akan men-submit form &
+// reload halaman padahal masih di step 1/2. Blokir Enter pada semua input.
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('registrasiForm');
+    if (!form) return;
+    form.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+        }
+    });
+});
+
 /* ---------- Ticket Counter ---------- */
 
 document.addEventListener('DOMContentLoaded', function () {
