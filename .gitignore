@@ -1,3 +1,4 @@
 ﻿uploads/*
 !uploads/.gitkeep
 .claude/
+config/db.local.php
