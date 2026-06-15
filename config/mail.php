@@ -13,7 +13,7 @@ $MAIL_SECURE     = 'ssl';                     // 'ssl' for 465, 'tls' for 587
 $MAIL_USER       = 'ticketing@vitavoxa.my.id';
 $MAIL_PASS       = '';                        // set in mail.local.php
 $MAIL_FROM       = 'ticketing@vitavoxa.my.id';
-$MAIL_FROM_NAME  = 'Vita Voxa Choir';
+$MAIL_FROM_NAME  = 'noreply@vitavoxa.my.id';
 
 $localCfg = __DIR__ . '/mail.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
