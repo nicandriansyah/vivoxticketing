@@ -340,6 +340,8 @@ body {
 .custom-input.is-invalid { border-color: var(--danger) !important; }
 
 .input-group-text.country-code {
+    display: flex;
+    align-items: center;
     background: #f5f5f5;
     border: 1.5px solid #d0d0d0;
     border-right: none;

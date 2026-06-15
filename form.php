@@ -9,7 +9,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reservasi Tiket — FOAS 13</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
@@ -76,7 +76,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                         <label class="form-label">Nomor WhatsApp <span class="required">*</span></label>
                         <div style="display:flex;">
                             <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">+62</span>
-                            <input type="tel" name="no_hp" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="812-3456-7890" autocomplete="off">
+                            <input type="tel" name="no_hp" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="812-3456-7890" autocomplete="off" oninput="if(this.value.startsWith('0')) this.value=this.value.slice(1);">
                         </div>
                     </div>
 
