@@ -19,6 +19,7 @@
         <p class="presents-text">Presents</p>
 
         <h1 class="event-title">FOAS 13</h1>
+        <p class="event-tagline">"mensana on corpore sano"</p>
 
         <div class="event-details">
             <p class="event-date">Sabtu, 7 November</p>

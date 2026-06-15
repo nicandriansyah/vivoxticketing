@@ -124,6 +124,16 @@ body {
     padding-bottom: 0.1em;
 }
 
+.event-tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: rgba(232, 198, 110, 0.75);
+    letter-spacing: 1px;
+    margin-bottom: 2rem;
+    margin-top: -1rem;
+}
+
 .event-details {
     margin-bottom: 3rem;
 }
