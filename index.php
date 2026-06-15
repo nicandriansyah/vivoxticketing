@@ -12,8 +12,7 @@
 
     <div class="welcome-container">
         <div class="choir-logo">
-            <div class="logo-ring"></div>
-            <span class="logo-text">VV</span>
+            <img src="logo.png" alt="Vita Voxa Choir" class="choir-logo-img">
         </div>
 
         <p class="choir-name">Vita Voxa Choir</p>
