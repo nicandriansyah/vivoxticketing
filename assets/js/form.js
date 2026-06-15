@@ -220,14 +220,18 @@ function buildReview() {
     const hubunganMap = { orang_tua: 'Orang Tua', anak: 'Anak', saudara: 'Saudara' };
     const sumbangan = get('sumbangan_amount');
 
+    const rr = 'style="display:flex;flex-direction:column;align-items:flex-start;gap:0.2rem;padding:0.75rem 0;"';
+    const rl = 'style="color:#888;font-size:0.85rem;"';
+    const rv = 'style="color:#1a1a1a;font-weight:600;"';
+
     let html = `
     <div class="review-group">
         <div class="review-group-title">Data Peserta</div>
         <div class="review-rows">
-            <div class="review-row"><span class="review-label">Nama Lengkap</span><span class="review-value">${esc(get('nama'))}</span></div>
-            <div class="review-row"><span class="review-label">Nomor WhatsApp</span><span class="review-value">+62 ${esc(get('no_hp'))}</span></div>
-            <div class="review-row"><span class="review-label">Email</span><span class="review-value">${esc(get('email'))}</span></div>
-            <div class="review-row"><span class="review-label">Jumlah Tiket</span><span class="review-value">${esc(get('jumlah_tiket'))} tiket</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Nama Lengkap</span><span class="review-value" ${rv}>${esc(get('nama'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Nomor WhatsApp</span><span class="review-value" ${rv}>+62 ${esc(get('no_hp'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Email</span><span class="review-value" ${rv}>${esc(get('email'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Jumlah Tiket</span><span class="review-value" ${rv}>${esc(get('jumlah_tiket'))} tiket</span></div>
         </div>
     </div>`;
 
@@ -238,11 +242,11 @@ function buildReview() {
     <div class="review-group">
         <div class="review-group-title">Data Arwah yang Didoakan</div>
         <div class="review-rows">
-            ${hasPhoto ? `<div class="review-row"><span class="review-label">Foto</span><span class="review-value"><img src="${previewSrc}" style="max-width:80px; max-height:80px; border-radius:8px; object-fit:cover;"></span></div>` : ''}
-            <div class="review-row"><span class="review-label">Nama Arwah</span><span class="review-value">${esc(get('nama_arwah'))}</span></div>
-            <div class="review-row"><span class="review-label">Tahun Lahir</span><span class="review-value">${esc(get('tahun_lahir'))}</span></div>
-            <div class="review-row"><span class="review-label">Tahun Wafat</span><span class="review-value">${esc(get('tahun_wafat'))}</span></div>
-            <div class="review-row"><span class="review-label">Hubungan</span><span class="review-value">${hubunganMap[get('hubungan_arwah')] || '-'}</span></div>
+            ${hasPhoto ? `<div class="review-row" ${rr}><span class="review-label" ${rl}>Foto</span><span class="review-value" ${rv}><img src="${previewSrc}" style="max-width:80px;max-height:80px;border-radius:8px;object-fit:cover;margin-top:4px;"></span></div>` : ''}
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Nama Arwah</span><span class="review-value" ${rv}>${esc(get('nama_arwah'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Lahir</span><span class="review-value" ${rv}>${esc(get('tahun_lahir'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Wafat</span><span class="review-value" ${rv}>${esc(get('tahun_wafat'))}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Hubungan</span><span class="review-value" ${rv}>${hubunganMap[get('hubungan_arwah')] || '-'}</span></div>
         </div>
     </div>`;
     }
@@ -251,7 +255,7 @@ function buildReview() {
     <div class="review-group">
         <div class="review-group-title">Persembahan</div>
         <div class="review-rows">
-            <div class="review-row"><span class="review-label">Sumbangan</span><span class="review-value">${sumbangan ? 'Rp ' + esc(sumbangan) : 'Tidak ada'}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Sumbangan</span><span class="review-value" ${rv}>${sumbangan ? 'Rp ' + esc(sumbangan) : 'Tidak ada'}</span></div>
         </div>
     </div>`;
 
