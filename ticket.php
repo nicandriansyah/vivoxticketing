@@ -7,9 +7,8 @@ if (empty($_SESSION['ticket'])) {
 }
 
 $t = $_SESSION['ticket'];
-$ticket_codes   = $t['ticket_codes'];
-$jumlah_tiket   = (int)$t['jumlah_tiket'];
-$hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
+$ticket_codes = $t['ticket_codes'];
+$jumlah_tiket = (int)$t['jumlah_tiket'];
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -31,93 +30,73 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
         <p>Tiket dikirim ke <span style="color:#8B6914;"><?= htmlspecialchars($t['email']) ?></span></p>
     </div>
 
-    <!-- Semua yang di-screenshot untuk download -->
+    <!-- Download wrap — semua tiket dirender di sini -->
     <div id="ticketDownloadWrap">
 
-        <!-- Concert Invitation Card -->
-        <div class="ticket-summary-card">
+        <?php foreach ($ticket_codes as $i => $kode): ?>
+        <div class="ticket-card">
 
-            <!-- Top: Logo + Choir Name -->
-            <div class="tsc-top">
-                <img src="logo.png" alt="Vita Voxa Choir" class="tsc-logo">
-                <div class="tsc-choir-text">
+            <!-- Header: Logo + Choir -->
+            <div class="tc-top">
+                <img src="logo.png" alt="Vita Voxa Choir" class="tc-logo">
+                <div class="tc-choir-text">
                     <span>PADUAN SUARA</span>
                     <strong>VITA VOXA CHOIR</strong>
                     <span>JAKARTA</span>
                 </div>
             </div>
 
-            <div class="tsc-rule"></div>
+            <div class="tc-rule"></div>
 
-            <!-- Undangan -->
-            <p class="tsc-undangan">Undangan</p>
+            <p class="tc-undangan">Undangan</p>
+            <h2 class="tc-title">FOAS 13</h2>
+            <p class="tc-subtitle">MENSANA IN CORPORE SANO</p>
+            <p class="tc-presents">FESTIVAL OF ARTS &amp; SONGS &nbsp;·&nbsp; VITA VOXA CHOIR</p>
 
-            <!-- Event Title -->
-            <h2 class="tsc-title">FOAS 13</h2>
-            <p class="tsc-subtitle">MENSANA IN CORPORE SANO</p>
-            <p class="tsc-presents">FESTIVAL OF ARTS &amp; SONGS · VITA VOXA CHOIR</p>
+            <div class="tc-rule"></div>
 
-            <div class="tsc-rule"></div>
-
-            <!-- Date + Event Details -->
-            <div class="tsc-info-row">
-                <div class="tsc-date">
-                    <span class="tsc-month">NOVEMBER</span>
-                    <span class="tsc-day">7</span>
-                    <span class="tsc-year">2026</span>
+            <!-- Tanggal + Detail -->
+            <div class="tc-info-row">
+                <div class="tc-date">
+                    <span class="tc-month">NOVEMBER</span>
+                    <span class="tc-day">7</span>
+                    <span class="tc-year">2026</span>
                 </div>
-                <div class="tsc-vline"></div>
-                <div class="tsc-detail">
-                    <p class="tsc-dayname">SABTU</p>
-                    <p class="tsc-time">19.00 WIB</p>
-                    <div class="tsc-rule-sm"></div>
-                    <p class="tsc-peserta-label">PEMESAN</p>
-                    <p class="tsc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
-                    <p class="tsc-peserta-tiket"><?= $jumlah_tiket ?> Tiket</p>
+                <div class="tc-vline"></div>
+                <div class="tc-detail">
+                    <p class="tc-dayname">SABTU</p>
+                    <p class="tc-time">19.00 WIB</p>
+                    <div class="tc-rule-sm"></div>
+                    <p class="tc-peserta-label">PEMESAN</p>
+                    <p class="tc-peserta-name"><?= htmlspecialchars($t['nama']) ?></p>
+                    <p class="tc-ticket-num">Tiket <?= $i + 1 ?> dari <?= $jumlah_tiket ?></p>
                 </div>
             </div>
 
-            <?php if ($t['upload_arwah'] && $t['nama_arwah']): ?>
-            <div class="tsc-rule"></div>
-            <div class="tsc-arwah">
-                <p class="tsc-arwah-label">MENDOAKAN</p>
-                <p class="tsc-arwah-name"><?= htmlspecialchars($t['nama_arwah']) ?></p>
-                <p class="tsc-arwah-years">
-                    <?= $t['tahun_lahir'] ?> – <?= $t['tahun_wafat'] ?>
-                    &nbsp;·&nbsp;
-                    <?= htmlspecialchars($hubunganLabel[$t['hubungan']] ?? '') ?>
-                </p>
-            </div>
-            <?php endif; ?>
+            <div class="tc-rule"></div>
 
-        </div>
-
-        <!-- QR Code Grid -->
-        <p class="qr-section-title">QR Code — <?= $jumlah_tiket ?> Tiket</p>
-
-        <div class="qr-grid">
-            <?php foreach ($ticket_codes as $i => $kode): ?>
-            <div class="qr-tile">
-                <span class="qr-tile-num">Tiket <?= $i + 1 ?>/<?= $jumlah_tiket ?></span>
-                <div class="qr-canvas-wrap">
+            <!-- QR Code -->
+            <div class="tc-qr-section">
+                <div class="tc-qr-wrap">
                     <div id="qr-<?= $i ?>"></div>
                 </div>
-                <p class="qr-code-val"><?= htmlspecialchars($kode) ?></p>
+                <p class="tc-qr-code"><?= htmlspecialchars($kode) ?></p>
             </div>
-            <?php endforeach; ?>
+
         </div>
+        <?php endforeach; ?>
 
     </div>
     <!-- /ticketDownloadWrap -->
 
     <!-- Actions -->
     <div class="ticket-actions">
-        <button class="btn-download" onclick="downloadTicket()">⬇ Simpan sebagai Gambar</button>
+        <button class="btn-download" onclick="downloadTicket()">⬇ Simpan Semua Tiket</button>
         <a href="index.php" class="btn-new-reg">Kembali ke Beranda</a>
     </div>
 
     <p class="email-note">
-        Tiket juga dikirimkan ke <span><?= htmlspecialchars($t['email']) ?></span><br>
+        <?= $jumlah_tiket ?> tiket dikirimkan ke <span><?= htmlspecialchars($t['email']) ?></span><br>
         <small style="font-size:.8rem; color:#aaa;">Cek folder Spam jika tidak menemukan email</small>
     </p>
 
@@ -126,9 +105,9 @@ $hubunganLabel  = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'S
         codes.forEach(function(code, i) {
             new QRCode(document.getElementById('qr-' + i), {
                 text: code,
-                width:  120,
-                height: 120,
-                colorDark:  '#000000',
+                width:  130,
+                height: 130,
+                colorDark:  '#1a0800',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
             });

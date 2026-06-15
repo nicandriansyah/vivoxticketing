@@ -1182,10 +1182,213 @@ body {
     line-height: 1.4;
 }
 
-/* Full ticket download wrap */
+/* Download wrap — stack tiket secara vertikal */
 #ticketDownloadWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
     width: 100%;
-    max-width: 640px;
+    max-width: 480px;
+    padding: 0.5rem 0;
+}
+
+/* ============================================================
+   INDIVIDUAL TICKET CARD (concert invitation style + QR)
+   ============================================================ */
+
+.ticket-card {
+    width: 100%;
+    background: #f8f4ec;
+    border: 1px solid #d8cdb4;
+    border-radius: 4px;
+    padding: 2rem 1.75rem;
+    text-align: center;
+    color: #1a0e00;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.5s ease both;
+}
+
+/* Header */
+.tc-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+.tc-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+.tc-choir-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.5;
+}
+.tc-choir-text span {
+    font-size: 0.58rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+}
+.tc-choir-text strong {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #2c1500;
+    font-weight: 800;
+}
+
+/* Dividers */
+.tc-rule    { height: 1px; background: #c8b898; margin: 0.85rem 0; }
+.tc-rule-sm { height: 1px; background: #c8b898; margin: 0.45rem 0; }
+
+/* Undangan cursive */
+.tc-undangan {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: #3d2000;
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
+}
+
+/* Event title */
+.tc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-weight: 900;
+    color: #1a0800;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 0.4rem;
+}
+.tc-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+.tc-presents {
+    font-size: 0.58rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9a7a55;
+}
+
+/* Date + Detail row */
+.tc-info-row {
+    display: flex;
+    align-items: stretch;
+    text-align: left;
+}
+.tc-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 1.25rem;
+    min-width: 80px;
+}
+.tc-month {
+    display: block;
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6b4c2a;
+    font-weight: 700;
+}
+.tc-day {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 3.25rem;
+    font-weight: 900;
+    color: #1a0800;
+    line-height: 1;
+    margin: 0.05rem 0;
+}
+.tc-year {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    color: #6b4c2a;
+    font-weight: 700;
+}
+.tc-vline {
+    width: 1px;
+    background: #c8b898;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+.tc-detail {
+    flex: 1;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.tc-dayname {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+}
+.tc-time {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a0800;
+    margin-bottom: 0.3rem;
+}
+.tc-peserta-label {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a7a55;
+    margin-bottom: 0.1rem;
+}
+.tc-peserta-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a0800;
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+}
+.tc-ticket-num {
+    font-size: 0.65rem;
+    color: #6b4c2a;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* QR section */
+.tc-qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+}
+.tc-qr-wrap {
+    background: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    display: inline-block;
+    line-height: 0;
+}
+.tc-qr-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.62rem;
+    color: #8a6a45;
+    letter-spacing: 1px;
 }
 
 /* ============================================================
