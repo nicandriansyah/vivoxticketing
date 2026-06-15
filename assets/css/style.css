@@ -1,0 +1,1050 @@
+/* ============================================================
+   FOAS 13 - Vita Voxa Choir | Global Styles
+   ============================================================ */
+
+:root {
+    --gold:      #c9a84c;
+    --gold-dark: #8B6914;
+    --gold-light:#e8c66e;
+    --bg:        #0d0d0d;
+    --card-bg:   #181818;
+    --card-bg2:  #222222;
+    --border:    #2e2e2e;
+    --text:      #f0f0f0;
+    --muted:     #888;
+    --danger:    #e05555;
+    --success:   #4caf50;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ============================================================
+   WELCOME PAGE
+   ============================================================ */
+
+.welcome-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 50%),
+        #0d0d0d;
+    overflow: hidden;
+    position: relative;
+}
+
+.welcome-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.welcome-container {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 2rem;
+    animation: fadeInUp 0.8s ease both;
+}
+
+/* Logo ring */
+.choir-logo {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 2rem;
+}
+.logo-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    position: absolute;
+    top: 0; left: 0;
+    animation: spin 12s linear infinite;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg 270deg,
+        rgba(201,168,76,0.4) 270deg 360deg
+    );
+}
+.logo-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+}
+
+.choir-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    letter-spacing: 4px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 0.5rem;
+}
+
+.presents-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+}
+
+.event-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    letter-spacing: -2px;
+}
+
+.event-details {
+    margin-bottom: 3rem;
+}
+.event-date {
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+    letter-spacing: 1px;
+}
+.event-time {
+    font-size: 1.05rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+}
+
+.btn-reserve {
+    display: inline-block;
+    padding: 1.1rem 3.5rem;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #0d0d0d;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 24px rgba(201,168,76,0.3);
+}
+.btn-reserve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(201,168,76,0.5);
+    color: #0d0d0d;
+}
+
+/* ============================================================
+   FORM PAGE
+   ============================================================ */
+
+.form-page {
+    background:
+        radial-gradient(ellipse at top, rgba(201,168,76,0.05) 0%, transparent 50%),
+        #0d0d0d;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+}
+
+.form-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* Progress Steps */
+.progress-container {
+    padding: 1.5rem 0 2.5rem;
+}
+.step-indicators {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+.step-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all 0.3s ease;
+}
+.step-item span {
+    font-size: 0.82rem;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+.step-line {
+    width: 80px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 8px;
+    margin-bottom: 22px;
+    transition: background 0.3s;
+}
+.step-item.active .step-circle {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: #0d0d0d;
+}
+.step-item.active span { color: var(--gold); }
+.step-item.completed .step-circle {
+    border-color: var(--gold);
+    background: transparent;
+    color: var(--gold);
+}
+.step-item.completed .step-circle::after {
+    content: '✓';
+}
+.step-line.completed { background: var(--gold); }
+
+/* Form Card */
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeInUp 0.4s ease both;
+}
+.form-card-header {
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(to bottom, rgba(201,168,76,0.05), transparent);
+}
+.form-step-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+}
+.form-card-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.form-card-header p {
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.form-card-body {
+    padding: 2rem;
+}
+.form-card-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Inputs */
+.form-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ddd;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+.required { color: var(--gold); }
+
+.custom-input {
+    background: var(--card-bg2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 1rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+.custom-input:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15) !important;
+    outline: none !important;
+}
+.custom-input::placeholder { color: #555 !important; }
+.custom-input.is-invalid { border-color: var(--danger) !important; }
+
+.input-group-text.country-code {
+    background: var(--card-bg2);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--gold);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px 0 0 8px;
+}
+.input-group .custom-input { border-radius: 0 8px 8px 0 !important; }
+
+/* Ticket Counter */
+.ticket-counter {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: fit-content;
+}
+.counter-btn {
+    width: 52px;
+    height: 52px;
+    background: var(--card-bg2);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    line-height: 1;
+}
+.counter-btn:first-child { border-radius: 8px 0 0 8px; }
+.counter-btn:last-child  { border-radius: 0 8px 8px 0; }
+.counter-btn:hover { background: rgba(201,168,76,0.1); }
+.counter-input {
+    width: 70px;
+    height: 52px;
+    text-align: center;
+    background: var(--card-bg2);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-right: none;
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.text-muted-gold { color: var(--muted); font-size: 0.9rem; display: block; margin-top: 0.5rem; }
+
+/* Arwah Toggle */
+.arwah-toggle {
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+}
+.custom-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+.custom-checkbox { display: none; }
+.checkmark {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 5px;
+    border: 2px solid var(--gold);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 0.8rem;
+    color: #0d0d0d;
+}
+.custom-checkbox:checked + .checkmark {
+    background: var(--gold);
+}
+.custom-checkbox:checked + .checkmark::after { content: '✓'; }
+.checkbox-text strong { display: block; font-size: 1rem; color: var(--text); }
+.checkbox-text small  { display: block; font-size: 0.88rem; color: var(--muted); margin-top: 4px; }
+
+/* Arwah Form */
+.arwah-form { margin-top: 1.25rem; }
+.arwah-card {
+    background: rgba(201,168,76,0.03);
+    border: 1px dashed rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 1.5rem;
+    animation: fadeInUp 0.3s ease both;
+}
+.arwah-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--gold-light);
+    margin-bottom: 1.25rem;
+}
+
+/* Upload Area */
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    background: var(--card-bg2);
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+    position: relative;
+}
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.05);
+}
+.upload-placeholder {
+    text-align: center;
+    padding: 1.5rem;
+    pointer-events: none;
+}
+.upload-placeholder p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0.25rem 0;
+}
+.upload-or { font-size: 0.75rem !important; }
+.upload-hint { font-size: 0.72rem; color: #555; display: block; margin-top: 0.4rem; }
+.btn-browse {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.35rem 1rem;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    font-size: 0.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: background 0.2s;
+}
+.btn-browse:hover { background: rgba(201,168,76,0.1); }
+
+.upload-preview {
+    width: 100%;
+    height: 160px;
+    position: relative;
+}
+.upload-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.btn-remove-img {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Buttons */
+.btn-primary-custom {
+    padding: 0.85rem 2.25rem;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #0d0d0d;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+}
+.btn-primary-custom:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+}
+.btn-secondary-custom {
+    padding: 0.85rem 1.75rem;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+.btn-secondary-custom:hover { border-color: var(--muted); color: var(--text); }
+.btn-submit-custom {
+    padding: 0.85rem 2.75rem;
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+}
+.btn-submit-custom:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(76,175,80,0.35);
+}
+
+/* ============================================================
+   STEP 2 - OFFERING
+   ============================================================ */
+
+.offering-info {
+    text-align: center;
+    padding: 1rem 0 1.5rem;
+}
+.offering-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.offering-info h5 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    margin-bottom: 0.75rem;
+}
+.offering-info p { color: var(--muted); font-size: 1rem; line-height: 1.65; }
+
+.bank-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card-bg2);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0;
+}
+.bank-logo {
+    width: 56px;
+    height: 56px;
+    background: #005f9e;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+.bank-details { flex: 1; }
+.bank-name   { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.bank-account{ font-size: 1.55rem; font-weight: 700; color: var(--text); letter-spacing: 3px; margin: 4px 0; }
+.bank-holder { font-size: 0.9rem; color: var(--gold); margin: 0; }
+.btn-copy {
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+.btn-copy:hover { background: rgba(201,168,76,0.1); }
+.btn-copy.copied { background: rgba(201,168,76,0.2); color: var(--gold-light); }
+
+.offering-note {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: rgba(201,168,76,0.05);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+}
+.note-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+.offering-note p { font-size: 0.95rem; color: #bbb; line-height: 1.65; margin: 0; }
+
+/* ============================================================
+   STEP 3 - REVIEW
+   ============================================================ */
+
+.review-section { display: flex; flex-direction: column; gap: 1.25rem; }
+.review-group {
+    background: var(--card-bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.review-group-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gold);
+    padding: 0.6rem 1rem;
+    background: rgba(201,168,76,0.05);
+    border-bottom: 1px solid var(--border);
+}
+.review-rows { padding: 0.75rem 1rem; }
+.review-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.55rem 0;
+    font-size: 1rem;
+}
+.review-row:not(:last-child) { border-bottom: 1px solid #1e1e1e; }
+.review-label { color: var(--muted); min-width: 140px; }
+.review-value { color: var(--text); text-align: right; font-weight: 600; }
+
+/* ============================================================
+   TICKET PAGE
+   ============================================================ */
+
+.ticket-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background:
+        radial-gradient(ellipse at center top, rgba(76,175,80,0.08) 0%, transparent 60%),
+        #0d0d0d;
+}
+
+.ticket-success-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.5s ease both;
+}
+.success-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(76,175,80,0.15);
+    border: 2px solid #4caf50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin: 0 auto 1.25rem;
+}
+.ticket-success-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.ticket-success-header p { color: var(--muted); font-size: 1rem; }
+
+/* The Ticket Design */
+#ticketDesign {
+    width: 100%;
+    max-width: 640px;
+    background: linear-gradient(135deg, #1a1410 0%, #0d0d0d 100%);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    animation: fadeInUp 0.6s ease 0.2s both;
+    box-shadow: 0 0 60px rgba(201,168,76,0.1);
+}
+#ticketDesign::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+}
+
+.ticket-top {
+    display: flex;
+    align-items: stretch;
+    min-height: 220px;
+}
+.ticket-left {
+    flex: 1;
+    padding: 2rem;
+    border-right: 2px dashed rgba(201,168,76,0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.ticket-right {
+    width: 160px;
+    flex-shrink: 0;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.ticket-choir {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+}
+.ticket-event {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+}
+.ticket-presents {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+.ticket-info-row {
+    display: flex;
+    gap: 1.5rem;
+}
+.ticket-info-item label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+.ticket-info-item span {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+#qrcode-container {
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+}
+.ticket-code-label {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.ticket-code-value {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 700;
+    text-align: center;
+    word-break: break-all;
+}
+
+.ticket-bottom {
+    border-top: 2px dashed rgba(201,168,76,0.2);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.attendee-info { flex: 1; }
+.attendee-label {
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 3px;
+}
+.attendee-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--text);
+}
+.ticket-qty {
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    text-align: center;
+}
+.ticket-qty-num {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+}
+.ticket-qty-label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Ticket Actions */
+.ticket-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeInUp 0.6s ease 0.4s both;
+}
+.btn-download {
+    padding: 0.9rem 2.25rem;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #0d0d0d;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+}
+.btn-download:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+}
+.btn-new-reg {
+    padding: 0.9rem 1.75rem;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-new-reg:hover { color: var(--text); border-color: var(--muted); }
+
+.email-note {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    animation: fadeInUp 0.6s ease 0.6s both;
+}
+.email-note span { color: var(--gold); }
+
+/* ============================================================
+   MULTI-QR TICKET GRID
+   ============================================================ */
+
+.ticket-summary-card {
+    width: 100%;
+    max-width: 640px;
+    background: linear-gradient(135deg, #1a1410 0%, #0d0d0d 100%);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.5s ease 0.1s both;
+    box-shadow: 0 0 60px rgba(201,168,76,0.08);
+}
+.ticket-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+}
+.summary-choir-name {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+}
+.summary-event-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.75rem;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.2rem;
+}
+.summary-event-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+.summary-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+.summary-meta-item label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+.summary-meta-item span {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* QR Grid */
+.qr-section-title {
+    width: 100%;
+    max-width: 640px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    animation: fadeInUp 0.5s ease 0.2s both;
+}
+
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 640px;
+    animation: fadeInUp 0.5s ease 0.3s both;
+}
+.qr-tile {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+.qr-tile-num {
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+}
+.qr-canvas-wrap {
+    background: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    line-height: 0;
+}
+.qr-code-val {
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: center;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+/* Full ticket download wrap */
+#ticketDownloadWrap {
+    width: 100%;
+    max-width: 640px;
+}
+
+/* ============================================================
+   VALIDATION ERRORS
+   ============================================================ */
+
+.field-error {
+    font-size: 0.78rem;
+    color: var(--danger);
+    margin-top: 0.3rem;
+    display: none;
+}
+.field-error.visible { display: block; }
+.shake { animation: shake 0.4s ease; }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60%  { transform: translateX(-6px); }
+    40%, 80%  { transform: translateX(6px); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .form-card-body  { padding: 1.25rem; }
+    .form-card-header{ padding: 1.25rem; }
+    .form-card-footer{ padding: 1rem 1.25rem; flex-direction: column-reverse; }
+    .btn-primary-custom, .btn-secondary-custom, .btn-submit-custom { width: 100%; text-align: center; justify-content: center; }
+    .ticket-top { flex-direction: column; }
+    .ticket-left { border-right: none; border-bottom: 2px dashed rgba(201,168,76,0.2); }
+    .ticket-right { width: 100%; flex-direction: row; border: none; padding: 1.25rem; }
+    .step-line { width: 40px; }
+}

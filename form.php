@@ -1,0 +1,239 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservasi Tiket — FOAS 13</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body class="form-page">
+
+<div class="form-wrapper">
+
+    <!-- Header kecil -->
+    <div style="text-align:center; padding: 1.5rem 0 0;">
+        <a href="index.php" style="text-decoration:none;">
+            <span style="font-size:0.7rem; letter-spacing:3px; color:#c9a84c; text-transform:uppercase;">← FOAS 13</span>
+        </a>
+    </div>
+
+    <!-- Step Indicators -->
+    <div class="progress-container">
+        <div class="step-indicators">
+            <div class="step-item active" id="si-1">
+                <div class="step-circle">1</div>
+                <span>Data Diri</span>
+            </div>
+            <div class="step-line" id="line-1"></div>
+            <div class="step-item" id="si-2">
+                <div class="step-circle">2</div>
+                <span>Persembahan</span>
+            </div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step-item" id="si-3">
+                <div class="step-circle">3</div>
+                <span>Review</span>
+            </div>
+        </div>
+    </div>
+
+    <form id="registrasiForm" method="POST" action="process.php" enctype="multipart/form-data">
+
+        <!-- ================================================
+             STEP 1: Data Diri
+             ================================================ -->
+        <div class="form-step" id="step-1">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <span class="form-step-tag">Langkah 1 dari 3</span>
+                    <h2>Data Peserta</h2>
+                    <p>Isi informasi Anda untuk reservasi tiket FOAS 13</p>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+                        <input type="text" name="nama" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap Anda">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Nomor WhatsApp <span class="required">*</span></label>
+                        <div style="display:flex;">
+                            <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">+62</span>
+                            <input type="tel" name="no_hp" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="812-3456-7890">
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Email Aktif <span class="required">*</span></label>
+                        <input type="email" name="email" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="email@anda.com">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Jumlah Tiket <span class="required">*</span></label>
+                        <div class="ticket-counter">
+                            <button type="button" class="counter-btn" id="decreaseBtn">−</button>
+                            <input type="number" name="jumlah_tiket" id="ticketCount" class="counter-input" value="1" min="1" max="5" readonly>
+                            <button type="button" class="counter-btn" id="increaseBtn">+</button>
+                        </div>
+                        <small class="text-muted-gold">Maksimal 5 tiket per transaksi</small>
+                    </div>
+
+                    <!-- Arwah Checkbox -->
+                    <div class="arwah-toggle mb-3">
+                        <label class="custom-checkbox-label">
+                            <input type="checkbox" id="uploadArwah" name="upload_arwah" value="1" class="custom-checkbox">
+                            <span class="checkmark"></span>
+                            <div class="checkbox-text">
+                                <strong>Upload Nama Arwah</strong>
+                                <small>Dedikasikan tiket ini untuk mendoakan orang terkasih yang telah berpulang</small>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Arwah Form (Hidden) -->
+                    <div class="arwah-form" id="arwahForm" style="display:none;">
+                        <div class="arwah-card">
+                            <h5 class="arwah-title">✦ Data Arwah yang Didoakan</h5>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label">Foto Arwah <small style="color:#666;">(opsional)</small></label>
+                                <div class="upload-area" id="uploadArea">
+                                    <input type="file" name="foto_arwah" id="fotoArwah" accept="image/*" hidden>
+                                    <div class="upload-placeholder" id="uploadPlaceholder">
+                                        <div class="upload-icon" style="font-size:2rem; margin-bottom:.5rem;">📷</div>
+                                        <p>Drag &amp; drop foto di sini</p>
+                                        <p class="upload-or">atau</p>
+                                        <button type="button" class="btn-browse">Browse File</button>
+                                        <small class="upload-hint">PNG, JPG — maks. 2MB</small>
+                                    </div>
+                                    <div class="upload-preview" id="uploadPreview" style="display:none;">
+                                        <img id="previewImg" src="" alt="Preview">
+                                        <button type="button" class="btn-remove-img" onclick="removeImage()">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label">Nama Arwah <span class="required">*</span></label>
+                                <input type="text" name="nama_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah">
+                            </div>
+
+                            <div style="display:flex; gap:1rem;">
+                                <div class="form-group mb-3" style="flex:1;">
+                                    <label class="form-label">Tahun Lahir <span class="required">*</span></label>
+                                    <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024">
+                                </div>
+                                <div class="form-group mb-3" style="flex:1;">
+                                    <label class="form-label">Tahun Wafat <span class="required">*</span></label>
+                                    <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025">
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-1">
+                                <label class="form-label">Hubungan dengan Anda <span class="required">*</span></label>
+                                <select name="hubungan_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem; appearance:auto;">
+                                    <option value="" disabled selected>Pilih hubungan...</option>
+                                    <option value="orang_tua">Orang Tua</option>
+                                    <option value="anak">Anak</option>
+                                    <option value="saudara">Saudara</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-card-footer">
+                    <a href="index.php" class="btn-secondary-custom">← Kembali</a>
+                    <button type="button" class="btn-primary-custom" onclick="nextStep(1)">Lanjutkan →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================
+             STEP 2: Persembahan
+             ================================================ -->
+        <div class="form-step" id="step-2" style="display:none;">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <span class="form-step-tag">Langkah 2 dari 3</span>
+                    <h2>Persembahan</h2>
+                    <p>Dukungan Anda sangat berarti untuk kelangsungan FOAS 13</p>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="offering-info">
+                        <div class="offering-icon">🎵</div>
+                        <h5>Sumbangan Sukarela</h5>
+                        <p>Persembahan ini bersifat <strong>tidak wajib</strong>. Jika ingin memberikan dukungan, silakan transfer ke rekening berikut:</p>
+                    </div>
+
+                    <div class="bank-card">
+                        <div class="bank-logo">BCA</div>
+                        <div class="bank-details">
+                            <p class="bank-name">PT Bank Central Asia Tbk</p>
+                            <p class="bank-account">1234 5678</p>
+                            <p class="bank-holder">Vita Voxa Choir</p>
+                        </div>
+                        <button type="button" class="btn-copy" onclick="copyRekening()">Salin</button>
+                    </div>
+
+                    <div class="offering-note">
+                        <div class="note-icon">💡</div>
+                        <p>Tambahkan <strong>001</strong> di akhir nominal transfer Anda sebagai penanda sumbangan.<br>
+                        <em>Contoh: Rp 100.001 atau Rp 50.001</em></p>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <label class="form-label">Nominal Sumbangan <small style="color:#666;">(opsional)</small></label>
+                        <div style="display:flex;">
+                            <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">Rp</span>
+                            <input type="number" name="sumbangan_amount" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="0" min="0">
+                        </div>
+                        <small class="text-muted-gold">Kosongkan jika tidak ingin memberikan sumbangan</small>
+                    </div>
+
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn-secondary-custom" onclick="prevStep(2)">← Kembali</button>
+                    <button type="button" class="btn-primary-custom" onclick="nextStep(2)">Lanjutkan →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================
+             STEP 3: Review
+             ================================================ -->
+        <div class="form-step" id="step-3" style="display:none;">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <span class="form-step-tag">Langkah 3 dari 3</span>
+                    <h2>Periksa Data</h2>
+                    <p>Pastikan semua informasi sudah benar sebelum mengirimkan</p>
+                </div>
+
+                <div class="form-card-body">
+                    <div class="review-section" id="reviewContent">
+                        <!-- Diisi oleh JavaScript -->
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn-secondary-custom" onclick="prevStep(3)">← Kembali</button>
+                    <button type="submit" class="btn-submit-custom">Kirim Reservasi ✓</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script src="assets/js/form.js"></script>
+</body>
+</html>
