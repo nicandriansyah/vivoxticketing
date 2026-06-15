@@ -1,5 +1,7 @@
 ﻿uploads/*
 !uploads/.gitkeep
+tickets/*
+!tickets/.gitkeep
 .claude/
 config/db.local.php
 config/mail.local.php

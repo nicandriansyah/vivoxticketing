@@ -173,6 +173,17 @@ body {
     box-shadow: 0 8px 32px rgba(201,168,76,0.5);
     color: #0d0d0d;
 }
+.btn-coming-soon {
+    background: #3a3a3a;
+    color: #cfcfcf;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.btn-coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+    color: #cfcfcf;
+}
 
 /* ============================================================
    FORM PAGE
@@ -201,6 +212,17 @@ body {
     z-index: 1;
     max-width: 640px;
     margin: 0 auto;
+}
+.form-soldout {
+    background: #fdecea;
+    border: 1.5px solid #e0a0a0;
+    color: #8a1f1f;
+    border-radius: 12px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    text-align: center;
 }
 
 /* Progress Steps */

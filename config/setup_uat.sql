@@ -28,6 +28,31 @@ CREATE TABLE IF NOT EXISTS registrations (
     created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabel check-in tiket (1 baris = 1 tiket ter-scan).
+-- Aplikasi juga membuat tabel ini otomatis bila belum ada.
+CREATE TABLE IF NOT EXISTS checkins (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    registration_id  INT          NOT NULL,
+    kode_tiket       VARCHAR(30)  NOT NULL UNIQUE,
+    checked_in_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_reg (registration_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tiket yang dibatalkan (data tidak dihapus, hanya mengurangi tiket aktif).
+CREATE TABLE IF NOT EXISTS cancelled_tickets (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    registration_id  INT          NOT NULL,
+    kode_tiket       VARCHAR(30)  NOT NULL UNIQUE,
+    cancelled_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_reg (registration_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pengaturan key-value (mis. kuota tiket).
+CREATE TABLE IF NOT EXISTS settings (
+    skey VARCHAR(50)  PRIMARY KEY,
+    sval VARCHAR(255) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- Grant akses untuk user vitavoxa_admin
 -- Ganti '202.165.34.82' dengan IP server / '%' untuk semua IP

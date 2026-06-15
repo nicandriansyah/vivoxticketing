@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/admin.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -14,7 +15,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $u = trim($_POST['username'] ?? '');
     $p = $_POST['password'] ?? '';
-    if ($u === $ADMIN_USER && password_verify($p, $ADMIN_PASS_HASH)) {
+    if (verifyAdminLogin($pdo ?? null, $u, $p)) {
         session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_user']      = $u;

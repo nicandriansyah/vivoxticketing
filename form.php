@@ -12,7 +12,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reservasi Tiket — FOAS 13</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=4" rel="stylesheet">
+    <link href="assets/css/style.css?v=5" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -24,6 +24,18 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 </script>
 
 <div class="form-wrapper">
+
+    <?php $err = $_GET['error'] ?? ''; if ($err === 'habis' || $err === 'sisa' || $err === 'closed'): ?>
+    <div class="form-soldout">
+        <?php if ($err === 'habis'): ?>
+            <strong>Maaf, tiket sudah habis.</strong><br>Kuota tiket FOAS 13 telah terpenuhi.
+        <?php elseif ($err === 'closed'): ?>
+            <strong>Penjualan tiket belum dibuka.</strong><br>Nantikan info selanjutnya — Coming Soon.
+        <?php else: $n = max(0, (int)($_GET['n'] ?? 0)); ?>
+            <strong>Sisa tiket tinggal <?= $n ?>.</strong><br>Silakan kurangi jumlah tiket Anda.
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Step Indicators -->
     <div class="progress-container">

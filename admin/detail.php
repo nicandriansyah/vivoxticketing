@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/helpers.php';
 
 $id  = (int)($_GET['id'] ?? 0);
 $row = null;
@@ -28,27 +29,11 @@ if ($row) {
 
 $hubunganMap = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
 function rp($n) { return 'Rp ' . number_format((float)$n, 0, ',', '.'); }
+
+$pageTitle  = 'Detail Registrasi';
+$activeMenu = 'dashboard';
+require __DIR__ . '/partials/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Registrasi — Admin FOAS 13</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css" rel="stylesheet">
-</head>
-<body class="admin-page">
-
-    <header class="adm-topbar">
-        <div class="adm-brand">FOAS 13 <span>Admin</span></div>
-        <nav class="adm-nav">
-            <span class="adm-user">👤 <?= htmlspecialchars($_SESSION['admin_user'] ?? 'admin') ?></span>
-            <a href="logout.php" class="adm-logout">Keluar</a>
-        </nav>
-    </header>
-
-    <main class="adm-main">
         <a href="index.php" class="adm-back">← Kembali ke Dashboard</a>
 
         <?php
@@ -76,7 +61,12 @@ function rp($n) { return 'Rp ' . number_format((float)$n, 0, ',', '.'); }
                 <div class="detail-row"><span>Sumbangan</span><strong><?= (float)$row['sumbangan_amount'] > 0 ? rp($row['sumbangan_amount']) : '—' ?></strong></div>
                 <div class="detail-row"><span>Status Email</span><strong><?= $row['email_sent'] ? '<span class="badge-ok">Terkirim</span>' : '<span class="badge-no">Belum</span>' ?></strong></div>
                 <div class="detail-row"><span>Tanggal Daftar</span><strong><?= date('d M Y H:i', strtotime($row['created_at'])) ?></strong></div>
-                <form method="POST" action="resend.php" style="margin-top:1rem;">
+                <?php $waUrl = waLink($row['no_hp'], adminTicketUrl($row['kode_tiket'])); ?>
+                <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="adm-btn-wa" style="margin-top:1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.345.223-.643.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    Kirim Link via WhatsApp
+                </a>
+                <form method="POST" action="resend.php" style="margin-top:0.6rem;">
                     <input type="hidden" name="id" value="<?= (int)$row['id'] ?>">
                     <input type="hidden" name="return" value="detail.php?id=<?= (int)$row['id'] ?>">
                     <button type="submit" class="adm-btn-secondary" style="width:100%;">
@@ -115,6 +105,5 @@ function rp($n) { return 'Rp ' . number_format((float)$n, 0, ',', '.'); }
         </div>
 
         <?php endif; ?>
-    </main>
-</body>
-</html>
+
+<?php require __DIR__ . '/partials/footer.php'; ?>

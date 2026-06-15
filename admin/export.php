@@ -1,20 +1,22 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/helpers.php';
 
 if (!$pdo) {
     http_response_code(500);
     exit('Database tidak tersedia.');
 }
 
-$q = trim($_GET['q'] ?? '');
-$where = '';
+$q      = trim($_GET['q'] ?? '');
+$filter = $_GET['filter'] ?? '';
+
+$conds  = [];
 $params = [];
-if ($q !== '') {
-    $where  = "WHERE nama LIKE ? OR email LIKE ? OR kode_tiket LIKE ? OR no_hp LIKE ?";
-    $like   = "%$q%";
-    $params = [$like, $like, $like, $like];
-}
+list($sc, $sp) = buildSearchClause($q);
+if ($sc) { $conds[] = $sc; $params = array_merge($params, $sp); }
+if ($filter === 'email_fail') { $conds[] = 'email_sent = 0'; }
+$where = $conds ? 'WHERE ' . implode(' AND ', $conds) : '';
 
 $stmt = $pdo->prepare("SELECT * FROM registrations $where ORDER BY id DESC");
 $stmt->execute($params);

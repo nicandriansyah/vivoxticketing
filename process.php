@@ -2,6 +2,7 @@
 session_start();
 require_once 'config/db.php';
 require_once 'config/mail.php';
+require_once 'config/checkin.php';
 
 // Set true untuk menampilkan error DB/email saat debugging di UAT.
 // Kembalikan ke false setelah selesai supaya error tidak bocor ke user.
@@ -92,6 +93,29 @@ if (!$pdo) {
     // Koneksi DB gagal — tampilkan error koneksi saat debug
     debugDie('Koneksi database GAGAL', $dbError ?? 'Penyebab tidak diketahui. Cek config/db.local.php (host/user/password/db).');
 }
+
+/* ---------- Cek penjualan dibuka/ditutup + kuota (war tiket saat submit) ---------- */
+try {
+    ensureTicketTables($pdo);
+    // Penjualan ditutup manual oleh admin
+    if ((int)getSetting($pdo, 'sales_open', '1') !== 1) {
+        header('Location: form.php?error=closed');
+        exit;
+    }
+    $quota = (int)getSetting($pdo, 'ticket_quota', '0');
+    if ($quota > 0) {
+        $sold      = getTotalSold($pdo);
+        $remaining = $quota - $sold;
+        if ($remaining <= 0) {
+            header('Location: form.php?error=habis');
+            exit;
+        }
+        if ($jumlah_tiket > $remaining) {
+            header('Location: form.php?error=sisa&n=' . $remaining);
+            exit;
+        }
+    }
+} catch (Exception $e) { /* jika gagal cek, lanjutkan saja */ }
 
 try {
     // Jika ada kode yang bentrok, ganti seluruh batch dengan batch ID baru

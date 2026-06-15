@@ -1,14 +1,22 @@
 <?php
 session_start();
 require_once 'config/db.php';
+require_once 'config/checkin.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
+function show404(string $msg = ''): void {
+    $GLOBALS['notfound_msg'] = $msg;
+    require __DIR__ . '/404.php';
+    exit;
+}
+
 $t            = null;
 $ticket_codes = [];
 $jumlah_tiket = 0;
+$regId        = null;
 $isNew        = isset($_GET['new']);
 $token        = trim($_GET['token'] ?? '');
 
@@ -19,11 +27,22 @@ if ($token && $pdo) {
         $stmt->execute([$token]);
         $row  = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row) {
-            $jumlah_tiket = (int)$row['jumlah_tiket'];
-            $batch        = substr($row['kode_tiket'], 7, 4);
-            for ($i = 0; $i < $jumlah_tiket; $i++) {
-                $ticket_codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            $regId    = (int)$row['id'];
+            $original = (int)$row['jumlah_tiket'];
+            $batch    = substr($row['kode_tiket'], 7, 4);
+
+            $allCodes = [];
+            for ($i = 0; $i < $original; $i++) {
+                $allCodes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
             }
+            // Buang tiket yang sudah dibatalkan
+            $cancelledMap   = getCancelledMap($pdo, [$regId]);
+            $cancelledCodes = $cancelledMap[$regId] ?? [];
+            $ticket_codes   = array_values(array_filter($allCodes, function ($c) use ($cancelledCodes) {
+                return !in_array($c, $cancelledCodes, true);
+            }));
+            $jumlah_tiket = count($ticket_codes);
+
             $t = [
                 'kode_utama'   => $row['kode_tiket'],
                 'ticket_codes' => $ticket_codes,
@@ -43,9 +62,19 @@ if (!$t && !empty($_SESSION['ticket'])) {
 }
 unset($_SESSION['ticket']); // always clear
 
+// Link tidak valid / tidak ketemu
 if (!$t) {
-    header('Location: index.php');
-    exit;
+    show404('Tiket tidak ditemukan. Periksa kembali link tiket yang sudah diberikan.');
+}
+
+// Semua tiket dibatalkan / sudah check-in → link tidak dapat diakses lagi
+if ($regId && $pdo) {
+    if ($jumlah_tiket <= 0) {
+        show404('Semua tiket pada link ini sudah dibatalkan. Periksa kembali link tiket yang sudah diberikan.');
+    }
+    if (countChecked($pdo, $regId) >= $jumlah_tiket) {
+        show404('Semua tiket pada link ini sudah digunakan untuk check-in. Periksa kembali link tiket yang sudah diberikan.');
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -170,6 +199,27 @@ if (!$t) {
         if (localStorage.getItem('wa_' + code)) showWaSent(i);
     });
 
+<?php if ($isNew): ?>
+    // Reservasi baru → simpan tiap tiket sebagai JPG ke server (sekali saja)
+    window.addEventListener('load', function () {
+        setTimeout(function () {
+            var cards = document.querySelectorAll('.ticket-card');
+            (function saveNext(i) {
+                if (i >= cards.length) return;
+                html2canvas(cards[i], captureOpts()).then(function (canvas) {
+                    var img = canvas.toDataURL('image/jpeg', 0.92);
+                    var fd  = new FormData();
+                    fd.append('code', codes[i]);
+                    fd.append('image', img);
+                    fetch('save_ticket.php', { method: 'POST', body: fd })
+                        .catch(function () {})
+                        .finally(function () { saveNext(i + 1); });
+                }).catch(function () { saveNext(i + 1); });
+            })(0);
+        }, 1200);
+    });
+<?php endif; ?>
+
     function showWaSent(i) {
         // Tampilkan badge penanda, TAPI tombol tetap terlihat & bisa diklik
         // supaya bisa dibagikan ulang berkali-kali.
@@ -263,13 +313,23 @@ if (!$t) {
             var pageW = pdf.internal.pageSize.getWidth();
             var pageH = pdf.internal.pageSize.getHeight();
 
+            var margin = 10;                       // mm
+            var maxW   = pageW - margin * 2;
+            var maxH   = pageH - margin * 2;
+
             for (var i = 0; i < cards.length; i++) {
                 if (i > 0) pdf.addPage();
                 var canvas  = await html2canvas(cards[i], captureOpts());
                 var imgData = canvas.toDataURL('image/jpeg', 0.92);
-                var imgH    = (canvas.height * pageW) / canvas.width;
-                var yOff    = imgH < pageH ? (pageH - imgH) / 2 : 0;
-                pdf.addImage(imgData, 'JPEG', 0, yOff, pageW, Math.min(imgH, pageH));
+
+                // Fit proporsional (contain): skala terbatas oleh lebar ATAU tinggi
+                var ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+                var imgW  = canvas.width  * ratio;
+                var imgH  = canvas.height * ratio;
+                var xOff  = (pageW - imgW) / 2;
+                var yOff  = (pageH - imgH) / 2;
+
+                pdf.addImage(imgData, 'JPEG', xOff, yOff, imgW, imgH);
             }
             pdf.save('tiket-foas13-<?= addslashes($t['nama']) ?>.pdf');
         } catch (e) {
