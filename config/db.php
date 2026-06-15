@@ -8,6 +8,7 @@ $DB_NAME = 'ticket_foas';
 $localCfg = __DIR__ . '/db.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
 
+$dbError = null;
 try {
     $pdo = new PDO(
         "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",
@@ -19,5 +20,6 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    $pdo = null;
+    $pdo     = null;
+    $dbError = $e->getMessage();   // simpan pesan error untuk debug
 }

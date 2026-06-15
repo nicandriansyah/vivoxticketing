@@ -3,6 +3,28 @@ session_start();
 require_once 'config/db.php';
 require_once 'config/mail.php';
 
+// Set true untuk menampilkan error DB/email saat debugging di UAT.
+// Kembalikan ke false setelah selesai supaya error tidak bocor ke user.
+$DEBUG = true;
+
+function debugDie(string $title, string $detail): void {
+    global $DEBUG;
+    if ($DEBUG) {
+        header('Content-Type: text/html; charset=UTF-8');
+        echo '<div style="font-family:monospace;max-width:760px;margin:40px auto;padding:24px;'
+           . 'border:2px solid #e05555;border-radius:10px;background:#fff5f5;color:#2c0000;">'
+           . '<h2 style="margin:0 0 12px;color:#c0392b;">DEBUG: ' . htmlspecialchars($title) . '</h2>'
+           . '<pre style="white-space:pre-wrap;word-break:break-word;font-size:14px;">'
+           . htmlspecialchars($detail) . '</pre>'
+           . '<p style="color:#888;font-size:13px;">Matikan dengan set <code>$DEBUG = false;</code> di process.php</p>'
+           . '</div>';
+        exit;
+    }
+    // Production: jangan bocorkan detail, kembali ke form
+    header('Location: form.php?error=save');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: form.php');
     exit;
@@ -66,7 +88,12 @@ for ($i = 0; $i < $jumlah_tiket; $i++) {
 $kode_utama = $ticket_codes[0];
 
 /* ---------- Save to DB ---------- */
-if ($pdo) {
+if (!$pdo) {
+    // Koneksi DB gagal — tampilkan error koneksi saat debug
+    debugDie('Koneksi database GAGAL', $dbError ?? 'Penyebab tidak diketahui. Cek config/db.local.php (host/user/password/db).');
+}
+
+try {
     // Jika ada kode yang bentrok, ganti seluruh batch dengan batch ID baru
     do {
         $ph   = implode(',', array_fill(0, count($ticket_codes), '?'));
@@ -98,6 +125,8 @@ if ($pdo) {
         $upload_arwah ? $hubungan : null,
         $sumbangan
     ]);
+} catch (PDOException $e) {
+    debugDie('Gagal menyimpan ke database', $e->getMessage());
 }
 
 /* ---------- Store in Session for Ticket Page ---------- */
