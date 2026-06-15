@@ -1,4 +1,10 @@
-<?php session_start(); ?>
+<?php
+session_start();
+// No-cache headers
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,8 +13,15 @@
     <title>Reservasi Tiket — FOAS 13</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body class="form-page">
+<script>
+    // Clear localStorage & sessionStorage saat halaman form dibuka
+    try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+</script>
 
 <div class="form-wrapper">
 
@@ -39,7 +52,7 @@
         </div>
     </div>
 
-    <form id="registrasiForm" method="POST" action="process.php" enctype="multipart/form-data">
+    <form id="registrasiForm" method="POST" action="process.php" enctype="multipart/form-data" autocomplete="off">
 
         <!-- ================================================
              STEP 1: Data Diri
@@ -56,20 +69,20 @@
 
                     <div class="form-group mb-4">
                         <label class="form-label">Nama Lengkap <span class="required">*</span></label>
-                        <input type="text" name="nama" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap Anda">
+                        <input type="text" name="nama" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap Anda" autocomplete="off">
                     </div>
 
                     <div class="form-group mb-4">
                         <label class="form-label">Nomor WhatsApp <span class="required">*</span></label>
                         <div style="display:flex;">
                             <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">+62</span>
-                            <input type="tel" name="no_hp" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="812-3456-7890">
+                            <input type="tel" name="no_hp" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="812-3456-7890" autocomplete="off">
                         </div>
                     </div>
 
                     <div class="form-group mb-4">
                         <label class="form-label">Email Aktif <span class="required">*</span></label>
-                        <input type="email" name="email" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="email@anda.com">
+                        <input type="email" name="email" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="email@anda.com" autocomplete="off">
                     </div>
 
                     <div class="form-group mb-4">
@@ -119,17 +132,17 @@
 
                             <div class="form-group mb-3">
                                 <label class="form-label">Nama Arwah <span class="required">*</span></label>
-                                <input type="text" name="nama_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah">
+                                <input type="text" name="nama_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah" autocomplete="off">
                             </div>
 
                             <div style="display:flex; gap:1rem;">
                                 <div class="form-group mb-3" style="flex:1;">
                                     <label class="form-label">Tahun Lahir <span class="required">*</span></label>
-                                    <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024">
+                                    <input type="number" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" min="1900" max="2024" autocomplete="off">
                                 </div>
                                 <div class="form-group mb-3" style="flex:1;">
                                     <label class="form-label">Tahun Wafat <span class="required">*</span></label>
-                                    <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025">
+                                    <input type="number" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" min="1900" max="2025" autocomplete="off">
                                 </div>
                             </div>
 
@@ -193,7 +206,7 @@
                         <label class="form-label">Nominal Sumbangan <small style="color:#666;">(opsional)</small></label>
                         <div style="display:flex;">
                             <span class="input-group-text country-code" style="border-radius:8px 0 0 8px;">Rp</span>
-                            <input type="number" name="sumbangan_amount" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="0" min="0">
+                            <input type="number" name="sumbangan_amount" class="custom-input" style="border-radius:0 8px 8px 0; width:100%; padding:.8rem 1rem; border:1px solid #2e2e2e; border-left:none; background:#222; color:#f0f0f0; font-size:1rem;" placeholder="0" min="0" autocomplete="off">
                         </div>
                         <small class="text-muted-gold">Kosongkan jika tidak ingin memberikan sumbangan</small>
                     </div>

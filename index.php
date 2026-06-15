@@ -1,4 +1,14 @@
-<?php session_start(); ?>
+<?php
+session_start();
+// Clear session saat kembali ke halaman utama — fresh start
+$_SESSION = [];
+session_destroy();
+
+// No-cache headers
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

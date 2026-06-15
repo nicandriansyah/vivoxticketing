@@ -1,14 +1,20 @@
 <?php
 session_start();
+// No-cache headers
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
 if (empty($_SESSION['ticket'])) {
     header('Location: index.php');
     exit;
 }
 
-$t = $_SESSION['ticket'];
-$ticket_codes = $t['ticket_codes'];
-$jumlah_tiket = (int)$t['jumlah_tiket'];
+// Ambil data lalu clear session — tidak bisa kembali ke halaman ini setelah refresh
+$t             = $_SESSION['ticket'];
+$ticket_codes  = $t['ticket_codes'];
+$jumlah_tiket  = (int)$t['jumlah_tiket'];
+unset($_SESSION['ticket']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
