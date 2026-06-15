@@ -177,6 +177,25 @@ if (!$t) {
         if (badge) badge.style.display = 'flex';
     }
 
+    // Shared html2canvas options. onclone strips the fadeInUp animation so the
+    // capture isn't taken while the cloned card is still faded (washed out).
+    function captureOpts() {
+        return {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#f8f4ec',
+            logging: false,
+            onclone: function(doc) {
+                doc.querySelectorAll('.ticket-card').forEach(function(el) {
+                    el.style.animation = 'none';
+                    el.style.opacity   = '1';
+                    el.style.transform = 'none';
+                });
+            }
+        };
+    }
+
     async function shareToWA(idx, code) {
         var btn     = document.getElementById('share-btn-' + idx);
         var origHTML = btn.innerHTML;
@@ -185,10 +204,7 @@ if (!$t) {
 
         try {
             var card   = document.querySelectorAll('.ticket-card')[idx];
-            var canvas = await html2canvas(card, {
-                scale: 2, useCORS: true, allowTaint: true,
-                backgroundColor: '#f8f4ec', logging: false
-            });
+            var canvas = await html2canvas(card, captureOpts());
 
             var fileName = 'tiket-foas13-' + (idx + 1) + '.jpg';
             var blob = await new Promise(function(resolve) {
@@ -247,10 +263,7 @@ if (!$t) {
 
             for (var i = 0; i < cards.length; i++) {
                 if (i > 0) pdf.addPage();
-                var canvas  = await html2canvas(cards[i], {
-                    scale: 2, useCORS: true, allowTaint: true,
-                    backgroundColor: '#f8f4ec', logging: false
-                });
+                var canvas  = await html2canvas(cards[i], captureOpts());
                 var imgData = canvas.toDataURL('image/jpeg', 0.92);
                 var imgH    = (canvas.height * pageW) / canvas.width;
                 var yOff    = imgH < pageH ? (pageH - imgH) / 2 : 0;
