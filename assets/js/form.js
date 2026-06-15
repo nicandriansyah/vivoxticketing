@@ -154,10 +154,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const input   = document.getElementById('fotoArwah');
     if (!area || !input) return;
 
+    // Klik di mana saja dalam area → buka file picker, kecuali tombol hapus
     area.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('btn-browse') && !e.target.classList.contains('btn-remove-img')) {
-            input.click();
-        }
+        if (e.target.classList.contains('btn-remove-img')) return;
+        input.click();
     });
 
     area.addEventListener('dragover', (e) => {
