@@ -164,14 +164,26 @@ body {
    ============================================================ */
 
 .form-page {
-    background:
-        radial-gradient(ellipse at top, rgba(201,168,76,0.05) 0%, transparent 50%),
-        #0d0d0d;
     min-height: 100vh;
     padding: 2rem 1rem 4rem;
+    position: relative;
+}
+
+.form-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('../../bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.3);
+    z-index: 0;
 }
 
 .form-wrapper {
+    position: relative;
+    z-index: 1;
     max-width: 640px;
     margin: 0 auto;
 }
@@ -656,9 +668,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
-    background:
-        radial-gradient(ellipse at center top, rgba(76,175,80,0.08) 0%, transparent 60%),
-        #0d0d0d;
+    background: #ffffff;
 }
 
 .ticket-success-header {
@@ -682,8 +692,9 @@ body {
     font-family: 'Playfair Display', serif;
     font-size: 2rem;
     margin-bottom: 0.5rem;
+    color: #1a1a1a;
 }
-.ticket-success-header p { color: var(--muted); font-size: 1rem; }
+.ticket-success-header p { color: #666; font-size: 1rem; }
 
 /* The Ticket Design */
 #ticketDesign {
@@ -865,24 +876,24 @@ body {
 .btn-new-reg {
     padding: 0.9rem 1.75rem;
     background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
+    color: #666;
+    border: 1.5px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
 }
-.btn-new-reg:hover { color: var(--text); border-color: var(--muted); }
+.btn-new-reg:hover { color: #222; border-color: #888; }
 
 .email-note {
     margin-top: 1.5rem;
     text-align: center;
     font-size: 0.9rem;
-    color: var(--muted);
+    color: #888;
     animation: fadeInUp 0.6s ease 0.6s both;
 }
-.email-note span { color: var(--gold); }
+.email-note span { color: #8B6914; }
 
 /* ============================================================
    MULTI-QR TICKET GRID
@@ -945,13 +956,13 @@ body {
     font-size: 0.7rem;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #999;
     margin-bottom: 3px;
 }
 .summary-meta-item span {
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--text);
+    color: #1a1a1a;
 }
 
 /* QR Grid */
@@ -960,7 +971,7 @@ body {
     max-width: 640px;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--muted);
+    color: #888;
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-top: 2rem;
@@ -978,8 +989,8 @@ body {
     animation: fadeInUp 0.5s ease 0.3s both;
 }
 .qr-tile {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
     border-radius: 12px;
     padding: 1.25rem 1rem;
     display: flex;
@@ -991,7 +1002,7 @@ body {
     font-size: 0.72rem;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--gold);
+    color: #8B6914;
     font-weight: 600;
 }
 .qr-canvas-wrap {
@@ -1003,7 +1014,7 @@ body {
 .qr-code-val {
     font-family: 'Courier New', monospace;
     font-size: 0.65rem;
-    color: var(--muted);
+    color: #888;
     text-align: center;
     word-break: break-all;
     line-height: 1.4;
