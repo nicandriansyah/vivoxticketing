@@ -7,13 +7,13 @@
    pattern as db.local.php.
    ============================================================ */
 
-$MAIL_HOST       = 'mail.vitavoxa.my.id';
-$MAIL_PORT       = 465;                       // 465 = SSL (implicit TLS)
+$MAIL_HOST       = 'smtp.gmail.com';
+$MAIL_PORT       = 587;                       // 465 = SSL (implicit TLS)
 $MAIL_SECURE     = 'ssl';                     // 'ssl' for 465, 'tls' for 587
-$MAIL_USER       = 'ticketing@vitavoxa.my.id';
-$MAIL_PASS       = '';                        // set in mail.local.php
-$MAIL_FROM       = 'ticketing@vitavoxa.my.id';
-$MAIL_FROM_NAME  = 'noreply@vitavoxa.my.id';
+$MAIL_USER       = 'sandbox@parokigrogolkaj.or.id';
+$MAIL_PASS       = 'anqm qyst ewke hecs';                        // set in mail.local.php
+$MAIL_FROM       = 'sandbox@parokigrogolkaj.or.id';
+$MAIL_FROM_NAME  = 'no Reply - Email Service';
 
 $localCfg = __DIR__ . '/mail.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
