@@ -11,7 +11,9 @@
    Override nilai sebenarnya di config/app.local.php (gitignored).
    ============================================================ */
 
-$PUBLIC_BASE_URL = '';
+// Default produksi (situs publik tiket). Untuk localhost, override jadi ''
+// di config/app.local.php agar link auto-deteksi dari host.
+$PUBLIC_BASE_URL = 'https://ticket.vitavoxa.my.id';
 
 $localCfg = __DIR__ . '/app.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
