@@ -12,7 +12,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reservasi Tiket — FOAS 13</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=5" rel="stylesheet">
+    <link href="assets/css/style.css?v=6" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -119,14 +119,15 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
                             <div class="form-group mb-3">
                                 <label class="form-label">Foto Arwah <small style="color:#666;">(opsional)</small></label>
+                                <div class="upload-warning">⚠ Hanya file <strong>JPG</strong> atau <strong>PNG</strong>, maksimal <strong>2 MB</strong>.</div>
                                 <div class="upload-area" id="uploadArea">
-                                    <input type="file" name="foto_arwah" id="fotoArwah" accept="image/*" hidden>
+                                    <input type="file" name="foto_arwah" id="fotoArwah" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
                                     <div class="upload-placeholder" id="uploadPlaceholder">
                                         <div class="upload-icon" style="font-size:2rem; margin-bottom:.5rem;">📷</div>
                                         <p>Drag &amp; drop foto di sini</p>
                                         <p class="upload-or">atau</p>
                                         <button type="button" class="btn-browse">Browse File</button>
-                                        <small class="upload-hint">PNG, JPG — maks. 2MB</small>
+                                        <small class="upload-hint">Format JPG / PNG &middot; Maksimal 2 MB</small>
                                     </div>
                                     <div class="upload-preview" id="uploadPreview" style="display:none;">
                                         <img id="previewImg" src="" alt="Preview">
@@ -256,7 +257,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <div style="position:absolute;top:1rem;right:1.2rem;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;" onclick="document.getElementById('photoModal').style.display='none'">✕</div>
 </div>
 
-<script src="assets/js/form.js?v=3"></script>
+<script src="assets/js/form.js?v=4"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {

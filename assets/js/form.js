@@ -191,8 +191,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function handleFile(file) {
-    if (!file.type.startsWith('image/')) { alert('Hanya file gambar yang diperbolehkan.'); return; }
-    if (file.size > 2 * 1024 * 1024) { alert('Ukuran file maksimal 2MB.'); return; }
+    var okType = ['image/jpeg', 'image/png'].indexOf(file.type) !== -1 || /\.(jpe?g|png)$/i.test(file.name);
+    if (!okType) { alert('Format tidak didukung. Hanya file JPG atau PNG yang diperbolehkan.'); return; }
+    if (file.size > 2 * 1024 * 1024) { alert('Ukuran file terlalu besar. Maksimal 2 MB.'); return; }
 
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -2,12 +2,20 @@
 /* Helper bersama untuk halaman admin */
 require_once __DIR__ . '/../config/app.php';
 
-/** Bangun URL tiket publik (pakai PUBLIC_BASE_URL bila diset; ticket.php ada di parent folder /admin). */
-function adminTicketUrl(string $kode): string {
-    // Fallback dir (localhost): parent dari folder /admin
+/** Direktori root app publik untuk fallback (parent dari folder /admin). */
+function adminRootDir(): string {
     $adminDir = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/'); // .../admin
-    $rootDir  = rtrim(str_replace('\\', '/', dirname($adminDir)), '/');            // root app
-    return publicTicketUrl($kode, $rootDir);
+    return rtrim(str_replace('\\', '/', dirname($adminDir)), '/');                 // root app
+}
+
+/** Bangun URL tiket publik (pakai PUBLIC_BASE_URL bila diset). */
+function adminTicketUrl(string $kode): string {
+    return publicTicketUrl($kode, adminRootDir());
+}
+
+/** URL foto upload via endpoint admin (dibaca filesystem; aman lintas subdomain). */
+function adminUploadUrl(string $file): string {
+    return 'upload_image.php?file=' . rawurlencode($file);
 }
 
 /** Bangun link wa.me dengan pesan otomatis berisi link tiket */

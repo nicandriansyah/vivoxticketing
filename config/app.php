@@ -23,17 +23,23 @@ function configuredBaseUrl(): string {
 }
 
 /**
- * Bangun URL tiket publik.
- * @param string $kode       kode tiket (token)
- * @param string $deriveDir  path direktori app (untuk fallback auto-deteksi)
+ * Bangun URL absolut ke aset di situs publik (mis. "uploads/foto.jpg",
+ * "ticket.php?token=..."). Pakai PUBLIC_BASE_URL bila diset.
+ * @param string $path       path relatif terhadap root app publik
+ * @param string $deriveDir  path direktori app (fallback auto-deteksi)
  */
-function publicTicketUrl(string $kode, string $deriveDir = ''): string {
+function publicUrl(string $path, string $deriveDir = ''): string {
+    $path = ltrim($path, '/');
     $base = configuredBaseUrl();
     if ($base !== '') {
-        return $base . '/ticket.php?token=' . urlencode($kode);
+        return $base . '/' . $path;
     }
-    // Fallback: deteksi dari request (localhost / satu domain)
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    return $scheme . '://' . $host . rtrim($deriveDir, '/') . '/ticket.php?token=' . urlencode($kode);
+    return $scheme . '://' . $host . rtrim($deriveDir, '/') . '/' . $path;
+}
+
+/** Bangun URL tiket publik. */
+function publicTicketUrl(string $kode, string $deriveDir = ''): string {
+    return publicUrl('ticket.php?token=' . urlencode($kode), $deriveDir);
 }

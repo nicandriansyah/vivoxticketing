@@ -54,7 +54,7 @@ if (!$nama || !$no_hp || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 /* ---------- File Upload ---------- */
 $foto_path = null;
 if ($upload_arwah && isset($_FILES['foto_arwah']) && $_FILES['foto_arwah']['error'] === UPLOAD_ERR_OK) {
-    $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+    $allowed = ['image/jpeg','image/png'];
     $finfo   = finfo_open(FILEINFO_MIME_TYPE);
     $mime    = finfo_file($finfo, $_FILES['foto_arwah']['tmp_name']);
     finfo_close($finfo);

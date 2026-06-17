@@ -110,7 +110,7 @@ foreach ($rows as $r) {
         'checked'      => array_values($checked),
         'cancelled'    => array_values($cancelled),
         'upload_arwah' => (int)$r['upload_arwah'],
-        'foto'         => $r['foto_arwah'] ? '../uploads/' . $r['foto_arwah'] : '',
+        'foto'         => $r['foto_arwah'] ? adminUploadUrl($r['foto_arwah']) : '',
         'nama_arwah'   => $r['nama_arwah'] ?? '',
         'tahun_lahir'  => $r['tahun_lahir'] ?? '',
         'tahun_wafat'  => $r['tahun_wafat'] ?? '',

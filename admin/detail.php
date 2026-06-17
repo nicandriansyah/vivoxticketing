@@ -92,7 +92,7 @@ require __DIR__ . '/partials/header.php';
                 <h3>🕊️ Data Arwah yang Didoakan</h3>
                 <?php if (!empty($row['foto_arwah'])): ?>
                     <div style="text-align:center;margin-bottom:1rem;">
-                        <img src="../uploads/<?= htmlspecialchars($row['foto_arwah']) ?>" alt="Foto Arwah"
+                        <img src="<?= htmlspecialchars(adminUploadUrl($row['foto_arwah'])) ?>" alt="Foto Arwah"
                              style="max-width:160px;max-height:160px;border-radius:10px;object-fit:cover;">
                     </div>
                 <?php endif; ?>
