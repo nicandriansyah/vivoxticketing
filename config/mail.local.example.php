@@ -2,14 +2,20 @@
 /* ============================================================
    CONTOH konfigurasi email — SALIN file ini menjadi:
        config/mail.local.php
-   lalu isi password email yang sebenarnya.
+   lalu isi kredensial yang sebenarnya.
    File mail.local.php TIDAK ikut ke Git (gitignored).
+   JANGAN menaruh password asli di file contoh ini.
+   ============================================================
+
+   Gmail / Google Workspace (pakai App Password, tanpa spasi):
+       HOST = smtp.gmail.com, PORT = 587, SECURE = 'tls'
+       USER = FROM = alamat akun Google yang login
    ============================================================ */
 
 $MAIL_HOST       = 'smtp.gmail.com';
-$MAIL_PORT       = 587;                       // 465 = SSL (implicit TLS)
-$MAIL_SECURE     = 'ssl';                     // 'ssl' for 465, 'tls' for 587
-$MAIL_USER       = 'sandbox@parokigrogolkaj.or.id';
-$MAIL_PASS       = 'anqm qyst ewke hecs';                        // set in mail.local.php
-$MAIL_FROM       = 'sandbox@parokigrogolkaj.or.id';
-$MAIL_FROM_NAME  = 'no Reply - Email Service';
+$MAIL_PORT       = 587;                       // 465 = SSL, 587 = STARTTLS
+$MAIL_SECURE     = 'tls';                     // 'ssl' untuk 465, 'tls' untuk 587
+$MAIL_USER       = 'akun@contoh.com';
+$MAIL_PASS       = 'APP_PASSWORD_TANPA_SPASI';
+$MAIL_FROM       = 'akun@contoh.com';         // harus sama dengan MAIL_USER (Gmail)
+$MAIL_FROM_NAME  = 'Vita Voxa Choir';

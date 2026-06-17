@@ -8,12 +8,12 @@
    ============================================================ */
 
 $MAIL_HOST       = 'smtp.gmail.com';
-$MAIL_PORT       = 587;                       // 465 = SSL (implicit TLS)
-$MAIL_SECURE     = 'ssl';                     // 'ssl' for 465, 'tls' for 587
-$MAIL_USER       = 'sandbox@parokigrogolkaj.or.id';
-$MAIL_PASS       = 'anqm qyst ewke hecs';                        // set in mail.local.php
-$MAIL_FROM       = 'sandbox@parokigrogolkaj.or.id';
-$MAIL_FROM_NAME  = 'no Reply - Email Service';
+$MAIL_PORT       = 587;                       // 465 = SSL implicit, 587 = STARTTLS
+$MAIL_SECURE     = 'tls';                     // 'ssl' untuk 465, 'tls' untuk 587
+$MAIL_USER       = '';                        // diisi di config/mail.local.php
+$MAIL_PASS       = '';                        // diisi di config/mail.local.php
+$MAIL_FROM       = '';                        // diisi di config/mail.local.php
+$MAIL_FROM_NAME  = 'Vita Voxa Choir';
 
 $localCfg = __DIR__ . '/mail.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
@@ -78,7 +78,11 @@ function sendSmtpMail(string $toEmail, string $toName, string $subject, string $
     if ($MAIL_SECURE === 'tls') {
         $write('STARTTLS');
         if (!$expect($read(), '220')) return $fail('STARTTLS rejected');
-        if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+        $crypto = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+        if (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT')) {
+            $crypto |= STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+        }
+        if (!stream_socket_enable_crypto($fp, true, $crypto)) {
             return $fail('TLS negotiation failed');
         }
         $write('EHLO ' . $ehloHost);
