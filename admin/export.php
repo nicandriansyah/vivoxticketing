@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/checkin.php';
 require_once __DIR__ . '/helpers.php';
 
 if (!$pdo) {
@@ -35,8 +36,6 @@ fputcsv($out, [
     'Tahun Lahir', 'Tahun Wafat', 'Hubungan', 'Email Terkirim'
 ]);
 
-$hubunganMap = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
-
 while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
     fputcsv($out, [
         $r['id'],
@@ -51,7 +50,7 @@ while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $r['nama_arwah'],
         $r['tahun_lahir'],
         $r['tahun_wafat'],
-        $hubunganMap[$r['hubungan_arwah']] ?? '',
+        hubunganLabel($r['hubungan_arwah']),
         $r['email_sent'] ? 'Ya' : 'Tidak',
     ]);
 }

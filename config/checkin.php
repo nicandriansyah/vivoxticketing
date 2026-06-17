@@ -26,6 +26,34 @@ function ensureTicketTables(PDO $pdo): void {
         skey VARCHAR(50)  PRIMARY KEY,
         sval VARCHAR(255) NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Migrasi sekali: ubah kolom hubungan_arwah dari ENUM lama ke VARCHAR
+    // agar mendukung kategori baru (orang_tua_ayah, pasangan, dll).
+    try {
+        if ((int)getSetting($pdo, 'schema_version', '1') < 2) {
+            $pdo->exec("ALTER TABLE registrations MODIFY hubungan_arwah VARCHAR(50) NULL");
+            setSetting($pdo, 'schema_version', '2');
+        }
+    } catch (Exception $e) { /* abaikan bila tak ada akses ALTER */ }
+}
+
+/** Pilihan hubungan arwah: key => label tampilan. */
+function hubunganOptions(): array {
+    return [
+        'orang_tua_ayah' => 'Orang Tua - Ayah',
+        'orang_tua_ibu'  => 'Orang Tua - Ibu',
+        'pasangan'       => 'Pasangan',
+        'anak'           => 'Anak',
+        'saudara'        => 'Saudara/Kerabat/Teman',
+    ];
+}
+
+/** Label tampilan untuk sebuah key hubungan (termasuk nilai lama). */
+function hubunganLabel(?string $key): string {
+    if (!$key) return '-';
+    $opt    = hubunganOptions();
+    $legacy = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
+    return $opt[$key] ?? $legacy[$key] ?? '-';
 }
 
 /** Parse kode tiket FOAS13-XXXXNNN → batch, nomor urut, kode utama. */

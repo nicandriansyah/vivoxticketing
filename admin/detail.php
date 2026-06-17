@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/checkin.php';
 require_once __DIR__ . '/helpers.php';
 
 $id  = (int)($_GET['id'] ?? 0);
@@ -27,7 +28,6 @@ if ($row) {
     }
 }
 
-$hubunganMap = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
 function rp($n) { return 'Rp ' . number_format((float)$n, 0, ',', '.'); }
 
 $pageTitle  = 'Detail Registrasi';
@@ -55,7 +55,7 @@ require __DIR__ . '/partials/header.php';
             <div class="detail-card">
                 <h3>Data Peserta</h3>
                 <div class="detail-row"><span>Nama Lengkap</span><strong><?= htmlspecialchars($row['nama']) ?></strong></div>
-                <div class="detail-row"><span>No. WhatsApp</span><strong><?= htmlspecialchars($row['no_hp']) ?></strong></div>
+                <div class="detail-row"><span>No. WhatsApp</span><strong><?= htmlspecialchars(phoneDisplay($row['no_hp'])) ?></strong></div>
                 <div class="detail-row"><span>Email</span><strong><?= htmlspecialchars($row['email']) ?></strong></div>
                 <div class="detail-row"><span>Jumlah Tiket</span><strong><?= (int)$row['jumlah_tiket'] ?> tiket</strong></div>
                 <div class="detail-row"><span>Sumbangan</span><strong><?= (float)$row['sumbangan_amount'] > 0 ? rp($row['sumbangan_amount']) : '—' ?></strong></div>
@@ -99,7 +99,7 @@ require __DIR__ . '/partials/header.php';
                 <div class="detail-row"><span>Nama Arwah</span><strong><?= htmlspecialchars($row['nama_arwah'] ?? '—') ?></strong></div>
                 <div class="detail-row"><span>Tahun Lahir</span><strong><?= htmlspecialchars($row['tahun_lahir'] ?? '—') ?></strong></div>
                 <div class="detail-row"><span>Tahun Wafat</span><strong><?= htmlspecialchars($row['tahun_wafat'] ?? '—') ?></strong></div>
-                <div class="detail-row"><span>Hubungan</span><strong><?= htmlspecialchars($hubunganMap[$row['hubungan_arwah']] ?? '—') ?></strong></div>
+                <div class="detail-row"><span>Hubungan</span><strong><?= htmlspecialchars(hubunganLabel($row['hubungan_arwah'])) ?></strong></div>
             </div>
             <?php endif; ?>
         </div>

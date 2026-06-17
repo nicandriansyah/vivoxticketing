@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     nama_arwah       VARCHAR(255)  NULL,
     tahun_lahir      SMALLINT      NULL,
     tahun_wafat      SMALLINT      NULL,
-    hubungan_arwah   ENUM('orang_tua','anak','saudara') NULL,
+    hubungan_arwah   VARCHAR(50)   NULL,
     sumbangan_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     email_sent       TINYINT(1)    NOT NULL DEFAULT 0,
     created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP

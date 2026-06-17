@@ -231,7 +231,13 @@ function buildReview() {
         return el ? el.value.trim() : '';
     };
     const checked = document.getElementById('uploadArwah') && document.getElementById('uploadArwah').checked;
-    const hubunganMap = { orang_tua: 'Orang Tua', anak: 'Anak', saudara: 'Saudara' };
+    const hubunganMap = {
+        orang_tua_ayah: 'Orang Tua - Ayah',
+        orang_tua_ibu:  'Orang Tua - Ibu',
+        pasangan:       'Pasangan',
+        anak:           'Anak',
+        saudara:        'Saudara/Kerabat/Teman'
+    };
     const sumbangan = get('sumbangan_amount');
 
     const rr = 'style="display:flex;flex-direction:column;align-items:flex-start;gap:0.2rem;padding:0.75rem 0;"';

@@ -18,9 +18,24 @@ function adminUploadUrl(string $file): string {
     return 'upload_image.php?file=' . rawurlencode($file);
 }
 
+/** Normalisasi nomor HP Indonesia ke format internasional tanpa '+' (mis. 628xxx). */
+function waNumber(string $no): string {
+    $n = preg_replace('/\D/', '', $no);          // ambil digit saja
+    if ($n === '') return '';
+    if (substr($n, 0, 2) === '62') return $n;    // sudah 62...
+    if ($n[0] === '0')  return '62' . substr($n, 1); // 0812.. -> 62812..
+    return '62' . $n;                            // 812.. -> 62812..
+}
+
+/** Nomor HP untuk ditampilkan: +62xxxxx (atau '-' jika kosong). */
+function phoneDisplay(string $no): string {
+    $n = waNumber($no);
+    return $n === '' ? '-' : '+' . $n;
+}
+
 /** Bangun link wa.me dengan pesan otomatis berisi link tiket */
 function waLink(string $noHp, string $ticketUrl): string {
-    $num  = preg_replace('/[^0-9]/', '', $noHp); // +62812.. -> 62812..
+    $num  = waNumber($noHp);
     $text = 'Hi vovoxers!, berikut adalah link dari tiketmu ya ' . $ticketUrl;
     return 'https://wa.me/' . $num . '?text=' . rawurlencode($text);
 }

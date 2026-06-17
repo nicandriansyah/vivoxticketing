@@ -154,9 +154,11 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                                 <label class="form-label">Hubungan dengan Anda <span class="required">*</span></label>
                                 <select name="hubungan_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem; appearance:auto;">
                                     <option value="" disabled selected>Pilih hubungan...</option>
-                                    <option value="orang_tua">Orang Tua</option>
+                                    <option value="orang_tua_ayah">Orang Tua - Ayah</option>
+                                    <option value="orang_tua_ibu">Orang Tua - Ibu</option>
+                                    <option value="pasangan">Pasangan</option>
                                     <option value="anak">Anak</option>
-                                    <option value="saudara">Saudara</option>
+                                    <option value="saudara">Saudara/Kerabat/Teman</option>
                                 </select>
                             </div>
                         </div>
@@ -257,7 +259,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <div style="position:absolute;top:1rem;right:1.2rem;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;" onclick="document.getElementById('photoModal').style.display='none'">✕</div>
 </div>
 
-<script src="assets/js/form.js?v=4"></script>
+<script src="assets/js/form.js?v=5"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {

@@ -42,7 +42,7 @@ $sumbangan      = max(0, (float)preg_replace('/[^0-9]/', '', $_POST['sumbangan_a
 $nama_arwah     = trim(htmlspecialchars($_POST['nama_arwah']   ?? ''));
 $tahun_lahir    = (int)($_POST['tahun_lahir']                  ?? 0) ?: null;
 $tahun_wafat    = (int)($_POST['tahun_wafat']                  ?? 0) ?: null;
-$hubungan       = in_array($_POST['hubungan_arwah'] ?? '', ['orang_tua','anak','saudara'])
+$hubungan       = array_key_exists($_POST['hubungan_arwah'] ?? '', hubunganOptions())
                   ? $_POST['hubungan_arwah'] : null;
 
 /* ---------- Basic validation ---------- */
@@ -51,23 +51,43 @@ if (!$nama || !$no_hp || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-/* ---------- File Upload ---------- */
-$foto_path = null;
-if ($upload_arwah && isset($_FILES['foto_arwah']) && $_FILES['foto_arwah']['error'] === UPLOAD_ERR_OK) {
-    $allowed = ['image/jpeg','image/png'];
+$foto_path = null; // diisi setelah kode tiket final (nama file butuh kode + kategori)
+
+/**
+ * Simpan foto arwah ke folder per-kategori dengan nama file deskriptif:
+ *   uploads/<kategori>/<KODE> - <Label Hubungan> - <Nama> - <Lahir> - <Wafat>.jpg
+ * Return path relatif (kategori/namafile) atau null.
+ */
+function saveArwahPhoto(string $kodeUtama, ?string $hubKey, string $namaArwah, $lahir, $wafat): ?string {
+    if (!isset($_FILES['foto_arwah']) || $_FILES['foto_arwah']['error'] !== UPLOAD_ERR_OK) return null;
+
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
     $finfo   = finfo_open(FILEINFO_MIME_TYPE);
     $mime    = finfo_file($finfo, $_FILES['foto_arwah']['tmp_name']);
     finfo_close($finfo);
+    if (!isset($allowed[$mime]) || $_FILES['foto_arwah']['size'] > 2 * 1024 * 1024) return null;
 
-    if (in_array($mime, $allowed) && $_FILES['foto_arwah']['size'] <= 2 * 1024 * 1024) {
-        $ext       = pathinfo($_FILES['foto_arwah']['name'], PATHINFO_EXTENSION);
-        $filename  = 'arwah_' . bin2hex(random_bytes(8)) . '.' . strtolower($ext);
-        $uploadDir = __DIR__ . '/uploads/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-        if (move_uploaded_file($_FILES['foto_arwah']['tmp_name'], $uploadDir . $filename)) {
-            $foto_path = $filename;
-        }
+    $folder    = ($hubKey && array_key_exists($hubKey, hubunganOptions())) ? $hubKey : 'lainnya';
+    $label     = hubunganLabel($hubKey);
+    $codeShort = preg_replace('/^FOAS13-/', '', $kodeUtama);              // 24LH001
+    $namaClean = html_entity_decode($namaArwah, ENT_QUOTES, 'UTF-8');
+
+    $parts = [$codeShort, $label, $namaClean, (string)($lahir ?? ''), (string)($wafat ?? '')];
+    $name  = implode(' - ', $parts);
+    $name  = str_replace(['/', '\\'], ' ', $name);                        // hapus pemisah path
+    $name  = preg_replace('#[:*?"<>|]+#', '', $name);                     // karakter ilegal lain
+    $name  = trim(preg_replace('/\s+/', ' ', $name));
+    if ($name === '') $name = $codeShort;
+    if (strlen($name) > 180) $name = substr($name, 0, 180);              // batasi panjang nama file
+
+    $dir = __DIR__ . '/uploads/' . $folder . '/';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
+    $filename = $name . '.' . $allowed[$mime];
+    if (@move_uploaded_file($_FILES['foto_arwah']['tmp_name'], $dir . $filename)) {
+        return $folder . '/' . $filename;
     }
+    return null;
 }
 
 /* ---------- Generate Ticket Codes ---------- */
@@ -133,6 +153,11 @@ try {
         }
     } while (true);
     $kode_utama = $ticket_codes[0];
+
+    // Simpan foto arwah (butuh kode tiket final + kategori hubungan)
+    if ($upload_arwah) {
+        $foto_path = saveArwahPhoto($kode_utama, $hubungan, $nama_arwah, $tahun_lahir, $tahun_wafat);
+    }
 
     $stmt = $pdo->prepare("
         INSERT INTO registrations

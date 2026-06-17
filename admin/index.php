@@ -87,7 +87,6 @@ $regIds       = array_map(fn($r) => (int)$r['id'], $rows);
 $checkedMap   = $dbReady ? getCheckedMap($pdo, $regIds) : [];
 $cancelledMap = $dbReady ? getCancelledMap($pdo, $regIds) : [];
 
-$hubunganMap = ['orang_tua' => 'Orang Tua', 'anak' => 'Anak', 'saudara' => 'Saudara'];
 
 // Data untuk modal detail
 $regJson = [];
@@ -98,7 +97,7 @@ foreach ($rows as $r) {
     $cancelled = $cancelledMap[$id] ?? [];
     $regJson[$id] = [
         'nama'         => $r['nama'],
-        'no_hp'        => $r['no_hp'],
+        'no_hp'        => phoneDisplay($r['no_hp']),
         'email'        => $r['email'],
         'url'          => adminTicketUrl($r['kode_tiket']),
         'jumlah'       => (int)$r['jumlah_tiket'],
@@ -114,7 +113,7 @@ foreach ($rows as $r) {
         'nama_arwah'   => $r['nama_arwah'] ?? '',
         'tahun_lahir'  => $r['tahun_lahir'] ?? '',
         'tahun_wafat'  => $r['tahun_wafat'] ?? '',
-        'hubungan'     => $hubunganMap[$r['hubungan_arwah']] ?? '',
+        'hubungan'     => hubunganLabel($r['hubungan_arwah']),
     ];
 }
 
@@ -278,7 +277,7 @@ require __DIR__ . '/partials/header.php';
                             </td>
                             <td><?= date('d M Y H:i', strtotime($r['created_at'])) ?></td>
                             <td class="adm-strong"><?= htmlspecialchars($r['nama']) ?></td>
-                            <td><?= htmlspecialchars($r['no_hp']) ?></td>
+                            <td><?= htmlspecialchars(phoneDisplay($r['no_hp'])) ?></td>
                             <td><?= htmlspecialchars($r['email']) ?></td>
                             <td><?= (float)$r['sumbangan_amount'] > 0 ? rp($r['sumbangan_amount']) : '—' ?></td>
                             <td style="text-align:center;"><?= $r['upload_arwah'] ? '🕊️' : '—' ?></td>
