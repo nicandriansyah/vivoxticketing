@@ -171,9 +171,9 @@ $_SESSION['ticket'] = [
 ];
 
 /* ---------- Send Email (SMTP) ---------- */
-$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+require_once 'config/app.php';
 $basePath  = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
-$ticketUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $basePath . '/ticket.php?token=' . urlencode($kode_utama);
+$ticketUrl = publicTicketUrl($kode_utama, $basePath);
 
 $htmlBody   = buildTicketEmailHtml($nama, $ticket_codes, $jumlah_tiket, $ticketUrl);
 $mailResult = sendSmtpMail($email, $nama, 'Tiket FOAS 13 — Vita Voxa Choir', $htmlBody);

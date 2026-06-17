@@ -6,3 +6,4 @@ tickets/*
 config/db.local.php
 config/mail.local.php
 config/admin.local.php
+config/app.local.php

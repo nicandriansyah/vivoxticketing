@@ -31,11 +31,11 @@ if (!$row) {
     exit;
 }
 
-// Bangun URL tiket (admin ada di /admin, ticket.php di parent)
-$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$adminDir = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/'); // .../admin
-$rootDir  = rtrim(str_replace('\\', '/', dirname($adminDir)), '/');            // ...
-$ticketUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $rootDir . '/ticket.php?token=' . urlencode($row['kode_tiket']);
+// Bangun URL tiket (pakai PUBLIC_BASE_URL bila diset; admin ada di /admin, ticket.php di parent)
+require_once __DIR__ . '/../config/app.php';
+$adminDir  = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/'); // .../admin
+$rootDir   = rtrim(str_replace('\\', '/', dirname($adminDir)), '/');            // ...
+$ticketUrl = publicTicketUrl($row['kode_tiket'], $rootDir);
 
 $result = sendTicketEmailForRow($row, $ticketUrl);
 
