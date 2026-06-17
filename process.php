@@ -33,7 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 /* ---------- Sanitize Inputs ---------- */
 $nama           = trim(htmlspecialchars($_POST['nama']         ?? ''));
-$no_hp          = trim(htmlspecialchars($_POST['no_hp']        ?? ''));
+// Normalisasi no HP → murni lokal (buang +, spasi, kode negara 62, dan 0 di depan)
+$no_hp          = preg_replace('/\D/', '', $_POST['no_hp'] ?? '');
+$no_hp          = preg_replace('/^0+/', '', $no_hp);
+if (strpos($no_hp, '62') === 0) $no_hp = substr($no_hp, 2);
 $email          = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
 $jumlah_tiket   = max(1, min(5, (int)($_POST['jumlah_tiket']  ?? 1)));
 $upload_arwah   = isset($_POST['upload_arwah']) ? 1 : 0;
