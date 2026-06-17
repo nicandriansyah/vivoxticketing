@@ -179,9 +179,14 @@ function buildTicketEmailHtml(string $nama, array $ticketCodes, int $jumlah, str
       <table style="border-collapse:collapse;width:100%;margin-bottom:20px;">' . $rows . '</table>
       <p style="font-size:14px;line-height:1.6;margin:0 0 6px;"><strong>Acara:</strong> Sabtu, 7 November 2026 &middot; 19.00 WIB</p>
       <p style="font-size:14px;line-height:1.6;margin:0 0 22px;"><strong>Jumlah:</strong> ' . $jumlah . ' tiket</p>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="' . htmlspecialchars($ticketUrl) . '" style="display:inline-block;background:#c9a84c;color:#1a0800;text-decoration:none;font-weight:700;padding:13px 30px;border-radius:8px;font-size:15px;">Lihat &amp; Simpan Tiket Saya</a>
-      </div>
+      <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin:24px auto;">
+        <tr>
+          <td align="center" bgcolor="#c9a84c" style="border-radius:8px;">
+            <a href="' . htmlspecialchars($ticketUrl) . '" target="_blank" style="display:inline-block;padding:14px 32px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#1a0800;text-decoration:none;border-radius:8px;">Lihat &amp; Simpan Tiket Saya</a>
+          </td>
+        </tr>
+      </table>
+      <p style="font-size:13px;color:#666;line-height:1.6;margin:8px 0 0;text-align:center;">Atau buka tautan ini:<br><a href="' . htmlspecialchars($ticketUrl) . '" target="_blank" style="color:#8B6914;word-break:break-all;">' . htmlspecialchars($ticketUrl) . '</a></p>
       <p style="font-size:13px;color:#888;line-height:1.6;margin:18px 0 0;">Simpan email ini. Anda bisa membuka tiket kapan saja melalui tautan di atas, lalu menyimpannya sebagai gambar/PDF atau membagikannya ke WhatsApp.</p>
       <p style="font-size:13px;color:#888;line-height:1.6;margin:14px 0 0;">Tunjukkan QR code tiket saat memasuki venue.</p>
     </div>
