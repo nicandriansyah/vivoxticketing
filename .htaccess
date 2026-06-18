@@ -1,0 +1,5 @@
+# Gunakan halaman 404 custom untuk semua not-found di situs publik
+ErrorDocument 404 /404.php
+
+# (opsional) sembunyikan listing direktori
+Options -Indexes
