@@ -12,7 +12,7 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> — Admin Ticketing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=17" rel="stylesheet">
+    <link href="assets/admin.css?v=24" rel="stylesheet">
 </head>
 <body class="admin-page">
 <div class="adm-layout">
@@ -36,7 +36,7 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
             </div>
             <span class="adm-user">👤 <?= htmlspecialchars($adminUser) ?></span>
         </header>
-        <main class="adm-main">
+        <main class="adm-main <?= htmlspecialchars($mainClass ?? '') ?>">
         <script>
         function toggleSidebar() {
             document.getElementById('admSidebar').classList.toggle('open');

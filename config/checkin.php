@@ -34,6 +34,12 @@ function ensureTicketTables(PDO $pdo): void {
             $pdo->exec("ALTER TABLE registrations MODIFY hubungan_arwah VARCHAR(50) NULL");
             setSetting($pdo, 'schema_version', '2');
         }
+        if ((int)getSetting($pdo, 'schema_version', '1') < 3) {
+            // Kolom penyimpanan layout slide PPT (JSON)
+            $col = $pdo->query("SHOW COLUMNS FROM registrations LIKE 'slide_layout'")->fetch();
+            if (!$col) $pdo->exec("ALTER TABLE registrations ADD COLUMN slide_layout TEXT NULL");
+            setSetting($pdo, 'schema_version', '3');
+        }
     } catch (Exception $e) { /* abaikan bila tak ada akses ALTER */ }
 }
 

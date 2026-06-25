@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     hubungan_arwah   VARCHAR(50)   NULL,
     sumbangan_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     email_sent       TINYINT(1)    NOT NULL DEFAULT 0,
+    slide_layout     TEXT          NULL,
     created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
