@@ -125,6 +125,7 @@ foreach ($rows as $r) {
 
 $pageTitle  = 'Dashboard';
 $activeMenu = 'dashboard';
+$mainClass  = 'adm-main-full';
 require __DIR__ . '/partials/header.php';
 ?>
 
