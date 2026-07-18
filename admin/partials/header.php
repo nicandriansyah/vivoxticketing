@@ -42,6 +42,19 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
     </script>
     <div class="adm-overlay" id="admOverlay" onclick="toggleSidebar()"></div>
 
+    <!-- Modal warning PPT Generator (akses dari layar kecil) -->
+    <div id="pptWarnModal" class="modal-overlay" style="align-items:center;" onclick="if(event.target===this)closePptWarn()">
+        <div class="modal-box" style="max-width:340px;text-align:center;padding:2rem 1.5rem;">
+            <div style="font-size:3rem;line-height:1;margin-bottom:0.75rem;">💻</div>
+            <h3 style="font-size:1.1rem;margin-bottom:0.5rem;">PPT Generator</h3>
+            <p style="color:#666;font-size:0.9rem;line-height:1.6;margin-bottom:1.25rem;">
+                Fitur ini hanya bisa diakses melalui <strong>laptop, komputer, atau tablet</strong>
+                agar slide dapat diedit dengan nyaman.
+            </p>
+            <button type="button" class="m-view-btn" style="width:100%;" onclick="closePptWarn()">Mengerti</button>
+        </div>
+    </div>
+
     <div class="adm-content">
         <header class="adm-topbar">
             <div class="adm-topbar-left">
@@ -67,9 +80,14 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
         /* PPT Generator hanya untuk layar laptop/komputer/tablet */
         function checkPptAccess() {
             if (window.innerWidth <= 720) {
-                alert('PPT Generator hanya bisa diakses melalui laptop, komputer, atau tablet.');
+                document.getElementById('admSidebar').classList.remove('open');
+                document.getElementById('admOverlay').classList.remove('open');
+                document.getElementById('pptWarnModal').classList.add('open');
                 return false;
             }
             return true;
+        }
+        function closePptWarn() {
+            document.getElementById('pptWarnModal').classList.remove('open');
         }
         </script>
