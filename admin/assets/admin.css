@@ -209,6 +209,9 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 .adm-page-title { font-weight: 700; font-size: 1.2rem; color: var(--ink); }
 .adm-user { font-size: 0.9rem; color: var(--muted); }
