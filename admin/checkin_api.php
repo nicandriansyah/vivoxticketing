@@ -14,7 +14,7 @@ $action = $_POST['action'] ?? $_GET['action'] ?? 'lookup';
 $code   = $_POST['code']   ?? $_GET['code']   ?? '';
 
 $p = parseTicketCode($code);
-if (!$p) out(['ok' => false, 'error' => 'Kode tiket tidak valid. Format: FOAS13-XXXXNNN']);
+if (!$p) out(['ok' => false, 'error' => 'Kode tiket tidak valid. Format: FOAS14-XXXXNNN']);
 
 // Cari registrasi
 $stmt = $pdo->prepare("SELECT * FROM registrations WHERE kode_tiket = ? LIMIT 1");

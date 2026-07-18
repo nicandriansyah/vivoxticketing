@@ -1,5 +1,5 @@
 /* ============================================================
-   FOAS 13 - Multi-step Form Logic
+   FOAS 14 - Multi-step Form Logic
    ============================================================ */
 
 let currentStep = 1;
@@ -67,21 +67,29 @@ function validateStep1() {
         valid = false;
     }
 
-    // Arwah validation
+    // Arwah validation (per-entri, sampai 5 arwah)
     if (document.getElementById('uploadArwah').checked) {
-        const arwahFields = [
-            { name: 'nama_arwah',     msg: 'Nama arwah wajib diisi' },
-            { name: 'tahun_lahir',    msg: 'Tahun lahir wajib diisi' },
-            { name: 'tahun_wafat',    msg: 'Tahun wafat wajib diisi' },
-            { name: 'hubungan_arwah', msg: 'Hubungan wajib dipilih' },
-        ];
-        arwahFields.forEach(({ name, msg }) => {
-            const el = document.querySelector(`[name="${name}"]`);
-            clearError(el);
-            if (!el.value.trim()) {
-                showError(el, msg);
-                valid = false;
+        const thisYear = new Date().getFullYear();
+        document.querySelectorAll('#arwahEntries .arwah-entry').forEach((entry) => {
+            const nama  = entry.querySelector('[name="nama_arwah[]"]');
+            const lahir = entry.querySelector('[name="tahun_lahir[]"]');
+            const wafat = entry.querySelector('[name="tahun_wafat[]"]');
+            const hub   = entry.querySelector('[name="hubungan_arwah[]"]');
+            [nama, lahir, wafat, hub].forEach(clearError);
+
+            if (!nama.value.trim())  { showError(nama, 'Nama arwah wajib diisi'); valid = false; }
+
+            const lv = parseInt(lahir.value, 10), wv = parseInt(wafat.value, 10);
+            if (!lahir.value.trim() || lv < 1900 || lv > thisYear) {
+                showError(lahir, 'Tahun lahir tidak valid'); valid = false;
             }
+            if (!wafat.value.trim() || wv < 1900 || wv > thisYear) {
+                showError(wafat, 'Tahun wafat tidak valid'); valid = false;
+            }
+            if (lahir.value.trim() && wafat.value.trim() && wv < lv) {
+                showError(wafat, 'Tahun wafat sebelum lahir'); valid = false;
+            }
+            if (!hub.value.trim())   { showError(hub, 'Hubungan wajib dipilih'); valid = false; }
         });
     }
 
@@ -143,73 +151,130 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-/* ---------- Arwah Toggle ---------- */
+/* ---------- Arwah: toggle + multi-entri (maks 5) + upload per-entri ---------- */
 
 document.addEventListener('DOMContentLoaded', function () {
+    const MAX      = 5;
     const checkbox = document.getElementById('uploadArwah');
-    const form     = document.getElementById('arwahForm');
-    if (!checkbox || !form) return;
+    const wrap     = document.getElementById('arwahForm');
+    const list     = document.getElementById('arwahEntries');
+    const addBtn   = document.getElementById('arwahAddBtn');
+    if (!checkbox || !wrap || !list || !addBtn) return;
 
     checkbox.addEventListener('change', function () {
-        if (this.checked) {
-            form.style.display = 'block';
-            form.style.animation = 'fadeInUp 0.3s ease both';
-        } else {
-            form.style.display = 'none';
+        wrap.style.display = this.checked ? 'block' : 'none';
+        if (this.checked) wrap.style.animation = 'fadeInUp 0.3s ease both';
+    });
+
+    function entries() { return Array.from(list.querySelectorAll('.arwah-entry')); }
+
+    function renumber() {
+        const els = entries();
+        els.forEach(function (el, i) {
+            const n = el.querySelector('.arwah-num');
+            if (n) n.textContent = i + 1;
+            const rm = el.querySelector('.arwah-remove');
+            if (rm) rm.style.display = els.length > 1 ? '' : 'none';
+        });
+        addBtn.style.display = els.length >= MAX ? 'none' : '';
+    }
+
+    function resetPhoto(entry) {
+        const inp = entry.querySelector('.arwah-foto');
+        const pv  = entry.querySelector('.arwah-pv');
+        const ph  = entry.querySelector('.arwah-ph');
+        const img = entry.querySelector('.arwah-previmg');
+        if (inp) inp.value = '';
+        if (pv)  pv.style.display = 'none';
+        if (ph)  ph.style.display = 'block';
+        if (img) img.src = '';
+    }
+
+    function clearEntry(entry) {
+        entry.querySelectorAll('input, select').forEach(function (f) {
+            if (f.type === 'file')        f.value = '';
+            else if (f.tagName === 'SELECT') f.selectedIndex = 0;
+            else                          f.value = '';
+            clearError(f);
+        });
+        resetPhoto(entry);
+    }
+
+    function handleArwahFile(inp) {
+        const file = inp.files[0];
+        if (!file) return;
+        const entry  = inp.closest('.arwah-entry');
+        const okType = ['image/jpeg', 'image/png'].indexOf(file.type) !== -1 || /\.(jpe?g|png)$/i.test(file.name);
+        if (!okType) { alert('Format tidak didukung. Hanya file JPG atau PNG yang diperbolehkan.'); resetPhoto(entry); return; }
+        if (file.size > 2 * 1024 * 1024) { alert('Ukuran file terlalu besar. Maksimal 2 MB.'); resetPhoto(entry); return; }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            entry.querySelector('.arwah-previmg').src = e.target.result;
+            entry.querySelector('.arwah-ph').style.display = 'none';
+            entry.querySelector('.arwah-pv').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Tambah arwah (clone entri pertama)
+    addBtn.addEventListener('click', function () {
+        const els = entries();
+        if (els.length >= MAX) return;
+        const clone = els[0].cloneNode(true);
+        clearEntry(clone);
+        list.appendChild(clone);
+        renumber();
+        clone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // Delegasi klik: hapus entri / hapus foto / buka file picker
+    list.addEventListener('click', function (e) {
+        if (e.target.closest('.arwah-remove')) {
+            if (entries().length > 1) { e.target.closest('.arwah-entry').remove(); renumber(); }
+            return;
         }
-    });
-});
-
-/* ---------- Drag & Drop Upload ---------- */
-
-document.addEventListener('DOMContentLoaded', function () {
-    const area    = document.getElementById('uploadArea');
-    const input   = document.getElementById('fotoArwah');
-    if (!area || !input) return;
-
-    // Klik di mana saja dalam area → buka file picker, kecuali tombol hapus
-    area.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-remove-img')) return;
-        input.click();
+        if (e.target.closest('.arwah-rmimg')) {
+            e.stopPropagation();
+            resetPhoto(e.target.closest('.arwah-entry'));
+            return;
+        }
+        const area = e.target.closest('.arwah-uploadarea');
+        if (area && !e.target.closest('.arwah-pv')) area.querySelector('.arwah-foto').click();
     });
 
-    area.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        area.classList.add('dragover');
+    // Delegasi perubahan file
+    list.addEventListener('change', function (e) {
+        const inp = e.target.closest('.arwah-foto');
+        if (inp && inp.files[0]) handleArwahFile(inp);
     });
-    area.addEventListener('dragleave', () => area.classList.remove('dragover'));
-    area.addEventListener('drop', (e) => {
+
+    // Drag & drop per area
+    list.addEventListener('dragover', function (e) {
+        const area = e.target.closest('.arwah-uploadarea');
+        if (area) { e.preventDefault(); area.classList.add('dragover'); }
+    });
+    list.addEventListener('dragleave', function (e) {
+        const area = e.target.closest('.arwah-uploadarea');
+        if (area) area.classList.remove('dragover');
+    });
+    list.addEventListener('drop', function (e) {
+        const area = e.target.closest('.arwah-uploadarea');
+        if (!area) return;
         e.preventDefault();
         area.classList.remove('dragover');
         const files = e.dataTransfer.files;
-        if (files.length > 0) handleFile(files[0]);
+        if (files.length > 0) {
+            const inp = area.querySelector('.arwah-foto');
+            // Assign ke input agar ikut ter-submit (bukan hanya preview)
+            const dt = new DataTransfer();
+            dt.items.add(files[0]);
+            inp.files = dt.files;
+            handleArwahFile(inp);
+        }
     });
 
-    input.addEventListener('change', function () {
-        if (this.files[0]) handleFile(this.files[0]);
-    });
+    renumber();
 });
-
-function handleFile(file) {
-    var okType = ['image/jpeg', 'image/png'].indexOf(file.type) !== -1 || /\.(jpe?g|png)$/i.test(file.name);
-    if (!okType) { alert('Format tidak didukung. Hanya file JPG atau PNG yang diperbolehkan.'); return; }
-    if (file.size > 2 * 1024 * 1024) { alert('Ukuran file terlalu besar. Maksimal 2 MB.'); return; }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('previewImg').src = e.target.result;
-        document.getElementById('uploadPlaceholder').style.display = 'none';
-        document.getElementById('uploadPreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-}
-
-function removeImage() {
-    document.getElementById('fotoArwah').value = '';
-    document.getElementById('previewImg').src = '';
-    document.getElementById('uploadPlaceholder').style.display = 'block';
-    document.getElementById('uploadPreview').style.display = 'none';
-}
 
 /* ---------- Copy Rekening ---------- */
 
@@ -256,19 +321,29 @@ function buildReview() {
     </div>`;
 
     if (checked) {
-        const previewSrc = document.getElementById('previewImg') ? document.getElementById('previewImg').src : '';
-        const hasPhoto = previewSrc && !previewSrc.endsWith('#') && previewSrc !== window.location.href;
-        html += `
+        const arwahEntries = document.querySelectorAll('#arwahEntries .arwah-entry');
+        arwahEntries.forEach((entry, idx) => {
+            const get1 = (sel) => { const el = entry.querySelector(sel); return el ? el.value.trim() : ''; };
+            const nama  = get1('[name="nama_arwah[]"]');
+            const lahir = get1('[name="tahun_lahir[]"]');
+            const wafat = get1('[name="tahun_wafat[]"]');
+            const hub   = get1('[name="hubungan_arwah[]"]');
+            const img   = entry.querySelector('.arwah-previmg');
+            const previewSrc = img ? img.src : '';
+            const hasPhoto = previewSrc && !previewSrc.endsWith('#') && previewSrc !== window.location.href;
+            const title = arwahEntries.length > 1 ? `Data Arwah #${idx + 1}` : 'Data Arwah yang Didoakan';
+            html += `
     <div class="review-group">
-        <div class="review-group-title">Data Arwah yang Didoakan</div>
+        <div class="review-group-title">${title}</div>
         <div class="review-rows">
             ${hasPhoto ? `<div style="text-align:center;padding:0.75rem 0;width:100%;"><img src="${previewSrc}" onclick="openPhotoModal(this.src)" style="max-width:130px;max-height:130px;border-radius:10px;object-fit:cover;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.18);" title="Klik untuk perbesar"></div>` : ''}
-            <div class="review-row" ${rr}><span class="review-label" ${rl}>Nama Arwah</span><span class="review-value" ${rv}>${esc(get('nama_arwah'))}</span></div>
-            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Lahir</span><span class="review-value" ${rv}>${esc(get('tahun_lahir'))}</span></div>
-            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Wafat</span><span class="review-value" ${rv}>${esc(get('tahun_wafat'))}</span></div>
-            <div class="review-row" ${rr}><span class="review-label" ${rl}>Hubungan</span><span class="review-value" ${rv}>${hubunganMap[get('hubungan_arwah')] || '-'}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Nama Arwah</span><span class="review-value" ${rv}>${esc(nama)}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Lahir</span><span class="review-value" ${rv}>${esc(lahir)}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Tahun Wafat</span><span class="review-value" ${rv}>${esc(wafat)}</span></div>
+            <div class="review-row" ${rr}><span class="review-label" ${rl}>Hubungan</span><span class="review-value" ${rv}>${hubunganMap[hub] || '-'}</span></div>
         </div>
     </div>`;
+        });
     }
 
     html += `

@@ -18,13 +18,16 @@ if (!$row) {
     $notFound = true;
 }
 
+// Daftar arwah (bisa lebih dari satu per registrasi)
+$arwahRows = ($pdo && $row) ? getArwahForReg($pdo, (int)$row['id']) : [];
+
 // Derive daftar kode tiket dari batch
 $ticketCodes = [];
 if ($row) {
     $jt    = (int)$row['jumlah_tiket'];
     $batch = substr($row['kode_tiket'], 7, 4);
     for ($i = 0; $i < $jt; $i++) {
-        $ticketCodes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+        $ticketCodes[] = 'FOAS14-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
     }
 }
 
@@ -86,21 +89,23 @@ require __DIR__ . '/partials/header.php';
                 <?php endforeach; ?>
             </div>
 
-            <!-- Data arwah -->
-            <?php if ($row['upload_arwah']): ?>
-            <div class="detail-card">
-                <h3>🕊️ Data Arwah yang Didoakan</h3>
-                <?php if (!empty($row['foto_arwah'])): ?>
-                    <div style="text-align:center;margin-bottom:1rem;">
-                        <img src="<?= htmlspecialchars(adminUploadUrl($row['foto_arwah'])) ?>" alt="Foto Arwah"
-                             style="max-width:160px;max-height:160px;border-radius:10px;object-fit:cover;">
-                    </div>
-                <?php endif; ?>
-                <div class="detail-row"><span>Nama Arwah</span><strong><?= htmlspecialchars($row['nama_arwah'] ?? '—') ?></strong></div>
-                <div class="detail-row"><span>Tahun Lahir</span><strong><?= htmlspecialchars($row['tahun_lahir'] ?? '—') ?></strong></div>
-                <div class="detail-row"><span>Tahun Wafat</span><strong><?= htmlspecialchars($row['tahun_wafat'] ?? '—') ?></strong></div>
-                <div class="detail-row"><span>Hubungan</span><strong><?= htmlspecialchars(hubunganLabel($row['hubungan_arwah'])) ?></strong></div>
-            </div>
+            <!-- Data arwah (bisa lebih dari satu) -->
+            <?php if ($arwahRows): ?>
+                <?php foreach ($arwahRows as $i => $a): ?>
+                <div class="detail-card">
+                    <h3>🕊️ Data Arwah<?= count($arwahRows) > 1 ? ' #' . ($i + 1) : ' yang Didoakan' ?></h3>
+                    <?php if (!empty($a['foto_arwah'])): ?>
+                        <div style="text-align:center;margin-bottom:1rem;">
+                            <img src="<?= htmlspecialchars(adminUploadUrl($a['foto_arwah'])) ?>" alt="Foto Arwah"
+                                 style="max-width:160px;max-height:160px;border-radius:10px;object-fit:cover;">
+                        </div>
+                    <?php endif; ?>
+                    <div class="detail-row"><span>Nama Arwah</span><strong><?= htmlspecialchars($a['nama_arwah'] ?? '—') ?></strong></div>
+                    <div class="detail-row"><span>Tahun Lahir</span><strong><?= htmlspecialchars($a['tahun_lahir'] ?? '—') ?></strong></div>
+                    <div class="detail-row"><span>Tahun Wafat</span><strong><?= htmlspecialchars($a['tahun_wafat'] ?? '—') ?></strong></div>
+                    <div class="detail-row"><span>Hubungan</span><strong><?= htmlspecialchars(hubunganLabel($a['hubungan_arwah'])) ?></strong></div>
+                </div>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
 

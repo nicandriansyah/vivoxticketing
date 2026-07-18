@@ -43,7 +43,7 @@ function waLink(string $noHp, string $ticketUrl): string {
 /**
  * Bangun klausa WHERE pencarian (tanpa kata WHERE) + parameternya.
  * Mendukung pencarian via kode tiket apa pun (mis. UGBQ001, UGBQ003,
- * FOAS13-UGBQ002) dengan mencocokkan batch tiketnya.
+ * FOAS14-UGBQ002) dengan mencocokkan batch tiketnya.
  * Return: [string $clause, array $params]  — clause '' jika query kosong.
  */
 function buildSearchClause(string $q): array {
@@ -55,7 +55,7 @@ function buildSearchClause(string $q): array {
     $params  = [$like, $like, $like, $like];
 
     // Jika query menyerupai kode tiket → cocokkan batch-nya (4 char) ke kode_tiket
-    $qb = preg_replace('/^FOAS13-?/i', '', strtoupper($q));
+    $qb = preg_replace('/^FOAS14-?/i', '', strtoupper($q));
     if (preg_match('/^([A-Z0-9]{4})[0-9]{0,3}$/', $qb, $m)) {
         $clauses[] = 'kode_tiket LIKE ?';
         $params[]  = '%' . $m[1] . '%';

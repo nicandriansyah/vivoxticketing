@@ -7,6 +7,9 @@ require_once __DIR__ . '/helpers.php';
 $dbReady = (bool)$pdo;
 if ($dbReady) { try { ensureTicketTables($pdo); } catch (Exception $e) {} }
 
+// Kontak bantuan halaman 404 (editable via modal)
+$helpContact = helpContact($dbReady ? $pdo : null);
+
 $stats = ['reg' => 0, 'tiket' => 0, 'sumbangan' => 0, 'email' => 0, 'checkin' => 0];
 $quota = 0; $sold = 0; $remaining = 0;
 $salesOpen = true; $quotaAvailable = true; $isOpen = true;
@@ -77,7 +80,7 @@ function deriveCodes(string $kodeUtama, int $jumlah): array {
     $batch = substr($kodeUtama, 7, 4);
     $codes = [];
     for ($i = 0; $i < $jumlah; $i++) {
-        $codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+        $codes[] = 'FOAS14-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
     }
     return $codes;
 }
@@ -86,6 +89,7 @@ function deriveCodes(string $kodeUtama, int $jumlah): array {
 $regIds       = array_map(fn($r) => (int)$r['id'], $rows);
 $checkedMap   = $dbReady ? getCheckedMap($pdo, $regIds) : [];
 $cancelledMap = $dbReady ? getCancelledMap($pdo, $regIds) : [];
+$arwahMap     = $dbReady ? getArwahMap($pdo, $regIds) : [];
 
 
 // Data untuk modal detail
@@ -108,12 +112,14 @@ foreach ($rows as $r) {
         'codes'        => $codes,
         'checked'      => array_values($checked),
         'cancelled'    => array_values($cancelled),
-        'upload_arwah' => (int)$r['upload_arwah'],
-        'foto'         => $r['foto_arwah'] ? adminUploadUrl($r['foto_arwah']) : '',
-        'nama_arwah'   => $r['nama_arwah'] ?? '',
-        'tahun_lahir'  => $r['tahun_lahir'] ?? '',
-        'tahun_wafat'  => $r['tahun_wafat'] ?? '',
-        'hubungan'     => hubunganLabel($r['hubungan_arwah']),
+        'upload_arwah' => (int)($r['upload_arwah'] || !empty($arwahMap[$id])),
+        'arwah'        => array_map(fn($a) => [
+            'foto'        => $a['foto_arwah'] ? adminUploadUrl($a['foto_arwah']) : '',
+            'nama_arwah'  => $a['nama_arwah'] ?? '',
+            'tahun_lahir' => $a['tahun_lahir'] ?? '',
+            'tahun_wafat' => $a['tahun_wafat'] ?? '',
+            'hubungan'    => hubunganLabel($a['hubungan_arwah']),
+        ], $arwahMap[$id] ?? []),
     ];
 }
 
@@ -178,6 +184,10 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-user-emoji">👥</div>
                 <div class="stat-label">Setting User</div>
             </a>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openHelpContact()">
+                <div class="stat-user-emoji">☎️</div>
+                <div class="stat-label">Kontak Bantuan</div>
+            </button>
         </div>
 
         <!-- Quota card -->
@@ -310,6 +320,25 @@ require __DIR__ . '/partials/header.php';
 
         <p class="adm-foot">Menampilkan <?= count($rows) ?> dari <?= number_format($total, 0, ',', '.') ?> registrasi</p>
 
+    <!-- Modal kontak bantuan (ditampilkan di halaman 404 publik) -->
+    <div id="helpContactModal" class="modal-overlay" onclick="if(event.target===this)closeHelpContact()">
+        <div class="modal-box" style="max-width:420px;">
+            <button class="modal-close" onclick="closeHelpContact()">✕</button>
+            <h3 class="m-title">Kontak Bantuan</h3>
+            <p style="font-size:.85rem;color:#888;margin:-.5rem 0 .75rem;line-height:1.5;">
+                Ditampilkan di halaman 404 sebagai kontak bila pengunjung mengalami kendala tiket.
+            </p>
+            <label class="hc-label">Nama Kontak</label>
+            <input type="text" id="hcName" class="hc-input" value="<?= htmlspecialchars($helpContact['name']) ?>">
+            <label class="hc-label">Nomor WhatsApp — format 62xxxxxxxxxx (dipakai untuk tampilan &amp; link wa.me)</label>
+            <input type="text" id="hcWa" class="hc-input" placeholder="62812xxxxxxxx" value="<?= htmlspecialchars($helpContact['wa']) ?>">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;">
+                <button type="button" class="m-view-btn" onclick="saveHelpContact()">💾 Simpan</button>
+                <span id="hcStatus" style="font-size:.8rem;font-weight:600;"></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Detail -->
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeDetail()">
         <div class="modal-box">
@@ -372,9 +401,12 @@ require __DIR__ . '/partials/header.php';
         });
     }
 
+    var currentDetailId = null;   // id registrasi yang sedang dibuka di modal
+
     function openDetail(id) {
         var d = REG[id];
         if (!d) return;
+        currentDetailId = id;
         var checkedSet = {}, cancelSet = {};
         (d.checked   || []).forEach(function(c){ checkedSet[c] = true; });
         (d.cancelled || []).forEach(function(c){ cancelSet[c]  = true; });
@@ -401,18 +433,22 @@ require __DIR__ . '/partials/header.php';
                    '</div>';
         }).join('');
 
-        var hasArwah = !!d.upload_arwah;
+        var arwahArr = d.arwah || [];
+        var hasArwah = !!d.upload_arwah && arwahArr.length > 0;
         var arwahHtml = '';
         if (hasArwah) {
-            arwahHtml =
-                '<h4 class="m-sub">🕊️ Data Arwah</h4>' +
-                (d.foto ? '<div style="text-align:center;margin-bottom:.75rem;"><img src="' + esc(d.foto) + '" style="max-width:120px;max-height:120px;border-radius:10px;object-fit:cover;"></div>' : '') +
-                '<div class="m-section">' +
-                row('Nama Arwah', esc(d.nama_arwah) || '—') +
-                row('Tahun Lahir', esc(d.tahun_lahir) || '—') +
-                row('Tahun Wafat', esc(d.tahun_wafat) || '—') +
-                row('Hubungan', esc(d.hubungan) || '—') +
-                '</div>';
+            arwahHtml = '<h4 class="m-sub">🕊️ Data Arwah (' + arwahArr.length + ')</h4>';
+            arwahArr.forEach(function (a, i) {
+                arwahHtml +=
+                    (arwahArr.length > 1 ? '<div class="m-arwah-no" style="font-weight:600;color:#8a6d1a;margin:.4rem 0 .2rem;">Arwah #' + (i + 1) + '</div>' : '') +
+                    (a.foto ? '<div style="text-align:center;margin-bottom:.5rem;"><img src="' + esc(a.foto) + '" style="max-width:120px;max-height:120px;border-radius:10px;object-fit:cover;"></div>' : '') +
+                    '<div class="m-section">' +
+                    row('Nama Arwah', esc(a.nama_arwah) || '—') +
+                    row('Tahun Lahir', esc(a.tahun_lahir) || '—') +
+                    row('Tahun Wafat', esc(a.tahun_wafat) || '—') +
+                    row('Hubungan', esc(a.hubungan) || '—') +
+                    '</div>';
+            });
         }
 
         var linkRow =
@@ -428,9 +464,27 @@ require __DIR__ . '/partials/header.php';
             '</div>';
         var arwahCol = hasArwah ? '<div class="m-col-right">' + arwahHtml + '</div>' : '';
 
+        // Kontak (bisa di-edit: no. WhatsApp & email)
+        var contactHtml =
+            '<div id="mContactView" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">' +
+                '<p class="m-contact" style="margin:0;">' + esc(d.no_hp) + ' &middot; ' + esc(d.email) + '</p>' +
+                '<button type="button" class="m-copy-btn" style="width:auto;padding:.15rem .55rem;font-size:.78rem;" onclick="startEditContact()">✎ Edit</button>' +
+            '</div>' +
+            '<div id="mContactEdit" style="display:none;margin:.1rem 0 .5rem;max-width:340px;">' +
+                '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">No. WhatsApp</label>' +
+                '<input type="text" id="mEditPhone" class="m-link-input" style="width:100%;margin-bottom:.4rem;" value="' + esc(d.no_hp) + '">' +
+                '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">Email</label>' +
+                '<input type="email" id="mEditEmail" class="m-link-input" style="width:100%;margin-bottom:.5rem;" value="' + esc(d.email) + '">' +
+                '<div style="display:flex;align-items:center;gap:.5rem;">' +
+                    '<button type="button" class="m-view-btn" onclick="saveContact()">💾 Simpan</button>' +
+                    '<button type="button" class="m-cancel-btn" onclick="cancelEditContact()">Batal</button>' +
+                    '<span id="mContactStatus" style="font-size:.8rem;font-weight:600;"></span>' +
+                '</div>' +
+            '</div>';
+
         document.getElementById('modalContent').innerHTML =
             '<h3 class="m-title">' + esc(d.nama) + '</h3>' +
-            '<p class="m-contact">' + esc(d.no_hp) + ' &middot; ' + esc(d.email) + '</p>' +
+            contactHtml +
             linkRow +
             '<div class="m-cols' + (hasArwah ? ' two' : '') + '">' + ticketsCol + arwahCol + '</div>';
 
@@ -454,6 +508,61 @@ require __DIR__ . '/partials/header.php';
         } else {
             input.select(); document.execCommand('copy'); done();
         }
+    }
+
+    /* ---------- Edit kontak (no. WA & email) ---------- */
+    function startEditContact() {
+        document.getElementById('mContactView').style.display = 'none';
+        document.getElementById('mContactEdit').style.display = 'block';
+    }
+    function cancelEditContact() {
+        var ev = document.getElementById('mContactEdit');
+        var vw = document.getElementById('mContactView');
+        if (ev) ev.style.display = 'none';
+        if (vw) vw.style.display = 'flex';
+        var st = document.getElementById('mContactStatus'); if (st) st.textContent = '';
+    }
+    function saveContact() {
+        if (!currentDetailId) return;
+        var st    = document.getElementById('mContactStatus');
+        var phone = document.getElementById('mEditPhone').value.trim();
+        var email = document.getElementById('mEditEmail').value.trim();
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        var fd = new FormData();
+        fd.append('id', currentDetailId);
+        fd.append('no_hp', phone);
+        fd.append('email', email);
+        fetch('update_contact.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
+                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+                setTimeout(function () { location.reload(); }, 600);  // sinkron tabel & link WA
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
+
+    /* ---------- Kontak bantuan 404 ---------- */
+    function openHelpContact()  { document.getElementById('helpContactModal').classList.add('open'); }
+    function closeHelpContact() {
+        document.getElementById('helpContactModal').classList.remove('open');
+        var st = document.getElementById('hcStatus'); if (st) st.textContent = '';
+    }
+    function saveHelpContact() {
+        var st = document.getElementById('hcStatus');
+        var fd = new FormData();
+        fd.append('name', document.getElementById('hcName').value.trim());
+        fd.append('wa',   document.getElementById('hcWa').value.trim());
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        fetch('update_help_contact.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
+                document.getElementById('hcWa').value = res.wa;
+                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+                setTimeout(closeHelpContact, 900);
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
     }
 
     function cancelTicket(code) {
@@ -503,7 +612,7 @@ require __DIR__ . '/partials/header.php';
             var file = new File([blob], code + '.jpg', { type: 'image/jpeg' });
 
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: 'Tiket FOAS 13' });
+                await navigator.share({ files: [file], title: 'Tiket FOAS 14' });
             } else {
                 // Fallback (desktop): buka gambar di tab baru untuk dibagikan manual
                 var url = URL.createObjectURL(blob);

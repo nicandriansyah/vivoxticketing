@@ -32,12 +32,12 @@ fwrite($out, "\xEF\xBB\xBF");
 
 fputcsv($out, [
     'ID', 'Tanggal', 'Kode Tiket Utama', 'Nama', 'No WhatsApp', 'Email',
-    'Jumlah Tiket', 'Sumbangan', 'Upload Arwah', 'Nama Arwah',
+    'Jumlah Tiket', 'Sumbangan', 'Upload Arwah', 'Arwah #', 'Nama Arwah',
     'Tahun Lahir', 'Tahun Wafat', 'Hubungan', 'Email Terkirim'
 ]);
 
 while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    fputcsv($out, [
+    $base = [
         $r['id'],
         $r['created_at'],
         $r['kode_tiket'],
@@ -47,12 +47,25 @@ while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $r['jumlah_tiket'],
         (float)$r['sumbangan_amount'],
         $r['upload_arwah'] ? 'Ya' : 'Tidak',
-        $r['nama_arwah'],
-        $r['tahun_lahir'],
-        $r['tahun_wafat'],
-        hubunganLabel($r['hubungan_arwah']),
-        $r['email_sent'] ? 'Ya' : 'Tidak',
-    ]);
+    ];
+    $tail = [$r['email_sent'] ? 'Ya' : 'Tidak'];
+
+    $arwahRows = getArwahForReg($pdo, (int)$r['id']);
+    if (!$arwahRows) {
+        // Tanpa arwah → satu baris dengan kolom arwah kosong
+        fputcsv($out, array_merge($base, ['', '', '', '', ''], $tail));
+        continue;
+    }
+    // Satu baris per arwah, data registrasi diulang
+    foreach ($arwahRows as $i => $a) {
+        fputcsv($out, array_merge($base, [
+            $i + 1,
+            $a['nama_arwah'],
+            $a['tahun_lahir'],
+            $a['tahun_wafat'],
+            hubunganLabel($a['hubungan_arwah']),
+        ], $tail));
+    }
 }
 fclose($out);
 exit;

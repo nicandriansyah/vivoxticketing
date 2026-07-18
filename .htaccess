@@ -3,3 +3,16 @@ ErrorDocument 404 /404.php
 
 # (opsional) sembunyikan listing direktori
 Options -Indexes
+
+RewriteEngine On
+
+# PENTING: override aturan pretty-URL dari htdocs/.htaccess (induk).
+# Aturan induk meredirect (301) SEMUA request ".php" ke versi tanpa ekstensi,
+# termasuk POST — sehingga body form (mis. process.php) hilang saat submit.
+# Di sini kita HANYA memetakan URL tanpa ekstensi ke file .php (tanpa redirect),
+# jadi POST ke *.php tidak pernah dibelokkan dan datanya utuh.
+
+# Petakan /path -> /path.php bila filenya ada (mis. /vivox/process -> process.php)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L]

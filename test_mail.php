@@ -21,7 +21,7 @@ if (!$to) {
 $result = sendSmtpMail(
     $to,
     'Test',
-    'Test Email FOAS 13',
+    'Test Email FOAS 14',
     '<h2>Test berhasil!</h2><p>Konfigurasi SMTP Vita Voxa Choir sudah jalan.</p>'
 );
 

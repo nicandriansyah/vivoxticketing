@@ -25,7 +25,7 @@ require __DIR__ . '/partials/header.php';
                 <div class="ci-divider"><span>atau masukkan manual</span></div>
 
                 <div class="ci-manual">
-                    <span class="ci-prefix">FOAS13-</span>
+                    <span class="ci-prefix">FOAS14-</span>
                     <input type="text" id="manualCode" class="adm-input" placeholder="VCTP003" autocomplete="off"
                            style="text-transform:uppercase;" onkeydown="if(event.key==='Enter'){event.preventDefault();manualNext();}">
                 </div>
@@ -84,7 +84,7 @@ require __DIR__ . '/partials/header.php';
     function manualNext() {
         var v = document.getElementById('manualCode').value.trim().toUpperCase();
         if (!v) { showError('Masukkan kode tiket.'); return; }
-        var code = v.indexOf('FOAS13-') === 0 ? v : 'FOAS13-' + v;
+        var code = v.indexOf('FOAS14-') === 0 ? v : 'FOAS14-' + v;
         lookup(code);
     }
 

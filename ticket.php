@@ -33,7 +33,7 @@ if ($token && $pdo) {
 
             $allCodes = [];
             for ($i = 0; $i < $original; $i++) {
-                $allCodes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+                $allCodes[] = 'FOAS14-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
             }
             // Buang tiket yang sudah dibatalkan
             $cancelledMap   = getCancelledMap($pdo, [$regId]);
@@ -82,7 +82,7 @@ if ($regId && $pdo) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tiket FOAS 13 — <?= htmlspecialchars($t['nama']) ?></title>
+    <title>Tiket FOAS 14 — <?= htmlspecialchars($t['nama']) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css?v=4" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -120,7 +120,7 @@ if ($regId && $pdo) {
         <div class="tc-rule"></div>
 
         <p class="tc-undangan">Undangan</p>
-        <h2 class="tc-title">FOAS 13</h2>
+        <h2 class="tc-title">FOAS 14</h2>
         <p class="tc-subtitle">MENSANA IN CORPORE SANO</p>
         <p class="tc-presents">FESTIVAL OF ARTS &amp; SONGS &nbsp;&middot;&nbsp; VITA VOXA CHOIR</p>
 
@@ -265,7 +265,7 @@ if ($regId && $pdo) {
             // Try Web Share API (mobile share sheet — user picks WhatsApp)
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({ files: [file], title: 'Tiket FOAS 13' });
+                    await navigator.share({ files: [file], title: 'Tiket FOAS 14' });
                 } catch (shareErr) {
                     if (shareErr.name === 'AbortError') {
                         // User cancelled share — restore button, don't mark as sent

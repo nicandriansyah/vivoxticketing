@@ -2,7 +2,7 @@
 /* ============================================================
    Halaman diagnostik DB — buka di browser:
        /test_db.php
-       /test_db.php?token=FOAS13-VCTP001
+       /test_db.php?token=FOAS14-VCTP001
    HAPUS file ini setelah selesai.
    ============================================================ */
 require_once __DIR__ . '/config/db.php';
@@ -48,7 +48,7 @@ if ($token) {
         echo "-> Record tidak tersimpan. Cek apakah DB aktif saat registrasi dibuat.\n";
     }
 } else {
-    echo "Tambahkan ?token=FOAS13-XXXX001 untuk cek tiket tertentu.\n";
+    echo "Tambahkan ?token=FOAS14-XXXX001 untuk cek tiket tertentu.\n";
     echo "\n5 registrasi terakhir:\n";
     $rows = $pdo->query("SELECT kode_tiket, nama, created_at FROM registrations ORDER BY id DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($rows as $r) echo "  {$r['kode_tiket']}  |  {$r['nama']}  |  {$r['created_at']}\n";

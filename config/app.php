@@ -45,3 +45,23 @@ function publicUrl(string $path, string $deriveDir = ''): string {
 function publicTicketUrl(string $kode, string $deriveDir = ''): string {
     return publicUrl('ticket.php?token=' . urlencode($kode), $deriveDir);
 }
+
+/**
+ * Versi aplikasi berdasarkan subject commit terakhir (mis. "v.1.032").
+ * Diambil dari git bila tersedia; fallback ke konstanta untuk lingkungan
+ * produksi yang tidak menyertakan git.
+ */
+function appVersion(): string {
+    static $ver = null;
+    if ($ver !== null) return $ver;
+
+    $fallback = 'v.1.033';   // dibump saat rilis bila git tak tersedia
+    $root = dirname(__DIR__);
+    if (function_exists('shell_exec') && is_dir($root . '/.git')) {
+        $out = @shell_exec('git -C ' . escapeshellarg($root) . ' log -1 --pretty=%s 2>&1');
+        if (is_string($out) && preg_match('/v\.?\d+\.\d+/i', $out, $m)) {
+            return $ver = $m[0];
+        }
+    }
+    return $ver = $fallback;
+}

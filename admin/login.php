@@ -30,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin — FOAS 13</title>
+    <title>Login Admin — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="assets/admin.css" rel="stylesheet">
 </head>
 <body class="admin-login-page">
     <div class="login-card">
         <div class="login-brand">
-            <div class="login-logo">FOAS 13</div>
+            <div class="login-logo">FOAS 14</div>
             <p>Vita Voxa Choir &middot; Panel Admin</p>
         </div>
         <?php if ($error): ?>

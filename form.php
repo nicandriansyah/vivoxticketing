@@ -10,7 +10,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reservasi Tiket — FOAS 13</title>
+    <title>Reservasi Tiket — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css?v=7" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
@@ -25,14 +25,37 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
 
 <div class="form-wrapper">
 
-    <?php $err = $_GET['error'] ?? ''; if ($err === 'habis' || $err === 'sisa' || $err === 'closed'): ?>
+    <?php
+    $err = $_GET['error'] ?? '';
+    $stockErrs = ['habis', 'sisa', 'closed'];
+    $arwahErrs = ['arwah_nama', 'arwah_tahun', 'arwah_tahun_urut', 'arwah_hubungan', 'foto_format', 'foto_besar', 'foto_gagal'];
+    if (in_array($err, $stockErrs, true)):
+    ?>
     <div class="form-soldout">
         <?php if ($err === 'habis'): ?>
-            <strong>Maaf, tiket sudah habis.</strong><br>Kuota tiket FOAS 13 telah terpenuhi.
+            <strong>Maaf, tiket sudah habis.</strong><br>Kuota tiket FOAS 14 telah terpenuhi.
         <?php elseif ($err === 'closed'): ?>
             <strong>Penjualan tiket belum dibuka.</strong><br>Nantikan info selanjutnya — Coming Soon.
         <?php else: $n = max(0, (int)($_GET['n'] ?? 0)); ?>
             <strong>Sisa tiket tinggal <?= $n ?>.</strong><br>Silakan kurangi jumlah tiket Anda.
+        <?php endif; ?>
+    </div>
+    <?php elseif (in_array($err, $arwahErrs, true)): ?>
+    <div class="form-soldout">
+        <?php if ($err === 'arwah_nama'): ?>
+            <strong>Nama arwah wajib diisi.</strong><br>Anda mencentang "upload arwah" tetapi nama arwah masih kosong.
+        <?php elseif ($err === 'arwah_tahun'): ?>
+            <strong>Tahun lahir & wafat wajib diisi.</strong><br>Isi dengan tahun yang valid (4 digit, tidak melebihi tahun ini).
+        <?php elseif ($err === 'arwah_tahun_urut'): ?>
+            <strong>Tahun wafat tidak boleh sebelum tahun lahir.</strong><br>Periksa kembali tahun lahir dan tahun wafat.
+        <?php elseif ($err === 'arwah_hubungan'): ?>
+            <strong>Hubungan wajib dipilih.</strong><br>Pilih hubungan Anda dengan arwah yang didoakan.
+        <?php elseif ($err === 'foto_format'): ?>
+            <strong>Format foto tidak didukung.</strong><br>Foto arwah harus berupa file JPG atau PNG.
+        <?php elseif ($err === 'foto_besar'): ?>
+            <strong>Ukuran foto terlalu besar.</strong><br>Maksimal 2 MB. Silakan perkecil ukuran file.
+        <?php else: ?>
+            <strong>Gagal mengunggah foto arwah.</strong><br>Silakan coba lagi.
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -67,7 +90,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                 <div class="form-card-header">
                     <span class="form-step-tag">Langkah 1 dari 3</span>
                     <h2>Data Peserta</h2>
-                    <p>Isi informasi Anda untuk reservasi tiket FOAS 13</p>
+                    <p>Isi informasi Anda untuk reservasi tiket FOAS 14</p>
                 </div>
 
                 <div class="form-card-body">
@@ -112,56 +135,63 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                         </label>
                     </div>
 
-                    <!-- Arwah Form (Hidden) -->
+                    <!-- Arwah Form (Hidden) — mendukung sampai 5 arwah per tiket -->
                     <div class="arwah-form" id="arwahForm" style="display:none;">
-                        <div class="arwah-card">
-                            <h5 class="arwah-title">✦ Data Arwah yang Didoakan</h5>
+                        <div id="arwahEntries">
+                            <div class="arwah-card arwah-entry">
+                                <div class="arwah-entry-head" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+                                    <h5 class="arwah-title">✦ Data Arwah <span class="arwah-num">1</span></h5>
+                                    <button type="button" class="arwah-remove" title="Hapus arwah ini" style="display:none;background:none;border:none;color:#c0392b;font-size:1.1rem;cursor:pointer;line-height:1;">✕</button>
+                                </div>
 
-                            <div class="form-group mb-3">
-                                <label class="form-label">Foto Arwah <small style="color:#666;">(opsional)</small></label>
-                                <div class="upload-warning">⚠ Hanya file <strong>JPG</strong> atau <strong>PNG</strong>, maksimal <strong>2 MB</strong>.</div>
-                                <div class="upload-area" id="uploadArea">
-                                    <input type="file" name="foto_arwah" id="fotoArwah" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
-                                    <div class="upload-placeholder" id="uploadPlaceholder">
-                                        <div class="upload-icon" style="font-size:2rem; margin-bottom:.5rem;">📷</div>
-                                        <p>Drag &amp; drop foto di sini</p>
-                                        <p class="upload-or">atau</p>
-                                        <button type="button" class="btn-browse">Browse File</button>
-                                        <small class="upload-hint">Format JPG / PNG &middot; Maksimal 2 MB</small>
-                                    </div>
-                                    <div class="upload-preview" id="uploadPreview" style="display:none;">
-                                        <img id="previewImg" src="" alt="Preview">
-                                        <button type="button" class="btn-remove-img" onclick="removeImage()">✕</button>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Foto Arwah <small style="color:#666;">(opsional)</small></label>
+                                    <div class="upload-warning">⚠ Hanya file <strong>JPG</strong> atau <strong>PNG</strong>, maksimal <strong>2 MB</strong>.</div>
+                                    <div class="upload-area arwah-uploadarea">
+                                        <input type="file" name="foto_arwah[]" class="arwah-foto" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
+                                        <div class="upload-placeholder arwah-ph">
+                                            <div class="upload-icon" style="font-size:2rem; margin-bottom:.5rem;">📷</div>
+                                            <p>Drag &amp; drop foto di sini</p>
+                                            <p class="upload-or">atau</p>
+                                            <button type="button" class="btn-browse">Browse File</button>
+                                            <small class="upload-hint">Format JPG / PNG &middot; Maksimal 2 MB</small>
+                                        </div>
+                                        <div class="upload-preview arwah-pv" style="display:none;">
+                                            <img class="arwah-previmg" src="" alt="Preview">
+                                            <button type="button" class="btn-remove-img arwah-rmimg">✕</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group mb-3">
-                                <label class="form-label">Nama Arwah <span class="required">*</span></label>
-                                <input type="text" name="nama_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah" autocomplete="off">
-                            </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Nama Arwah <span class="required">*</span></label>
+                                    <input type="text" name="nama_arwah[]" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah" autocomplete="off">
+                                </div>
 
-                            <div class="form-group mb-3">
-                                <label class="form-label">Tahun Lahir <span class="required">*</span></label>
-                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_lahir" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" maxlength="4" autocomplete="off">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label class="form-label">Tahun Wafat <span class="required">*</span></label>
-                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_wafat" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" maxlength="4" autocomplete="off">
-                            </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Tahun Lahir <span class="required">*</span></label>
+                                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_lahir[]" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="1950" maxlength="4" autocomplete="off">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Tahun Wafat <span class="required">*</span></label>
+                                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="tahun_wafat[]" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="2023" maxlength="4" autocomplete="off">
+                                </div>
 
-                            <div class="form-group mb-1">
-                                <label class="form-label">Hubungan dengan Anda <span class="required">*</span></label>
-                                <select name="hubungan_arwah" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem; appearance:auto;">
-                                    <option value="" disabled selected>Pilih hubungan...</option>
-                                    <option value="orang_tua_ayah">Orang Tua - Ayah</option>
-                                    <option value="orang_tua_ibu">Orang Tua - Ibu</option>
-                                    <option value="pasangan">Pasangan</option>
-                                    <option value="anak">Anak</option>
-                                    <option value="saudara">Saudara/Kerabat/Teman</option>
-                                </select>
+                                <div class="form-group mb-1">
+                                    <label class="form-label">Hubungan dengan Anda <span class="required">*</span></label>
+                                    <select name="hubungan_arwah[]" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem; appearance:auto;">
+                                        <option value="" disabled selected>Pilih hubungan...</option>
+                                        <option value="orang_tua_ayah">Orang Tua - Ayah</option>
+                                        <option value="orang_tua_ibu">Orang Tua - Ibu</option>
+                                        <option value="pasangan">Pasangan</option>
+                                        <option value="anak">Anak</option>
+                                        <option value="saudara">Saudara/Kerabat/Teman</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
+
+                        <button type="button" class="btn-browse arwah-add" id="arwahAddBtn" style="margin-top:.9rem;">＋ Tambah Arwah (maks 5)</button>
                     </div>
 
                 </div>
@@ -181,7 +211,7 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                 <div class="form-card-header">
                     <span class="form-step-tag">Langkah 2 dari 3</span>
                     <h2>Persembahan</h2>
-                    <p>Dukungan Anda sangat berarti untuk kelangsungan FOAS 13</p>
+                    <p>Dukungan Anda sangat berarti untuk kelangsungan FOAS 14</p>
                 </div>
 
                 <div class="form-card-body">

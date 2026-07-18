@@ -27,6 +27,20 @@ function ensureTicketTables(PDO $pdo): void {
         sval VARCHAR(255) NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    // Data arwah (1 registrasi bisa punya sampai 5 arwah)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS arwah (
+        id               INT AUTO_INCREMENT PRIMARY KEY,
+        registration_id  INT          NOT NULL,
+        urutan           TINYINT      NOT NULL DEFAULT 1,
+        nama_arwah       VARCHAR(255) NOT NULL,
+        tahun_lahir      SMALLINT     NULL,
+        tahun_wafat      SMALLINT     NULL,
+        hubungan_arwah   VARCHAR(50)  NULL,
+        foto_arwah       VARCHAR(255) NULL,
+        slide_layout     TEXT         NULL,
+        INDEX idx_reg (registration_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
     // Migrasi sekali: ubah kolom hubungan_arwah dari ENUM lama ke VARCHAR
     // agar mendukung kategori baru (orang_tua_ayah, pasangan, dll).
     try {
@@ -62,15 +76,15 @@ function hubunganLabel(?string $key): string {
     return $opt[$key] ?? $legacy[$key] ?? '-';
 }
 
-/** Parse kode tiket FOAS13-XXXXNNN → batch, nomor urut, kode utama. */
+/** Parse kode tiket FOAS14-XXXXNNN → batch, nomor urut, kode utama. */
 function parseTicketCode(string $code): ?array {
     $code = strtoupper(trim($code));
-    if (!preg_match('/^FOAS13-([A-Z0-9]{4})([0-9]{3})$/', $code, $m)) return null;
+    if (!preg_match('/^FOAS14-([A-Z0-9]{4})([0-9]{3})$/', $code, $m)) return null;
     return [
         'full'       => $code,
         'batch'      => $m[1],
         'seq'        => (int)$m[2],
-        'kode_utama' => 'FOAS13-' . $m[1] . '001',
+        'kode_utama' => 'FOAS14-' . $m[1] . '001',
     ];
 }
 
@@ -79,7 +93,7 @@ function deriveAllCodes(string $kodeUtama, int $jumlah): array {
     $batch = substr($kodeUtama, 7, 4);
     $codes = [];
     for ($i = 0; $i < $jumlah; $i++) {
-        $codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+        $codes[] = 'FOAS14-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
     }
     return $codes;
 }
@@ -100,6 +114,32 @@ function mapByReg(PDO $pdo, string $table, array $regIds): array {
 }
 function getCheckedMap(PDO $pdo, array $regIds): array   { return mapByReg($pdo, 'checkins', $regIds); }
 function getCancelledMap(PDO $pdo, array $regIds): array  { return mapByReg($pdo, 'cancelled_tickets', $regIds); }
+
+/* ---------- Data arwah ---------- */
+
+/** Semua arwah untuk banyak registrasi: registration_id => [rows]. */
+function getArwahMap(PDO $pdo, array $regIds): array {
+    if (!$regIds) return [];
+    try {
+        $ph   = implode(',', array_fill(0, count($regIds), '?'));
+        $stmt = $pdo->prepare("SELECT * FROM arwah WHERE registration_id IN ($ph) ORDER BY registration_id, urutan, id");
+        $stmt->execute($regIds);
+        $map = [];
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $map[(int)$r['registration_id']][] = $r;
+        }
+        return $map;
+    } catch (Exception $e) { return []; }
+}
+
+/** Daftar arwah untuk satu registrasi (urut). */
+function getArwahForReg(PDO $pdo, int $regId): array {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM arwah WHERE registration_id = ? ORDER BY urutan, id");
+        $stmt->execute([$regId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) { return []; }
+}
 
 function countChecked(PDO $pdo, int $regId): int {
     try { $s = $pdo->prepare("SELECT COUNT(*) FROM checkins WHERE registration_id = ?"); $s->execute([$regId]); return (int)$s->fetchColumn(); }
@@ -129,4 +169,20 @@ function getSetting(PDO $pdo, string $key, $default = null) {
 function setSetting(PDO $pdo, string $key, string $val): void {
     $pdo->prepare("INSERT INTO settings (skey, sval) VALUES (?, ?)
                    ON DUPLICATE KEY UPDATE sval = VALUES(sval)")->execute([$key, $val]);
+}
+
+/* ---------- Kontak bantuan ---------- */
+
+/** Kontak bantuan yang ditampilkan di halaman 404 (default + override settings).
+    'wa' dipakai untuk tampilan sekaligus link wa.me — format internasional tanpa +, mis. 62812xxx. */
+function helpContact(?PDO $pdo): array {
+    $def = [
+        'name' => 'Ocin',
+        'wa'   => '6281289622858',
+    ];
+    if (!$pdo) return $def;
+    return [
+        'name' => getSetting($pdo, 'help_name', $def['name']) ?: $def['name'],
+        'wa'   => getSetting($pdo, 'help_wa',   $def['wa'])   ?: $def['wa'],
+    ];
 }

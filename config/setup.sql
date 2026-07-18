@@ -1,4 +1,4 @@
--- FOAS 13 — Vita Voxa Choir
+-- FOAS 14 — Vita Voxa Choir
 -- Jalankan script ini satu kali di phpMyAdmin atau MySQL CLI
 
 CREATE DATABASE IF NOT EXISTS ticket_foas

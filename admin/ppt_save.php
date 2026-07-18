@@ -20,7 +20,7 @@ if (!is_array($slides)) out(['ok' => false, 'error' => 'bad-data']);
 
 $saved = 0;
 try {
-    $stmt = $pdo->prepare("UPDATE registrations SET slide_layout = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE arwah SET slide_layout = ? WHERE id = ?");
     foreach ($slides as $s) {
         $id = (int)($s['id'] ?? 0);
         if (!$id) continue;

@@ -42,37 +42,138 @@ $jumlah_tiket   = max(1, min(5, (int)($_POST['jumlah_tiket']  ?? 1)));
 $upload_arwah   = isset($_POST['upload_arwah']) ? 1 : 0;
 $sumbangan      = max(0, (float)preg_replace('/[^0-9]/', '', $_POST['sumbangan_amount'] ?? '0'));
 
-$nama_arwah     = trim(htmlspecialchars($_POST['nama_arwah']   ?? ''));
-$tahun_lahir    = (int)($_POST['tahun_lahir']                  ?? 0) ?: null;
-$tahun_wafat    = (int)($_POST['tahun_wafat']                  ?? 0) ?: null;
-$hubungan       = array_key_exists($_POST['hubungan_arwah'] ?? '', hubunganOptions())
-                  ? $_POST['hubungan_arwah'] : null;
-
 /* ---------- Basic validation ---------- */
 if (!$nama || !$no_hp || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     header('Location: form.php?error=invalid');
     exit;
 }
 
-$foto_path = null; // diisi setelah kode tiket final (nama file butuh kode + kategori)
+/* ---------- Parse & validasi data arwah (server-side, maks 5 arwah) ---------- */
+// Field dikirim sebagai array paralel: nama_arwah[], tahun_lahir[], tahun_wafat[],
+// hubungan_arwah[], dan file foto_arwah[]. Client (form.js) memvalidasi hal yang
+// sama, tapi server tetap jadi sumber kebenaran (bisa dilewati).
+const MAX_ARWAH = 5;
+$arwahList = []; // entri tervalidasi: ['nama','lahir','wafat','hubungan','file']
+
+if ($upload_arwah) {
+    $names  = $_POST['nama_arwah']     ?? [];
+    $lahirs = $_POST['tahun_lahir']    ?? [];
+    $wafats = $_POST['tahun_wafat']    ?? [];
+    $hubs   = $_POST['hubungan_arwah'] ?? [];
+    // Kompat: bila klien lama mengirim nilai tunggal (bukan array), bungkus.
+    if (!is_array($names))  $names  = [$names];
+    if (!is_array($lahirs)) $lahirs = [$lahirs];
+    if (!is_array($wafats)) $wafats = [$wafats];
+    if (!is_array($hubs))   $hubs   = [$hubs];
+
+    $count    = min(MAX_ARWAH, max(count($names), count($lahirs), count($wafats), count($hubs)));
+    $thisYear = (int)date('Y');
+
+    for ($i = 0; $i < $count; $i++) {
+        $nm = trim(htmlspecialchars($names[$i]  ?? ''));
+        $lh = (int)($lahirs[$i] ?? 0) ?: null;
+        $wf = (int)($wafats[$i] ?? 0) ?: null;
+        $hb = array_key_exists($hubs[$i] ?? '', hubunganOptions()) ? $hubs[$i] : null;
+
+        $file    = fileAtIndex($_FILES['foto_arwah'] ?? null, $i);
+        $hasFile = $file !== null && $file['error'] !== UPLOAD_ERR_NO_FILE;
+
+        // Baris kosong sepenuhnya → lewati (mis. entri sisa yang tak diisi)
+        if ($nm === '' && $lh === null && $wf === null && $hb === null && !$hasFile) continue;
+
+        // Nama wajib
+        if ($nm === '') { header('Location: form.php?error=arwah_nama'); exit; }
+        // Tahun lahir & wafat wajib dan dalam rentang wajar
+        if ($lh === null || $wf === null
+            || $lh < 1900 || $lh > $thisYear || $wf < 1900 || $wf > $thisYear) {
+            header('Location: form.php?error=arwah_tahun'); exit;
+        }
+        // Wafat tidak boleh sebelum lahir
+        if ($wf < $lh) { header('Location: form.php?error=arwah_tahun_urut'); exit; }
+        // Hubungan wajib
+        if ($hb === null) { header('Location: form.php?error=arwah_hubungan'); exit; }
+        // Foto opsional: kalau dikirim, wajib valid (jangan gagal diam-diam)
+        if ($hasFile) {
+            $fotoErr = validateArwahPhoto($file);
+            if ($fotoErr !== null) { header('Location: form.php?error=' . $fotoErr); exit; }
+        }
+
+        $arwahList[] = [
+            'nama'     => $nm,
+            'lahir'    => $lh,
+            'wafat'    => $wf,
+            'hubungan' => $hb,
+            'file'     => $hasFile ? $file : null,
+        ];
+    }
+
+    // Upload dicentang tapi tidak ada satupun arwah terisi → tolak
+    if (!$arwahList) { header('Location: form.php?error=arwah_nama'); exit; }
+    // Konsistenkan flag: hanya 1 jika benar ada arwah
+    $upload_arwah = 1;
+} else {
+    $upload_arwah = 0;
+}
+
+/**
+ * Validasi file foto arwah yang diunggah.
+ * Return kode error (string) untuk ?error=... atau null jika valid.
+ */
+function validateArwahPhoto(array $file): ?string {
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        // Gagal di level upload (mis. melebihi limit PHP, transfer terputus)
+        return ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE)
+             ? 'foto_besar' : 'foto_gagal';
+    }
+    if ($file['size'] > 2 * 1024 * 1024) return 'foto_besar';
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    if (!in_array($mime, ['image/jpeg', 'image/png'], true)) return 'foto_format';
+
+    return null;
+}
+
+/**
+ * Ambil satu file dari $_FILES['foto_arwah'] pada index $i.
+ * Mendukung input multiple (foto_arwah[]) maupun tunggal (kompat lama).
+ * Return array file bergaya $_FILES atau null bila tidak ada.
+ */
+function fileAtIndex($files, int $i): ?array {
+    if (!is_array($files) || !isset($files['name'])) return null;
+    if (is_array($files['name'])) {                       // input multiple
+        if (!array_key_exists($i, $files['name'])) return null;
+        return [
+            'name'     => $files['name'][$i],
+            'type'     => $files['type'][$i]     ?? '',
+            'tmp_name' => $files['tmp_name'][$i] ?? '',
+            'error'    => $files['error'][$i]    ?? UPLOAD_ERR_NO_FILE,
+            'size'     => $files['size'][$i]     ?? 0,
+        ];
+    }
+    return $i === 0 ? $files : null;                      // input tunggal
+}
 
 /**
  * Simpan foto arwah ke folder per-kategori dengan nama file deskriptif:
- *   uploads/<kategori>/<KODE> - <Label Hubungan> - <Nama> - <Lahir> - <Wafat>.jpg
- * Return path relatif (kategori/namafile) atau null.
+ *   uploads/<kategori>/<KODE>-<n> - <Label Hubungan> - <Nama> - <Lahir> - <Wafat>.jpg
+ * Return path relatif (kategori/namafile) atau null. $file diasumsikan sudah
+ * lolos validateArwahPhoto() sebelum dipanggil.
  */
-function saveArwahPhoto(string $kodeUtama, ?string $hubKey, string $namaArwah, $lahir, $wafat): ?string {
-    if (!isset($_FILES['foto_arwah']) || $_FILES['foto_arwah']['error'] !== UPLOAD_ERR_OK) return null;
+function saveArwahPhoto(array $file, string $kodeUtama, int $urutan, ?string $hubKey, string $namaArwah, $lahir, $wafat): ?string {
+    if ($file['error'] !== UPLOAD_ERR_OK) return null;
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
     $finfo   = finfo_open(FILEINFO_MIME_TYPE);
-    $mime    = finfo_file($finfo, $_FILES['foto_arwah']['tmp_name']);
+    $mime    = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
-    if (!isset($allowed[$mime]) || $_FILES['foto_arwah']['size'] > 2 * 1024 * 1024) return null;
+    if (!isset($allowed[$mime]) || $file['size'] > 2 * 1024 * 1024) return null;
 
     $folder    = ($hubKey && array_key_exists($hubKey, hubunganOptions())) ? $hubKey : 'lainnya';
     $label     = hubunganLabel($hubKey);
-    $codeShort = preg_replace('/^FOAS13-/', '', $kodeUtama);              // 24LH001
+    // Sertakan urutan agar nama file unik antar arwah dalam 1 registrasi
+    $codeShort = preg_replace('/^FOAS14-/', '', $kodeUtama) . '-' . $urutan;   // 24LH001-1
     $namaClean = html_entity_decode($namaArwah, ENT_QUOTES, 'UTF-8');
 
     $parts = [$codeShort, $label, $namaClean, (string)($lahir ?? ''), (string)($wafat ?? '')];
@@ -87,14 +188,14 @@ function saveArwahPhoto(string $kodeUtama, ?string $hubKey, string $namaArwah, $
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
 
     $filename = $name . '.' . $allowed[$mime];
-    if (@move_uploaded_file($_FILES['foto_arwah']['tmp_name'], $dir . $filename)) {
+    if (@move_uploaded_file($file['tmp_name'], $dir . $filename)) {
         return $folder . '/' . $filename;
     }
     return null;
 }
 
 /* ---------- Generate Ticket Codes ---------- */
-// Format: FOAS13-XXXXNNN  (XXXX = batch acak, NNN = nomor urut 001, 002, ...)
+// Format: FOAS14-XXXXNNN  (XXXX = batch acak, NNN = nomor urut 001, 002, ...)
 function generateBatchId(): string {
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $id = '';
@@ -107,7 +208,7 @@ function generateBatchId(): string {
 $batch = generateBatchId();
 $ticket_codes = [];
 for ($i = 0; $i < $jumlah_tiket; $i++) {
-    $ticket_codes[] = 'FOAS13-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+    $ticket_codes[] = 'FOAS14-' . $batch . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
 }
 $kode_utama = $ticket_codes[0];
 
@@ -149,7 +250,7 @@ try {
         if ((int)$stmt->fetchColumn() > 0) {
             $batch = generateBatchId();
             for ($j = 0; $j < $jumlah_tiket; $j++) {
-                $ticket_codes[$j] = 'FOAS13-' . $batch . str_pad($j + 1, 3, '0', STR_PAD_LEFT);
+                $ticket_codes[$j] = 'FOAS14-' . $batch . str_pad($j + 1, 3, '0', STR_PAD_LEFT);
             }
         } else {
             break;
@@ -157,10 +258,16 @@ try {
     } while (true);
     $kode_utama = $ticket_codes[0];
 
-    // Simpan foto arwah (butuh kode tiket final + kategori hubungan)
-    if ($upload_arwah) {
-        $foto_path = saveArwahPhoto($kode_utama, $hubungan, $nama_arwah, $tahun_lahir, $tahun_wafat);
+    // Simpan foto tiap arwah (butuh kode tiket final) & siapkan baris
+    $savedArwah = [];
+    foreach ($arwahList as $idx => $a) {
+        $urut = $idx + 1;
+        $fp   = $a['file']
+              ? saveArwahPhoto($a['file'], $kode_utama, $urut, $a['hubungan'], $a['nama'], $a['lahir'], $a['wafat'])
+              : null;
+        $savedArwah[] = $a + ['urutan' => $urut, 'foto_path' => $fp];
     }
+    $first = $savedArwah[0] ?? null; // untuk mengisi kolom arwah legacy (kompat)
 
     $stmt = $pdo->prepare("
         INSERT INTO registrations
@@ -172,11 +279,27 @@ try {
     ");
     $stmt->execute([
         $kode_utama, $nama, $no_hp, $email, $jumlah_tiket,
-        $upload_arwah, $foto_path, $upload_arwah ? $nama_arwah : null,
-        $upload_arwah ? $tahun_lahir : null, $upload_arwah ? $tahun_wafat : null,
-        $upload_arwah ? $hubungan : null,
+        $upload_arwah,
+        $first['foto_path'] ?? null,
+        $first['nama']      ?? null,
+        $first['lahir']     ?? null,
+        $first['wafat']     ?? null,
+        $first['hubungan']  ?? null,
         $sumbangan
     ]);
+    $regId = (int)$pdo->lastInsertId();
+
+    // Simpan tiap arwah ke tabel anak
+    if ($savedArwah) {
+        $insA = $pdo->prepare("
+            INSERT INTO arwah
+                (registration_id, urutan, nama_arwah, tahun_lahir, tahun_wafat, hubungan_arwah, foto_arwah)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
+        foreach ($savedArwah as $a) {
+            $insA->execute([$regId, $a['urutan'], $a['nama'], $a['lahir'], $a['wafat'], $a['hubungan'], $a['foto_path']]);
+        }
+    }
 } catch (PDOException $e) {
     debugDie('Gagal menyimpan ke database', $e->getMessage());
 }
@@ -190,12 +313,14 @@ $_SESSION['ticket'] = [
     'email'         => $email,
     'jumlah_tiket'  => $jumlah_tiket,
     'upload_arwah'  => $upload_arwah,
-    'nama_arwah'    => $upload_arwah ? $nama_arwah   : null,
-    'tahun_lahir'   => $upload_arwah ? $tahun_lahir  : null,
-    'tahun_wafat'   => $upload_arwah ? $tahun_wafat  : null,
-    'hubungan'      => $upload_arwah ? $hubungan      : null,
+    'arwah'         => array_map(fn($a) => [
+        'nama'      => $a['nama'],
+        'lahir'     => $a['lahir'],
+        'wafat'     => $a['wafat'],
+        'hubungan'  => $a['hubungan'],
+        'foto_path' => $a['foto_path'],
+    ], $savedArwah),
     'sumbangan'     => $sumbangan,
-    'foto_path'     => $foto_path,
 ];
 
 /* ---------- Send Email (SMTP) ---------- */
@@ -204,7 +329,7 @@ $basePath  = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
 $ticketUrl = publicTicketUrl($kode_utama, $basePath);
 
 $htmlBody   = buildTicketEmailHtml($nama, $ticket_codes, $jumlah_tiket, $ticketUrl);
-$mailResult = sendSmtpMail($email, $nama, 'Tiket FOAS 13 — Vita Voxa Choir', $htmlBody);
+$mailResult = sendSmtpMail($email, $nama, 'Tiket FOAS 14 — Vita Voxa Choir', $htmlBody);
 $emailSent  = ($mailResult === true) ? 1 : 0;
 
 // Update flag email_sent di DB
