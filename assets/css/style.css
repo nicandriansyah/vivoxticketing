@@ -946,6 +946,40 @@ body {
 }
 .email-note span { color: #8B6914; }
 
+/* Kontak bantuan di bawah tiket (tampilan sama dengan halaman 404) */
+.ticket-help {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0d6c2;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #5a4a35;
+    text-align: center;
+    animation: fadeInUp 0.6s ease 0.7s both;
+}
+.ticket-help strong { color: #1a0800; }
+.ticket-help-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    background: #25D366;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 0.85rem 1.6rem;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+.ticket-help-wa:hover { background: #1da851; }
+.ticket-help-brand {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: #9a7a55;
+    text-transform: uppercase;
+}
+
 .ticket-share-row {
     width: 100%;
     max-width: 380px;

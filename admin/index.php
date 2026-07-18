@@ -326,12 +326,16 @@ require __DIR__ . '/partials/header.php';
             <button class="modal-close" onclick="closeHelpContact()">✕</button>
             <h3 class="m-title">Kontak Bantuan</h3>
             <p style="font-size:.85rem;color:#888;margin:-.5rem 0 .75rem;line-height:1.5;">
-                Ditampilkan di halaman 404 sebagai kontak bila pengunjung mengalami kendala tiket.
+                Ditampilkan sebagai kontak bila pengunjung mengalami kendala tiket.
             </p>
             <label class="hc-label">Nama Kontak</label>
             <input type="text" id="hcName" class="hc-input" value="<?= htmlspecialchars($helpContact['name']) ?>">
-            <label class="hc-label">Nomor WhatsApp — format 62xxxxxxxxxx (dipakai untuk tampilan &amp; link wa.me)</label>
-            <input type="text" id="hcWa" class="hc-input" placeholder="62812xxxxxxxx" value="<?= htmlspecialchars($helpContact['wa']) ?>">
+            <label class="hc-label">Nomor WhatsApp (dipakai untuk tampilan &amp; link wa.me)</label>
+            <div class="hc-wa-group">
+                <span class="hc-prefix">62</span>
+                <input type="text" id="hcWa" class="hc-input" placeholder="812xxxxxxxx"
+                       value="<?= htmlspecialchars(preg_replace('/^62/', '', $helpContact['wa'])) ?>">
+            </div>
             <div style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;">
                 <button type="button" class="m-view-btn" onclick="saveHelpContact()">💾 Simpan</button>
                 <span id="hcStatus" style="font-size:.8rem;font-weight:600;"></span>
@@ -550,15 +554,18 @@ require __DIR__ . '/partials/header.php';
     }
     function saveHelpContact() {
         var st = document.getElementById('hcStatus');
+        // Prefix 62 fix di kiri field — user hanya mengisi sisa nomornya
+        var waLocal = document.getElementById('hcWa').value
+            .replace(/\D/g, '').replace(/^0+/, '').replace(/^62/, '');
         var fd = new FormData();
         fd.append('name', document.getElementById('hcName').value.trim());
-        fd.append('wa',   document.getElementById('hcWa').value.trim());
+        fd.append('wa',   waLocal ? '62' + waLocal : '');
         st.style.color = '#666'; st.textContent = 'Menyimpan...';
         fetch('update_help_contact.php', { method: 'POST', body: fd })
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
-                document.getElementById('hcWa').value = res.wa;
+                document.getElementById('hcWa').value = res.wa.replace(/^62/, '');
                 st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
                 setTimeout(closeHelpContact, 900);
             })
