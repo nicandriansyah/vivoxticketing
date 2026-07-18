@@ -360,22 +360,20 @@ body {
 .stat-card-link { text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s; display: block; }
 .stat-card-link:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,168,76,0.18); }
 .stat-card-link .stat-value { color: var(--gold-dark); }
-.stat-card-user { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.3rem; }
+.stat-card-user { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.3rem; padding: 1rem 1.4rem; }
 .stat-user-emoji { font-size: 2.4rem; line-height: 1; }
 .stat-card-user .stat-label { color: var(--ink); font-weight: 600; }
 .stat-card-btn { font-family: inherit; cursor: pointer; width: 100%; }
 
 /* Kartu status registrasi/kuota: hijau saat dibuka, merah saat ditutup/penuh */
-.stat-card-quota .stat-label { font-weight: 700; }
+.stat-card-quota .stat-label { font-weight: 700; font-size: 1.05rem; }
 .stat-card-quota.q-open  { border-color: var(--ok); background: #eafaf1; }
-.stat-card-quota.q-open .stat-label,
-.stat-card-quota.q-open .stat-quota-mini { color: #1a7a40; }
+.stat-card-quota.q-open .stat-label { color: #1a7a40; }
 .stat-card-quota.q-open:hover { border-color: var(--ok); box-shadow: 0 2px 12px rgba(39,174,96,0.25); }
 .stat-card-quota.q-closed { border-color: var(--no); background: #fdedec; }
-.stat-card-quota.q-closed .stat-label,
-.stat-card-quota.q-closed .stat-quota-mini { color: var(--no); }
+.stat-card-quota.q-closed .stat-label { color: var(--no); }
 .stat-card-quota.q-closed:hover { border-color: var(--no); box-shadow: 0 2px 12px rgba(192,57,43,0.25); }
-.stat-quota-mini { font-size: 0.72rem; font-weight: 700; }
+.stat-quota-mini { font-size: 1rem; font-weight: 700; color: var(--ink); }
 .quota-modal-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
 .quota-modal-status.closed .quota-dot { background: var(--no); }
 .pass-form { display: flex; gap: 0.35rem; align-items: center; }

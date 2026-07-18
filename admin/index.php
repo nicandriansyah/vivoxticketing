@@ -196,7 +196,6 @@ require __DIR__ . '/partials/header.php';
             <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>" onclick="openQuotaModal()">
                 <div class="stat-label">Registrasi <?= $statusLabel ?></div>
                 <div class="stat-quota-mini">
-                    Terjual <?= number_format($sold, 0, ',', '.') ?> &middot;
                     Kuota <?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?> &middot;
                     Sisa <?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?>
                 </div>
