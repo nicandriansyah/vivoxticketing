@@ -788,7 +788,14 @@ body {
 
 /* ---------- Modal tickets ---------- */
 .m-contact { color: var(--muted); font-size: 0.9rem; margin: -0.6rem 0 0.7rem; }
-.modal-box-wide { max-width: 1540px; }
+/* Perlu selector ganda agar menang dari .modal-box (max-width 640) yang ditulis lebih bawah */
+.modal-box.modal-box-wide { max-width: 1540px; }
+/* Desktop: overlay & modal hanya menutupi area konten (adm-main-full), sidebar tetap terlihat */
+@media (min-width: 721px) {
+    .modal-box.modal-box-wide { max-width: none; }
+    body.admin-page .modal-overlay { left: 230px; }
+    body.admin-page .adm-layout:has(.adm-sidebar.collapsed) .modal-overlay { left: 74px; }
+}
 .m-cols { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 .m-cols.two { grid-template-columns: 1.25fr 1fr; }
 @media (max-width: 600px) { .m-cols.two { grid-template-columns: 1fr; } }
@@ -816,16 +823,32 @@ body {
 }
 .m-copy-btn:hover { border-color: var(--gold); }
 .m-copy-btn.copied { background: #e6f9ee; border-color: #a8e6be; color: var(--ok); }
+/* 2 kolom: 5 tiket → 3 kiri, 2 kanan (isi mengalir per kolom) */
 .m-tickets {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
+    column-count: 2;
+    column-gap: 0.6rem;
 }
 .m-ticket {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.7rem 0.8rem;
     background: #fafbfc;
+    break-inside: avoid;
+    margin-bottom: 0.6rem;
+}
+/* 2 kolom untuk daftar arwah di modal */
+.m-arwah-list { column-count: 2; column-gap: 0.8rem; }
+.m-arwah-unit { break-inside: avoid; margin-bottom: 0.8rem; }
+/* Foto arwah ukuran fix agar tinggi row seragam walau rasio foto beda */
+.m-arwah-foto {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+@media (max-width: 600px) {
+    .m-tickets    { column-count: 1; }
+    .m-arwah-list { column-count: 1; }
 }
 .m-ticket.cancelled { opacity: 0.65; }
 .m-ticket-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }

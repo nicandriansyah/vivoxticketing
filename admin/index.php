@@ -114,11 +114,13 @@ foreach ($rows as $r) {
         'cancelled'    => array_values($cancelled),
         'upload_arwah' => (int)($r['upload_arwah'] || !empty($arwahMap[$id])),
         'arwah'        => array_map(fn($a) => [
+            'id'          => (int)$a['id'],
             'foto'        => $a['foto_arwah'] ? adminUploadUrl($a['foto_arwah']) : '',
             'nama_arwah'  => $a['nama_arwah'] ?? '',
             'tahun_lahir' => $a['tahun_lahir'] ?? '',
             'tahun_wafat' => $a['tahun_wafat'] ?? '',
             'hubungan'    => hubunganLabel($a['hubungan_arwah']),
+            'hub_key'     => $a['hubungan_arwah'] ?? '',
         ], $arwahMap[$id] ?? []),
     ];
 }
@@ -241,7 +243,7 @@ require __DIR__ . '/partials/header.php';
                 <button type="submit" class="adm-btn-primary">Cari</button>
                 <?php if ($q !== '' || $filter !== ''): ?><a href="index.php" class="adm-btn-ghost">Reset</a><?php endif; ?>
             </form>
-            <a href="export.php<?= qs() ?>" class="adm-btn-secondary">⬇ Export CSV</a>
+            <a href="export.php<?= qs() ?>" class="adm-btn-secondary">⬇ Export Excel</a>
         </div>
 
         <?php if ($filter === 'email_fail'): ?>
@@ -382,6 +384,7 @@ require __DIR__ . '/partials/header.php';
 
     <script>
     var REG = <?= json_encode($regJson, JSON_UNESCAPED_UNICODE) ?>;
+    var HUB_OPTS = <?= json_encode(hubunganOptions(), JSON_UNESCAPED_UNICODE) ?>;
 
     function esc(s) {
         return String(s == null ? '' : s)
@@ -449,18 +452,54 @@ require __DIR__ . '/partials/header.php';
         var hasArwah = !!d.upload_arwah && arwahArr.length > 0;
         var arwahHtml = '';
         if (hasArwah) {
-            arwahHtml = '<h4 class="m-sub">🕊️ Data Arwah (' + arwahArr.length + ')</h4>';
+            arwahHtml = '<h4 class="m-sub">🕊️ Data Arwah (' + arwahArr.length + ')</h4><div class="m-arwah-list">';
             arwahArr.forEach(function (a, i) {
+                var uid = a.id;
+                var hubSelect = '<select id="arwahHub-' + uid + '" class="m-link-input" style="width:100%;">' +
+                    '<option value="">— Pilih Hubungan —</option>';
+                Object.keys(HUB_OPTS).forEach(function (k) {
+                    hubSelect += '<option value="' + esc(k) + '"' + (a.hub_key === k ? ' selected' : '') + '>' + esc(HUB_OPTS[k]) + '</option>';
+                });
+                hubSelect += '</select>';
+
+                var lbl = 'display:block;font-size:.75rem;color:#888;margin:.45rem 0 .15rem;';
                 arwahHtml +=
+                    '<div class="m-arwah-unit">' +
                     (arwahArr.length > 1 ? '<div class="m-arwah-no" style="font-weight:600;color:#8a6d1a;margin:.4rem 0 .2rem;">Arwah #' + (i + 1) + '</div>' : '') +
-                    (a.foto ? '<div style="text-align:center;margin-bottom:.5rem;"><img src="' + esc(a.foto) + '" style="max-width:120px;max-height:120px;border-radius:10px;object-fit:cover;"></div>' : '') +
-                    '<div class="m-section">' +
-                    row('Nama Arwah', esc(a.nama_arwah) || '—') +
-                    row('Tahun Lahir', esc(a.tahun_lahir) || '—') +
-                    row('Tahun Wafat', esc(a.tahun_wafat) || '—') +
-                    row('Hubungan', esc(a.hubungan) || '—') +
+                    // --- Tampilan ---
+                    '<div id="arwahView-' + uid + '">' +
+                        (a.foto ? '<div style="text-align:center;margin-bottom:.5rem;"><img class="m-arwah-foto" src="' + esc(a.foto) + '"></div>' : '') +
+                        '<div class="m-section">' +
+                        row('Nama Arwah', esc(a.nama_arwah) || '—') +
+                        row('Tahun Lahir', esc(a.tahun_lahir) || '—') +
+                        row('Tahun Wafat', esc(a.tahun_wafat) || '—') +
+                        row('Hubungan', esc(a.hubungan) || '—') +
+                        '</div>' +
+                        '<button type="button" class="m-copy-btn" style="width:auto;padding:.15rem .55rem;font-size:.78rem;margin-top:.4rem;" onclick="startEditArwah(' + uid + ')">✎ Edit</button>' +
+                    '</div>' +
+                    // --- Form edit ---
+                    '<div id="arwahEdit-' + uid + '" style="display:none;">' +
+                        (a.foto ? '<div style="text-align:center;margin-bottom:.4rem;"><img class="m-arwah-foto" src="' + esc(a.foto) + '"></div>' : '') +
+                        '<label style="' + lbl + '">Upload Ulang Foto (JPG/PNG, maks 2MB)</label>' +
+                        '<input type="file" id="arwahFoto-' + uid + '" accept="image/jpeg,image/png" style="width:100%;font-size:.8rem;">' +
+                        '<label style="' + lbl + '">Nama Arwah</label>' +
+                        '<input type="text" id="arwahNama-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.nama_arwah) + '">' +
+                        '<div style="display:flex;gap:.5rem;">' +
+                            '<div style="flex:1;"><label style="' + lbl + '">Tahun Lahir</label>' +
+                            '<input type="number" id="arwahLahir-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.tahun_lahir) + '"></div>' +
+                            '<div style="flex:1;"><label style="' + lbl + '">Tahun Wafat</label>' +
+                            '<input type="number" id="arwahWafat-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.tahun_wafat) + '"></div>' +
+                        '</div>' +
+                        '<label style="' + lbl + '">Hubungan</label>' + hubSelect +
+                        '<div style="display:flex;align-items:center;gap:.5rem;margin-top:.6rem;flex-wrap:wrap;">' +
+                            '<button type="button" class="m-view-btn" onclick="saveArwah(' + uid + ')">💾 Simpan</button>' +
+                            '<button type="button" class="m-cancel-btn" onclick="cancelEditArwah(' + uid + ')">Batal</button>' +
+                            '<span id="arwahStatus-' + uid + '" style="font-size:.8rem;font-weight:600;"></span>' +
+                        '</div>' +
+                    '</div>' +
                     '</div>';
             });
+            arwahHtml += '</div>';
         }
 
         var linkRow =
@@ -478,19 +517,25 @@ require __DIR__ . '/partials/header.php';
 
         // Kontak (bisa di-edit: no. WhatsApp & email)
         var contactHtml =
-            '<div id="mContactView" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">' +
+            '<div id="mContactView" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem;">' +
                 '<p class="m-contact" style="margin:0;">' + esc(d.no_hp) + ' &middot; ' + esc(d.email) + '</p>' +
                 '<button type="button" class="m-copy-btn" style="width:auto;padding:.15rem .55rem;font-size:.78rem;" onclick="startEditContact()">✎ Edit</button>' +
             '</div>' +
-            '<div id="mContactEdit" style="display:none;margin:.1rem 0 .5rem;max-width:340px;">' +
-                '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">No. WhatsApp</label>' +
-                '<input type="text" id="mEditPhone" class="m-link-input" style="width:100%;margin-bottom:.4rem;" value="' + esc(d.no_hp) + '">' +
-                '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">Email</label>' +
-                '<input type="email" id="mEditEmail" class="m-link-input" style="width:100%;margin-bottom:.5rem;" value="' + esc(d.email) + '">' +
-                '<div style="display:flex;align-items:center;gap:.5rem;">' +
-                    '<button type="button" class="m-view-btn" onclick="saveContact()">💾 Simpan</button>' +
-                    '<button type="button" class="m-cancel-btn" onclick="cancelEditContact()">Batal</button>' +
-                    '<span id="mContactStatus" style="font-size:.8rem;font-weight:600;"></span>' +
+            '<div id="mContactEdit" style="display:none;margin:.1rem 0 .7rem;">' +
+                '<div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end;">' +
+                    '<div style="flex:1 1 170px;min-width:160px;">' +
+                        '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">No. WhatsApp</label>' +
+                        '<input type="text" id="mEditPhone" class="m-link-input" style="width:100%;" value="' + esc(d.no_hp) + '">' +
+                    '</div>' +
+                    '<div style="flex:1.4 1 220px;min-width:200px;">' +
+                        '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">Email</label>' +
+                        '<input type="email" id="mEditEmail" class="m-link-input" style="width:100%;" value="' + esc(d.email) + '">' +
+                    '</div>' +
+                    '<div style="display:flex;align-items:center;gap:.5rem;flex:0 0 auto;">' +
+                        '<button type="button" class="m-view-btn" onclick="saveContact()">💾 Simpan</button>' +
+                        '<button type="button" class="m-cancel-btn" onclick="cancelEditContact()">Batal</button>' +
+                        '<span id="mContactStatus" style="font-size:.8rem;font-weight:600;"></span>' +
+                    '</div>' +
                 '</div>' +
             '</div>';
 
@@ -500,8 +545,8 @@ require __DIR__ . '/partials/header.php';
             linkRow +
             '<div class="m-cols' + (hasArwah ? ' two' : '') + '">' + ticketsCol + arwahCol + '</div>';
 
-        // Lebarkan modal jika ada kolom arwah
-        document.querySelector('#detailModal .modal-box').classList.toggle('modal-box-wide', hasArwah);
+        // Modal detail selalu lebar penuh (konten tiket/arwah 2 kolom butuh ruang)
+        document.querySelector('#detailModal .modal-box').classList.add('modal-box-wide');
 
         document.getElementById('detailModal').classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -550,6 +595,37 @@ require __DIR__ . '/partials/header.php';
                 if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
                 st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
                 setTimeout(function () { location.reload(); }, 600);  // sinkron tabel & link WA
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
+
+    /* ---------- Edit data arwah (foto + isian, sinkron ke PPT Generator) ---------- */
+    function startEditArwah(id) {
+        document.getElementById('arwahView-' + id).style.display = 'none';
+        document.getElementById('arwahEdit-' + id).style.display = 'block';
+    }
+    function cancelEditArwah(id) {
+        document.getElementById('arwahEdit-' + id).style.display = 'none';
+        document.getElementById('arwahView-' + id).style.display = 'block';
+        var st = document.getElementById('arwahStatus-' + id); if (st) st.textContent = '';
+    }
+    function saveArwah(id) {
+        var st = document.getElementById('arwahStatus-' + id);
+        var fd = new FormData();
+        fd.append('id', id);
+        fd.append('nama_arwah',     document.getElementById('arwahNama-'  + id).value.trim());
+        fd.append('tahun_lahir',    document.getElementById('arwahLahir-' + id).value.trim());
+        fd.append('tahun_wafat',    document.getElementById('arwahWafat-' + id).value.trim());
+        fd.append('hubungan_arwah', document.getElementById('arwahHub-'   + id).value);
+        var f = document.getElementById('arwahFoto-' + id).files[0];
+        if (f) fd.append('foto', f);
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        fetch('arwah_update.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
+                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+                setTimeout(function () { location.reload(); }, 600);   // sinkron modal, tabel & PPT
             })
             .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
     }
