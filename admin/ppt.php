@@ -78,7 +78,7 @@ function unitDefaults(int $per, int $idx): array {
 
 $pageTitle  = 'PPT Generator';
 $activeMenu = 'ppt';
-$mainClass  = 'adm-main-full';
+$mainClass  = 'adm-main-full adm-main-ppt';
 require __DIR__ . '/partials/header.php';
 ?>
 
@@ -220,9 +220,21 @@ require __DIR__ . '/partials/header.php';
     function layoutSlides() {
         var area = document.querySelector('.ppt-canvas-area');
         if (!area) return;
-        slideScale = area.clientWidth / SLIDE_W;
-        document.querySelectorAll('.ppt-slide').forEach(function (s) { s.style.transform = 'scale(' + slideScale + ')'; });
-        area.style.height = (SLIDE_H * slideScale) + 'px';
+        if (window.innerWidth <= 820) {
+            // Layout kolom (tablet kecil): skala ikut lebar, tinggi area menyesuaikan
+            slideScale = area.clientWidth / SLIDE_W;
+            area.style.height = (SLIDE_H * slideScale) + 'px';
+            document.querySelectorAll('.ppt-slide').forEach(function (s) { s.style.transform = 'scale(' + slideScale + ')'; });
+            return;
+        }
+        // Desktop fullscreen: fit lebar & tinggi area (tanpa scroll), slide di tengah
+        area.style.height = '';
+        var aw = area.clientWidth, ah = area.clientHeight;
+        slideScale = Math.min(aw / SLIDE_W, ah / SLIDE_H);
+        var ox = (aw - SLIDE_W * slideScale) / 2, oy = (ah - SLIDE_H * slideScale) / 2;
+        document.querySelectorAll('.ppt-slide').forEach(function (s) {
+            s.style.transform = 'translate(' + ox + 'px,' + oy + 'px) scale(' + slideScale + ')';
+        });
     }
     window.addEventListener('resize', layoutSlides);
 
