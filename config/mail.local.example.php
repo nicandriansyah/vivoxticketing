@@ -15,8 +15,8 @@
 $MAIL_HOST       = 'smtp.gmail.com';
 $MAIL_PORT       = 587;                       // 465 = SSL implicit, 587 = STARTTLS
 $MAIL_SECURE     = 'tls';                     // 'ssl' untuk 465, 'tls' untuk 587
-$MAIL_USER       = 'sandbox@parokigrogolkaj.or.id';                        // diisi di config/mail.local.php
-$MAIL_PASS       = 'bozn jyto ieym tpgi';                        // diisi di config/mail.local.php
-$MAIL_FROM       = 'sandbox@parokigrogolkaj.or.id';                        // diisi di config/mail.local.php
+$MAIL_USER       = 'alamat@email.anda';
+$MAIL_PASS       = 'app-password-anda';
+$MAIL_FROM       = 'alamat@email.anda';
 $MAIL_FROM_NAME  = 'Email Broadcaster';
 
