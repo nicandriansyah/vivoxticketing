@@ -344,6 +344,10 @@ body {
     gap: 1rem;
     margin-bottom: 1.75rem;
 }
+/* Desktop: fix 4 kartu per baris */
+@media (min-width: 721px) {
+    .stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
 .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -360,6 +364,20 @@ body {
 .stat-user-emoji { font-size: 2.4rem; line-height: 1; }
 .stat-card-user .stat-label { color: var(--ink); font-weight: 600; }
 .stat-card-btn { font-family: inherit; cursor: pointer; width: 100%; }
+
+/* Kartu status registrasi/kuota: hijau saat dibuka, merah saat ditutup/penuh */
+.stat-card-quota .stat-label { font-weight: 700; }
+.stat-card-quota.q-open  { border-color: var(--ok); background: #eafaf1; }
+.stat-card-quota.q-open .stat-label,
+.stat-card-quota.q-open .stat-quota-mini { color: #1a7a40; }
+.stat-card-quota.q-open:hover { border-color: var(--ok); box-shadow: 0 2px 12px rgba(39,174,96,0.25); }
+.stat-card-quota.q-closed { border-color: var(--no); background: #fdedec; }
+.stat-card-quota.q-closed .stat-label,
+.stat-card-quota.q-closed .stat-quota-mini { color: var(--no); }
+.stat-card-quota.q-closed:hover { border-color: var(--no); box-shadow: 0 2px 12px rgba(192,57,43,0.25); }
+.stat-quota-mini { font-size: 0.72rem; font-weight: 700; }
+.quota-modal-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
+.quota-modal-status.closed .quota-dot { background: var(--no); }
 .pass-form { display: flex; gap: 0.35rem; align-items: center; }
 .pass-form .adm-input { width: 130px; }
 

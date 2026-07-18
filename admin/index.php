@@ -189,42 +189,50 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-user-emoji">☎️</div>
                 <div class="stat-label">Kontak Bantuan</div>
             </button>
+            <?php
+                $statusLabel = $isOpen ? 'DIBUKA'
+                    : (!$salesOpen ? 'DITUTUP (manual)' : 'DITUTUP (Penuh)');
+            ?>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>" onclick="openQuotaModal()">
+                <div class="stat-label">Registrasi <?= $statusLabel ?></div>
+                <div class="stat-quota-mini">
+                    Terjual <?= number_format($sold, 0, ',', '.') ?> &middot;
+                    Kuota <?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?> &middot;
+                    Sisa <?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?>
+                </div>
+            </button>
         </div>
 
-        <!-- Quota card -->
-        <?php
-            $statusLabel = $isOpen ? 'DIBUKA'
-                : (!$salesOpen ? 'DITUTUP (manual)' : 'DITUTUP (Penuh)');
-        ?>
-        <div class="quota-card <?= $isOpen ? '' : 'closed' ?>">
-            <div class="quota-info">
-                <div class="quota-status">
+        <!-- Modal kuota & buka/tutup penjualan -->
+        <div id="quotaModal" class="modal-overlay" onclick="if(event.target===this)closeQuotaModal()">
+            <div class="modal-box" style="max-width:420px;">
+                <button class="modal-close" onclick="closeQuotaModal()">✕</button>
+                <h3 class="m-title">Kuota &amp; Penjualan</h3>
+                <div class="quota-modal-status <?= $isOpen ? '' : 'closed' ?>">
                     <span class="quota-dot"></span>
                     Registrasi <strong><?= $statusLabel ?></strong>
                 </div>
-                <div class="quota-numbers">
+                <div class="quota-numbers" style="margin:0.6rem 0 1.1rem;">
                     <span>Terjual <strong><?= number_format($sold, 0, ',', '.') ?></strong></span>
                     <span>Kuota <strong><?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?></strong></span>
                     <span>Sisa <strong><?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?></strong></span>
                 </div>
-            </div>
-            <div class="quota-actions">
                 <form method="POST" action="quota_save.php" class="quota-form" onsubmit="return confirm('Yakin mengganti kuota tiket menjadi ' + document.getElementById('quotaInput').value + '?');">
                     <label>Kuota</label>
                     <input type="number" id="quotaInput" name="quota" min="0" value="<?= $quota ?>" class="adm-input" style="width:95px;" disabled>
                     <button type="button" id="btnEditQuota" class="adm-btn-ghost" onclick="enableQuotaEdit()">Edit</button>
                     <button type="submit" id="btnSaveQuota" class="adm-btn-primary" style="display:none;">Simpan</button>
                 </form>
-                <form method="POST" action="sales_toggle.php" id="salesForm">
+                <form method="POST" action="sales_toggle.php" id="salesForm" style="margin-top:0.9rem;">
                     <input type="hidden" name="open" value="<?= $salesOpen ? '0' : '1' ?>">
-                    <button type="button" class="<?= $salesOpen ? 'adm-btn-danger' : 'adm-btn-secondary' ?>"
+                    <button type="button" style="width:100%;" class="<?= $salesOpen ? 'adm-btn-danger' : 'adm-btn-secondary' ?>"
                             onclick="confirmSales('<?= $salesOpen ? 'Tutup' : 'Buka' ?>')">
                         <?= $salesOpen ? '⏸ Tutup Penjualan' : '▶ Buka Penjualan' ?>
                     </button>
                 </form>
+                <p class="quota-hint" style="margin:0.9rem 0 0;">Kuota <strong>0</strong> = tanpa batas. Saat penjualan ditutup atau kuota penuh, tombol di halaman depan jadi "Coming Soon".</p>
             </div>
         </div>
-        <p class="quota-hint">Kuota <strong>0</strong> = tanpa batas. Saat penjualan ditutup atau kuota penuh, tombol di halaman depan jadi "Coming Soon".</p>
 
         <!-- Toolbar -->
         <div class="adm-toolbar">
@@ -546,6 +554,10 @@ require __DIR__ . '/partials/header.php';
             })
             .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
     }
+
+    /* ---------- Modal kuota & penjualan ---------- */
+    function openQuotaModal()  { document.getElementById('quotaModal').classList.add('open'); }
+    function closeQuotaModal() { document.getElementById('quotaModal').classList.remove('open'); }
 
     /* ---------- Kontak bantuan 404 ---------- */
     function openHelpContact()  { document.getElementById('helpContactModal').classList.add('open'); }

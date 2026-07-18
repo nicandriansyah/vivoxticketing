@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> — Admin Ticketing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=37" rel="stylesheet">
+    <link href="assets/admin.css?v=39" rel="stylesheet">
 </head>
 <body class="admin-page">
 <div class="adm-layout">
