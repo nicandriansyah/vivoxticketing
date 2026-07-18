@@ -12,7 +12,7 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> — Admin Ticketing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=34" rel="stylesheet">
+    <link href="assets/admin.css?v=35" rel="stylesheet">
 </head>
 <body class="admin-page">
 <div class="adm-layout">
@@ -21,6 +21,7 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
         <button type="button" class="adm-collapse-btn" id="admCollapseBtn" onclick="toggleCollapse()" title="Kecilkan / besarkan sidebar">«</button>
         <div class="adm-side-brand"><span class="side-txt">Ticketing </span><span class="brand-gold">Admin</span>
             <div class="adm-side-version side-txt"><?= htmlspecialchars(function_exists('appVersion') ? appVersion() : '') ?></div>
+            <div class="adm-side-user side-txt">👤 <?= htmlspecialchars($adminUser) ?></div>
         </div>
         <nav class="adm-side-nav">
             <a href="index.php"   class="<?= $activeMenu === 'dashboard' ? 'active' : '' ?>"><span class="ico">📊</span> <span class="side-txt">Dashboard</span></a>
@@ -56,13 +57,7 @@ $adminUser  = $_SESSION['admin_user'] ?? 'admin';
     </div>
 
     <div class="adm-content">
-        <header class="adm-topbar">
-            <div class="adm-topbar-left">
-                <button class="adm-hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-                <div class="adm-page-title"><?= htmlspecialchars($pageTitle) ?></div>
-            </div>
-            <span class="adm-user">👤 <?= htmlspecialchars($adminUser) ?></span>
-        </header>
+        <button class="adm-hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
         <main class="adm-main <?= htmlspecialchars($mainClass ?? '') ?>">
         <script>
         function toggleSidebar() {
