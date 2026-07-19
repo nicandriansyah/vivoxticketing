@@ -9,6 +9,8 @@ if ($dbReady) { try { ensureTicketTables($pdo); } catch (Exception $e) {} }
 
 // Kontak bantuan halaman 404 (editable via modal)
 $helpContact = helpContact($dbReady ? $pdo : null);
+// Rekening sumbangan di form registrasi (editable via modal)
+$donation = donationAccount($dbReady ? $pdo : null);
 
 $stats = ['reg' => 0, 'tiket' => 0, 'sumbangan' => 0, 'email' => 0, 'checkin' => 0];
 $quota = 0; $sold = 0; $remaining = 0;
@@ -199,6 +201,10 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-user-emoji">☎️</div>
                 <div class="stat-label">Kontak Bantuan</div>
             </button>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openDonation()">
+                <div class="stat-user-emoji">🏦</div>
+                <div class="stat-label">Rekening Sumbangan</div>
+            </button>
         </div>
 
         <!-- Modal kuota & buka/tutup penjualan -->
@@ -346,6 +352,29 @@ require __DIR__ . '/partials/header.php';
             <div style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;">
                 <button type="button" class="m-view-btn" onclick="saveHelpContact()">💾 Simpan</button>
                 <span id="hcStatus" style="font-size:.8rem;font-weight:600;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal rekening sumbangan (ditampilkan di form registrasi) -->
+    <div id="donationModal" class="modal-overlay" onclick="if(event.target===this)closeDonation()">
+        <div class="modal-box" style="max-width:420px;">
+            <button class="modal-close" onclick="closeDonation()">✕</button>
+            <h3 class="m-title">Rekening Sumbangan</h3>
+            <p style="font-size:.85rem;color:#888;margin:-.5rem 0 .75rem;line-height:1.5;">
+                Ditampilkan di langkah Persembahan pada form registrasi tiket.
+            </p>
+            <label class="hc-label">Bank (singkat, tampil sebagai logo)</label>
+            <input type="text" id="donBankShort" class="hc-input" value="<?= htmlspecialchars($donation['bank_short']) ?>">
+            <label class="hc-label">Nama Bank</label>
+            <input type="text" id="donBankName" class="hc-input" value="<?= htmlspecialchars($donation['bank_name']) ?>">
+            <label class="hc-label">Nomor Rekening</label>
+            <input type="text" id="donAccount" class="hc-input" value="<?= htmlspecialchars($donation['account']) ?>">
+            <label class="hc-label">Atas Nama</label>
+            <input type="text" id="donHolder" class="hc-input" value="<?= htmlspecialchars($donation['holder']) ?>">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;">
+                <button type="button" class="m-view-btn" onclick="saveDonation()">💾 Simpan</button>
+                <span id="donStatus" style="font-size:.8rem;font-weight:600;"></span>
             </div>
         </div>
     </div>
@@ -630,6 +659,31 @@ require __DIR__ . '/partials/header.php';
     /* ---------- Modal kuota & penjualan ---------- */
     function openQuotaModal()  { document.getElementById('quotaModal').classList.add('open'); }
     function closeQuotaModal() { document.getElementById('quotaModal').classList.remove('open'); }
+
+    /* ---------- Rekening sumbangan ---------- */
+    function openDonation()  { document.getElementById('donationModal').classList.add('open'); }
+    function closeDonation() {
+        document.getElementById('donationModal').classList.remove('open');
+        var st = document.getElementById('donStatus'); if (st) st.textContent = '';
+    }
+    function saveDonation() {
+        var st = document.getElementById('donStatus');
+        var fd = new FormData();
+        fd.append('bank_short', document.getElementById('donBankShort').value.trim());
+        fd.append('bank_name',  document.getElementById('donBankName').value.trim());
+        fd.append('account',    document.getElementById('donAccount').value.trim());
+        fd.append('holder',     document.getElementById('donHolder').value.trim());
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        fetch('update_donation.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
+                document.getElementById('donAccount').value = res.account;
+                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+                setTimeout(closeDonation, 900);
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
 
     /* ---------- Kontak bantuan 404 ---------- */
     function openHelpContact()  { document.getElementById('helpContactModal').classList.add('open'); }

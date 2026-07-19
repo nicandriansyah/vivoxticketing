@@ -4,6 +4,13 @@ session_start();
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
+
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/checkin.php';
+$donation = donationAccount($pdo ?? null);
+// Format nomor rekening per 4 digit untuk tampilan
+$accDigits  = preg_replace('/\D/', '', $donation['account']);
+$accDisplay = trim(chunk_split($accDigits, 4, ' '));
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -223,11 +230,11 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
                     </div>
 
                     <div class="bank-card">
-                        <div class="bank-logo">BCA</div>
+                        <div class="bank-logo"><?= htmlspecialchars($donation['bank_short']) ?></div>
                         <div class="bank-details">
-                            <p class="bank-name">PT Bank Central Asia Tbk</p>
-                            <p class="bank-account">1234 5678</p>
-                            <p class="bank-holder">Vita Voxa Choir</p>
+                            <p class="bank-name"><?= htmlspecialchars($donation['bank_name']) ?></p>
+                            <p class="bank-account"><?= htmlspecialchars($accDisplay) ?></p>
+                            <p class="bank-holder"><?= htmlspecialchars($donation['holder']) ?></p>
                         </div>
                         <button type="button" class="btn-copy btn-copy-full" onclick="copyRekening()">Salin Nomor Rekening</button>
                     </div>
@@ -289,7 +296,8 @@ header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
     <div style="position:absolute;top:1rem;right:1.2rem;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;" onclick="document.getElementById('photoModal').style.display='none'">✕</div>
 </div>
 
-<script src="assets/js/form.js?v=5"></script>
+<script>var REKENING = '<?= htmlspecialchars($accDigits) ?>';</script>
+<script src="assets/js/form.js?v=6"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {

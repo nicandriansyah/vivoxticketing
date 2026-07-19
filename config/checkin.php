@@ -171,6 +171,25 @@ function setSetting(PDO $pdo, string $key, string $val): void {
                    ON DUPLICATE KEY UPDATE sval = VALUES(sval)")->execute([$key, $val]);
 }
 
+/* ---------- Rekening sumbangan ---------- */
+
+/** Rekening sumbangan di form registrasi (default + override settings). */
+function donationAccount(?PDO $pdo): array {
+    $def = [
+        'bank_short' => 'BCA',
+        'bank_name'  => 'PT Bank Central Asia Tbk',
+        'account'    => '12345678',
+        'holder'     => 'Vita Voxa Choir',
+    ];
+    if (!$pdo) return $def;
+    return [
+        'bank_short' => getSetting($pdo, 'don_bank_short', $def['bank_short']) ?: $def['bank_short'],
+        'bank_name'  => getSetting($pdo, 'don_bank_name',  $def['bank_name'])  ?: $def['bank_name'],
+        'account'    => getSetting($pdo, 'don_account',    $def['account'])    ?: $def['account'],
+        'holder'     => getSetting($pdo, 'don_holder',     $def['holder'])     ?: $def['holder'],
+    ];
+}
+
 /* ---------- Kontak bantuan ---------- */
 
 /** Kontak bantuan yang ditampilkan di halaman 404 (default + override settings).

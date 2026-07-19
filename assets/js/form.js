@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ---------- Copy Rekening ---------- */
 
 function copyRekening() {
-    navigator.clipboard.writeText('12345678').then(() => {
+    navigator.clipboard.writeText(window.REKENING || '12345678').then(() => {
         const btn = document.querySelector('.btn-copy');
         const orig = btn.textContent;
         btn.textContent = 'Tersalin!';
