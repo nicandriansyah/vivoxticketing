@@ -13,38 +13,48 @@ $me = $_SESSION['admin_user'] ?? '';
 if ($dbReady && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     try {
-        if ($action === 'add') {
-            $u = trim($_POST['username'] ?? '');
-            $p = (string)($_POST['password'] ?? '');
-            $r = ($_POST['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin';
+        if ($action === 'save') {
+            // Satu form untuk tambah (id=0) & edit (id>0)
+            $id = (int)($_POST['id'] ?? 0);
+            $u  = trim($_POST['username'] ?? '');
+            $p  = (string)($_POST['password'] ?? '');
+            $r  = ($_POST['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin';
             if (!preg_match('/^[A-Za-z0-9._-]{3,50}$/', $u)) {
                 header('Location: users.php?msg=baduser'); exit;
             }
-            if (strlen($p) < 4) {
-                header('Location: users.php?msg=badpass'); exit;
+
+            if ($id === 0) {
+                // Tambah akun baru — password wajib
+                if (strlen($p) < 4) { header('Location: users.php?msg=badpass'); exit; }
+                $chk = $pdo->prepare("SELECT 1 FROM admin_users WHERE username = ?");
+                $chk->execute([$u]);
+                if ($chk->fetchColumn()) { header('Location: users.php?msg=dupe'); exit; }
+                $pdo->prepare("INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)")
+                    ->execute([$u, password_hash($p, PASSWORD_DEFAULT), $r]);
+                header('Location: users.php?msg=added'); exit;
             }
-            $chk = $pdo->prepare("SELECT 1 FROM admin_users WHERE username = ?");
-            $chk->execute([$u]);
-            if ($chk->fetchColumn()) { header('Location: users.php?msg=dupe'); exit; }
-            $pdo->prepare("INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)")
-                ->execute([$u, password_hash($p, PASSWORD_DEFAULT), $r]);
-            header('Location: users.php?msg=added'); exit;
-        }
-        if ($action === 'editrole') {
-            $id = (int)($_POST['id'] ?? 0);
-            $r  = ($_POST['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin';
-            $s = $pdo->prepare("SELECT username FROM admin_users WHERE id = ?");
+
+            // Edit akun — password opsional (kosong = tidak diganti)
+            $s = $pdo->prepare("SELECT username, role FROM admin_users WHERE id = ?");
             $s->execute([$id]);
-            if ($s->fetchColumn() === $me) { header('Location: users.php?msg=selfrole'); exit; }
-            $pdo->prepare("UPDATE admin_users SET role = ? WHERE id = ?")->execute([$r, $id]);
-            header('Location: users.php?msg=role'); exit;
-        }
-        if ($action === 'editpass') {
-            $id = (int)($_POST['id'] ?? 0);
-            $p  = (string)($_POST['password'] ?? '');
-            if (strlen($p) < 4) { header('Location: users.php?msg=badpass'); exit; }
-            $pdo->prepare("UPDATE admin_users SET password_hash = ? WHERE id = ?")
-                ->execute([password_hash($p, PASSWORD_DEFAULT), $id]);
+            $row = $s->fetch(PDO::FETCH_ASSOC);
+            if (!$row) { header('Location: users.php?msg=err'); exit; }
+            if ($p !== '' && strlen($p) < 4) { header('Location: users.php?msg=badpass'); exit; }
+            if ($u !== $row['username']) {
+                $chk = $pdo->prepare("SELECT 1 FROM admin_users WHERE username = ? AND id <> ?");
+                $chk->execute([$u, $id]);
+                if ($chk->fetchColumn()) { header('Location: users.php?msg=dupe'); exit; }
+            }
+            if ($row['username'] === $me && $r !== ($row['role'] ?: 'admin')) {
+                header('Location: users.php?msg=selfrole'); exit;
+            }
+            $pdo->prepare("UPDATE admin_users SET username = ?, role = ? WHERE id = ?")->execute([$u, $r, $id]);
+            if ($p !== '') {
+                $pdo->prepare("UPDATE admin_users SET password_hash = ? WHERE id = ?")
+                    ->execute([password_hash($p, PASSWORD_DEFAULT), $id]);
+            }
+            // Bila username sendiri diubah, sinkronkan session agar tidak logout paksa
+            if ($row['username'] === $me && $u !== $me) $_SESSION['admin_user'] = $u;
             header('Location: users.php?msg=updated'); exit;
         }
         if ($action === 'delete') {
@@ -79,9 +89,8 @@ require __DIR__ . '/partials/header.php';
         $msg = $_GET['msg'] ?? '';
         $okMap = [
             'added'   => 'Akun berhasil ditambahkan.',
-            'updated' => 'Password berhasil diperbarui.',
+            'updated' => 'Akun berhasil diperbarui.',
             'deleted' => 'Akun berhasil dihapus.',
-            'role'    => 'Role berhasil diubah.',
         ];
         $errMap = [
             'baduser' => 'Username tidak valid (3-50 karakter: huruf, angka, . _ -).',
@@ -102,21 +111,25 @@ require __DIR__ . '/partials/header.php';
             <div class="adm-alert">Koneksi database gagal<?= isset($dbErr) ? ': ' . htmlspecialchars($dbErr) : '' ?>.</div>
         <?php else: ?>
 
-        <!-- Tambah Akun -->
-        <div class="detail-card" style="max-width:520px;margin-bottom:1.5rem;">
-            <h3>Tambah Akun</h3>
+        <!-- Tambah / Edit Akun (satu form) -->
+        <div class="detail-card" style="max-width:520px;margin-bottom:1.5rem;" id="userFormCard">
+            <h3 id="userFormTitle">Tambah Akun</h3>
             <form method="POST" autocomplete="off">
-                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="id" id="fId" value="0">
                 <label class="adm-label">Username</label>
-                <input type="text" name="username" class="adm-input" autocomplete="off" required>
-                <label class="adm-label">Password</label>
-                <input type="password" name="password" class="adm-input" autocomplete="new-password" required>
+                <input type="text" name="username" id="fUsername" class="adm-input" autocomplete="off" required>
+                <label class="adm-label">Password <small id="fPassHint" style="display:none;color:#888;font-weight:400;">(kosongkan jika tidak diganti)</small></label>
+                <input type="password" name="password" id="fPassword" class="adm-input" autocomplete="new-password" required>
                 <label class="adm-label">Role</label>
-                <select name="role" class="adm-input">
+                <select name="role" id="fRole" class="adm-input">
                     <option value="admin">Admin — akses penuh</option>
                     <option value="ticketing">Ticketing — dashboard &amp; check-in saja</option>
                 </select>
-                <button type="submit" class="adm-btn-primary" style="margin-top:1rem;">Save</button>
+                <div style="display:flex;gap:0.6rem;margin-top:1rem;">
+                    <button type="submit" class="adm-btn-primary" id="fSubmit">Save</button>
+                    <button type="button" class="adm-btn-ghost" id="btnCancelEdit" style="display:none;" onclick="resetUserForm()">Batal</button>
+                </div>
             </form>
         </div>
 
@@ -134,36 +147,16 @@ require __DIR__ . '/partials/header.php';
                             <?= htmlspecialchars($u['username']) ?>
                             <?php if ($u['username'] === $me): ?><small style="color:#888;">(Anda)</small><?php endif; ?>
                         </td>
-                        <td>
-                            <?php if ($u['username'] === $me): ?>
-                                <span class="badge-ok" style="font-weight:600;"><?= htmlspecialchars($u['role'] ?? 'admin') ?></span>
-                            <?php else: ?>
-                                <form method="POST" style="display:flex;gap:.35rem;align-items:center;"
-                                      onsubmit="return confirm('Ubah role <?= htmlspecialchars($u['username'], ENT_QUOTES) ?>?');">
-                                    <input type="hidden" name="action" value="editrole">
-                                    <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
-                                    <select name="role" class="adm-input" style="width:auto;font-size:.8rem;padding:4px 8px;">
-                                        <option value="admin"     <?= ($u['role'] ?? 'admin') === 'admin'     ? 'selected' : '' ?>>admin</option>
-                                        <option value="ticketing" <?= ($u['role'] ?? '')      === 'ticketing' ? 'selected' : '' ?>>ticketing</option>
-                                    </select>
-                                    <button type="submit" class="adm-btn-sm adm-btn-mail">✓</button>
-                                </form>
-                            <?php endif; ?>
-                        </td>
+                        <td><?= ($u['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin' ?></td>
                         <td><?= date('d M Y H:i', strtotime($u['created_at'])) ?></td>
                         <td class="col-aksi">
                             <div class="aksi-stack">
-                                <button type="button" class="adm-btn-sm adm-btn-detail" onclick="togglePass(<?= (int)$u['id'] ?>)">Edit Password</button>
+                                <button type="button" class="adm-btn-sm adm-btn-detail"
+                                        onclick="editUser(<?= (int)$u['id'] ?>, '<?= htmlspecialchars($u['username'], ENT_QUOTES) ?>', '<?= ($u['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin' ?>', <?= $u['username'] === $me ? 'true' : 'false' ?>)">Edit</button>
                                 <form method="POST" onsubmit="return confirm('Hapus akun <?= htmlspecialchars($u['username'], ENT_QUOTES) ?>?');">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                                     <button type="submit" class="adm-btn-sm adm-btn-danger" style="width:100%;">Delete</button>
-                                </form>
-                                <form method="POST" class="pass-form" id="pf-<?= (int)$u['id'] ?>" style="display:none;">
-                                    <input type="hidden" name="action" value="editpass">
-                                    <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
-                                    <input type="password" name="password" class="adm-input" placeholder="Password baru" required style="font-size:0.8rem;padding:5px 8px;">
-                                    <button type="submit" class="adm-btn-sm adm-btn-mail">Simpan</button>
                                 </form>
                             </div>
                         </td>
@@ -176,9 +169,29 @@ require __DIR__ . '/partials/header.php';
         <?php endif; ?>
 
         <script>
-        function togglePass(id) {
-            var f = document.getElementById('pf-' + id);
-            f.style.display = (f.style.display === 'none' || !f.style.display) ? 'flex' : 'none';
+        /* Isi form atas dengan data user untuk diedit */
+        function editUser(id, username, role, isSelf) {
+            document.getElementById('fId').value       = id;
+            document.getElementById('fUsername').value = username;
+            document.getElementById('fRole').value     = role;
+            document.getElementById('fRole').disabled  = isSelf;   // role sendiri tidak bisa diubah
+            var p = document.getElementById('fPassword');
+            p.value = ''; p.required = false;
+            document.getElementById('fPassHint').style.display  = 'inline';
+            document.getElementById('userFormTitle').textContent = 'Edit Akun: ' + username;
+            document.getElementById('btnCancelEdit').style.display = 'inline-flex';
+            document.getElementById('userFormCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function resetUserForm() {
+            document.getElementById('fId').value       = '0';
+            document.getElementById('fUsername').value = '';
+            document.getElementById('fRole').value     = 'admin';
+            document.getElementById('fRole').disabled  = false;
+            var p = document.getElementById('fPassword');
+            p.value = ''; p.required = true;
+            document.getElementById('fPassHint').style.display  = 'none';
+            document.getElementById('userFormTitle').textContent = 'Tambah Akun';
+            document.getElementById('btnCancelEdit').style.display = 'none';
         }
         </script>
 
