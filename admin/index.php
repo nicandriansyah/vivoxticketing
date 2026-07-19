@@ -156,13 +156,21 @@ require __DIR__ . '/partials/header.php';
 
         <!-- Stat cards -->
         <div class="stat-grid">
+            <?php
+                $statusLabel = $isOpen ? 'DIBUKA'
+                    : (!$salesOpen ? 'DITUTUP (manual)' : 'DITUTUP (Penuh)');
+            ?>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>" onclick="openQuotaModal()">
+                <div class="stat-label">Registrasi <?= $statusLabel ?></div>
+                <div class="stat-quota-mini">
+                    Booking <?= number_format($stats['tiket'], 0, ',', '.') ?> &middot;
+                    Kuota <?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?> &middot;
+                    Sisa <?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?>
+                </div>
+            </button>
             <div class="stat-card">
                 <div class="stat-label">Total Registrasi</div>
                 <div class="stat-value"><?= number_format($stats['reg'], 0, ',', '.') ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Tiket</div>
-                <div class="stat-value"><?= number_format($stats['tiket'], 0, ',', '.') ?></div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Sudah Check-in</div>
@@ -190,17 +198,6 @@ require __DIR__ . '/partials/header.php';
             <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openHelpContact()">
                 <div class="stat-user-emoji">☎️</div>
                 <div class="stat-label">Kontak Bantuan</div>
-            </button>
-            <?php
-                $statusLabel = $isOpen ? 'DIBUKA'
-                    : (!$salesOpen ? 'DITUTUP (manual)' : 'DITUTUP (Penuh)');
-            ?>
-            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>" onclick="openQuotaModal()">
-                <div class="stat-label">Registrasi <?= $statusLabel ?></div>
-                <div class="stat-quota-mini">
-                    Kuota <?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?> &middot;
-                    Sisa <?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?>
-                </div>
             </button>
         </div>
 

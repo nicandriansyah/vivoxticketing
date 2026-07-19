@@ -5,11 +5,6 @@ $DB_USER = 'root';
 $DB_PASS = '';
 $DB_NAME = 'ticket_foas';
 
-// $DB_HOST = 'localhost';
-// $DB_PASS = 'nananina1234';
-// $DB_NAME = 'vitavoxa_ticket_foas';
-// $DB_USER = 'vitavoxa_admin';
-
 $localCfg = __DIR__ . '/db.local.php';
 if (file_exists($localCfg)) require_once $localCfg;
 
