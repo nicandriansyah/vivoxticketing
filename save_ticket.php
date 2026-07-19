@@ -11,6 +11,17 @@ require_once 'config/checkin.php';
 header('Content-Type: application/json; charset=UTF-8');
 function out(array $d) { echo json_encode($d); exit; }
 
+// Mode check (GET): ?check=KODE1,KODE2 → daftar kode yang gambarnya belum ada
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['check'])) {
+    $missing = [];
+    foreach (array_slice(explode(',', $_GET['check']), 0, 50) as $c) {
+        $p = parseTicketCode(trim($c));
+        if (!$p) continue;
+        if (!glob(__DIR__ . '/tickets/' . $p['full'] . '-*.jpg')) $missing[] = $p['full'];
+    }
+    out(['ok' => true, 'missing' => $missing]);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') out(['ok' => false, 'error' => 'method']);
 if (!$pdo) out(['ok' => false, 'error' => 'no-db']);
 

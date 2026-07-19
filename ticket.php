@@ -216,26 +216,33 @@ if ($regId && $pdo) {
         if (localStorage.getItem('wa_' + code)) showWaSent(i);
     });
 
-<?php if ($isNew): ?>
-    // Reservasi baru → simpan tiap tiket sebagai JPG ke server (sekali saja)
+    // Simpan tiket sebagai JPG ke server bila belum ada (self-healing:
+    // registrasi lama yang gambarnya belum tersimpan ikut dibuatkan).
     window.addEventListener('load', function () {
-        setTimeout(function () {
-            var cards = document.querySelectorAll('.ticket-card');
-            (function saveNext(i) {
-                if (i >= cards.length) return;
-                html2canvas(cards[i], captureOpts()).then(function (canvas) {
-                    var img = canvas.toDataURL('image/jpeg', 0.92);
-                    var fd  = new FormData();
-                    fd.append('code', codes[i]);
-                    fd.append('image', img);
-                    fetch('save_ticket.php', { method: 'POST', body: fd })
-                        .catch(function () {})
-                        .finally(function () { saveNext(i + 1); });
-                }).catch(function () { saveNext(i + 1); });
-            })(0);
-        }, 1200);
+        fetch('save_ticket.php?check=' + encodeURIComponent(codes.join(',')))
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                var missing = res.missing || [];
+                if (!missing.length) return;
+                setTimeout(function () {
+                    var cards = document.querySelectorAll('.ticket-card');
+                    (function saveNext(i) {
+                        if (i >= codes.length) return;
+                        if (missing.indexOf(codes[i]) === -1) { saveNext(i + 1); return; }
+                        html2canvas(cards[i], captureOpts()).then(function (canvas) {
+                            var img = canvas.toDataURL('image/jpeg', 0.92);
+                            var fd  = new FormData();
+                            fd.append('code', codes[i]);
+                            fd.append('image', img);
+                            fetch('save_ticket.php', { method: 'POST', body: fd })
+                                .catch(function () {})
+                                .finally(function () { saveNext(i + 1); });
+                        }).catch(function () { saveNext(i + 1); });
+                    })(0);
+                }, 1200);
+            })
+            .catch(function () {});
     });
-<?php endif; ?>
 
     function showWaSent(i) {
         // Tampilkan badge penanda, TAPI tombol tetap terlihat & bisa diklik
