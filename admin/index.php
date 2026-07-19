@@ -7,6 +7,8 @@ require_once __DIR__ . '/helpers.php';
 $dbReady = (bool)$pdo;
 if ($dbReady) { try { ensureTicketTables($pdo); } catch (Exception $e) {} }
 
+$isTicketing = adminRole() === 'ticketing';   // role terbatas: tanpa kartu/modal setting
+
 // Kontak bantuan halaman 404 (editable via modal)
 $helpContact = helpContact($dbReady ? $pdo : null);
 // Rekening sumbangan di form registrasi (editable via modal)
@@ -162,7 +164,7 @@ require __DIR__ . '/partials/header.php';
                 $statusLabel = $isOpen ? 'DIBUKA'
                     : (!$salesOpen ? 'DITUTUP (manual)' : 'DITUTUP (Penuh)');
             ?>
-            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>" onclick="openQuotaModal()">
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $isOpen ? 'q-open' : 'q-closed' ?>"<?= $isTicketing ? ' style="cursor:default;"' : ' onclick="openQuotaModal()"' ?>>
                 <div class="stat-label">Registrasi <?= $statusLabel ?></div>
                 <div class="stat-quota-mini">
                     Booking <?= number_format($stats['tiket'], 0, ',', '.') ?> &middot;
@@ -178,10 +180,12 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-label">Sudah Check-in</div>
                 <div class="stat-value"><?= number_format($stats['checkin'], 0, ',', '.') ?> <small>/ <?= number_format($stats['tiket'], 0, ',', '.') ?></small></div>
             </div>
+            <?php if (!$isTicketing): ?>
             <div class="stat-card">
                 <div class="stat-label">Total Sumbangan</div>
                 <div class="stat-value"><?= rp($stats['sumbangan']) ?></div>
             </div>
+            <?php endif; ?>
             <?php $emailFail = max(0, $stats['reg'] - $stats['email']); ?>
             <div class="stat-card">
                 <div class="stat-label">Email Terkirim</div>
@@ -193,6 +197,7 @@ require __DIR__ . '/partials/header.php';
                     </a>
                 </div>
             </div>
+            <?php if (!$isTicketing): ?>
             <a href="users.php" class="stat-card stat-card-link stat-card-user">
                 <div class="stat-user-emoji">👥</div>
                 <div class="stat-label">Setting User</div>
@@ -205,8 +210,10 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-user-emoji">🏦</div>
                 <div class="stat-label">Rekening Sumbangan</div>
             </button>
+            <?php endif; ?>
         </div>
 
+        <?php if (!$isTicketing): ?>
         <!-- Modal kuota & buka/tutup penjualan -->
         <div id="quotaModal" class="modal-overlay" onclick="if(event.target===this)closeQuotaModal()">
             <div class="modal-box" style="max-width:420px;">
@@ -237,6 +244,7 @@ require __DIR__ . '/partials/header.php';
                 <p class="quota-hint" style="margin:0.9rem 0 0;">Kuota <strong>0</strong> = tanpa batas. Saat penjualan ditutup atau kuota penuh, tombol di halaman depan jadi "Coming Soon".</p>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Toolbar -->
         <div class="adm-toolbar">
@@ -333,6 +341,7 @@ require __DIR__ . '/partials/header.php';
 
         <p class="adm-foot">Menampilkan <?= count($rows) ?> dari <?= number_format($total, 0, ',', '.') ?> registrasi</p>
 
+    <?php if (!$isTicketing): ?>
     <!-- Modal kontak bantuan (ditampilkan di halaman 404 publik) -->
     <div id="helpContactModal" class="modal-overlay" onclick="if(event.target===this)closeHelpContact()">
         <div class="modal-box" style="max-width:420px;">
@@ -378,6 +387,7 @@ require __DIR__ . '/partials/header.php';
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Modal Detail -->
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeDetail()">

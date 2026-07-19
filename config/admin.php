@@ -22,8 +22,15 @@ function ensureAdminUsersTable(PDO $pdo): void {
         id            INT AUTO_INCREMENT PRIMARY KEY,
         username      VARCHAR(50)  NOT NULL UNIQUE,
         password_hash VARCHAR(255) NOT NULL,
+        role          VARCHAR(20)  NOT NULL DEFAULT 'admin',
         created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Migrasi: tambah kolom role pada instalasi lama
+    try {
+        $col = $pdo->query("SHOW COLUMNS FROM admin_users LIKE 'role'")->fetch();
+        if (!$col) $pdo->exec("ALTER TABLE admin_users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'admin'");
+    } catch (Exception $e) { /* abaikan bila tak ada akses ALTER */ }
 
     $cnt = (int)$pdo->query("SELECT COUNT(*) FROM admin_users")->fetchColumn();
     if ($cnt === 0) {
@@ -46,4 +53,17 @@ function verifyAdminLogin(?PDO $pdo, string $user, string $pass): bool {
     }
     // Fallback master (selalu bisa login walau DB down / akun terhapus)
     return ($user === $ADMIN_USER && password_verify($pass, $ADMIN_PASS_HASH));
+}
+
+/** Role sebuah user: 'admin' (akses penuh) atau 'ticketing' (terbatas). */
+function getAdminRole(?PDO $pdo, string $user): string {
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT role FROM admin_users WHERE username = ? LIMIT 1");
+            $stmt->execute([$user]);
+            $role = $stmt->fetchColumn();
+            if ($role === 'ticketing') return 'ticketing';
+        } catch (Exception $e) { /* default admin */ }
+    }
+    return 'admin';
 }

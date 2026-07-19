@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/auth.php';
+requireAdminRole();   // khusus role admin
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/admin.php';
 
@@ -15,6 +16,7 @@ if ($dbReady && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'add') {
             $u = trim($_POST['username'] ?? '');
             $p = (string)($_POST['password'] ?? '');
+            $r = ($_POST['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin';
             if (!preg_match('/^[A-Za-z0-9._-]{3,50}$/', $u)) {
                 header('Location: users.php?msg=baduser'); exit;
             }
@@ -24,9 +26,18 @@ if ($dbReady && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $chk = $pdo->prepare("SELECT 1 FROM admin_users WHERE username = ?");
             $chk->execute([$u]);
             if ($chk->fetchColumn()) { header('Location: users.php?msg=dupe'); exit; }
-            $pdo->prepare("INSERT INTO admin_users (username, password_hash) VALUES (?, ?)")
-                ->execute([$u, password_hash($p, PASSWORD_DEFAULT)]);
+            $pdo->prepare("INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)")
+                ->execute([$u, password_hash($p, PASSWORD_DEFAULT), $r]);
             header('Location: users.php?msg=added'); exit;
+        }
+        if ($action === 'editrole') {
+            $id = (int)($_POST['id'] ?? 0);
+            $r  = ($_POST['role'] ?? 'admin') === 'ticketing' ? 'ticketing' : 'admin';
+            $s = $pdo->prepare("SELECT username FROM admin_users WHERE id = ?");
+            $s->execute([$id]);
+            if ($s->fetchColumn() === $me) { header('Location: users.php?msg=selfrole'); exit; }
+            $pdo->prepare("UPDATE admin_users SET role = ? WHERE id = ?")->execute([$r, $id]);
+            header('Location: users.php?msg=role'); exit;
         }
         if ($action === 'editpass') {
             $id = (int)($_POST['id'] ?? 0);
@@ -56,7 +67,7 @@ if ($dbReady && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $users = [];
 if ($dbReady) {
-    $users = $pdo->query("SELECT id, username, created_at FROM admin_users ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+    $users = $pdo->query("SELECT id, username, role, created_at FROM admin_users ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
 }
 
 $pageTitle  = 'Setting User';
@@ -70,12 +81,14 @@ require __DIR__ . '/partials/header.php';
             'added'   => 'Akun berhasil ditambahkan.',
             'updated' => 'Password berhasil diperbarui.',
             'deleted' => 'Akun berhasil dihapus.',
+            'role'    => 'Role berhasil diubah.',
         ];
         $errMap = [
             'baduser' => 'Username tidak valid (3-50 karakter: huruf, angka, . _ -).',
             'badpass' => 'Password minimal 4 karakter.',
             'dupe'    => 'Username sudah dipakai.',
             'self'    => 'Tidak bisa menghapus akun yang sedang Anda gunakan.',
+            'selfrole'=> 'Tidak bisa mengubah role akun yang sedang Anda gunakan.',
             'last'    => 'Tidak bisa menghapus akun terakhir.',
             'err'     => 'Terjadi kesalahan.',
         ];
@@ -98,6 +111,11 @@ require __DIR__ . '/partials/header.php';
                 <input type="text" name="username" class="adm-input" autocomplete="off" required>
                 <label class="adm-label">Password</label>
                 <input type="password" name="password" class="adm-input" autocomplete="new-password" required>
+                <label class="adm-label">Role</label>
+                <select name="role" class="adm-input">
+                    <option value="admin">Admin — akses penuh</option>
+                    <option value="ticketing">Ticketing — dashboard &amp; check-in saja</option>
+                </select>
                 <button type="submit" class="adm-btn-primary" style="margin-top:1rem;">Save</button>
             </form>
         </div>
@@ -106,7 +124,7 @@ require __DIR__ . '/partials/header.php';
         <div class="adm-table-wrap">
             <table class="adm-table">
                 <thead>
-                    <tr><th>#</th><th>Username</th><th>Dibuat</th><th class="col-aksi">Aksi</th></tr>
+                    <tr><th>#</th><th>Username</th><th>Role</th><th>Dibuat</th><th class="col-aksi">Aksi</th></tr>
                 </thead>
                 <tbody>
                     <?php foreach ($users as $i => $u): ?>
@@ -115,6 +133,22 @@ require __DIR__ . '/partials/header.php';
                         <td class="adm-strong">
                             <?= htmlspecialchars($u['username']) ?>
                             <?php if ($u['username'] === $me): ?><small style="color:#888;">(Anda)</small><?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($u['username'] === $me): ?>
+                                <span class="badge-ok" style="font-weight:600;"><?= htmlspecialchars($u['role'] ?? 'admin') ?></span>
+                            <?php else: ?>
+                                <form method="POST" style="display:flex;gap:.35rem;align-items:center;"
+                                      onsubmit="return confirm('Ubah role <?= htmlspecialchars($u['username'], ENT_QUOTES) ?>?');">
+                                    <input type="hidden" name="action" value="editrole">
+                                    <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
+                                    <select name="role" class="adm-input" style="width:auto;font-size:.8rem;padding:4px 8px;">
+                                        <option value="admin"     <?= ($u['role'] ?? 'admin') === 'admin'     ? 'selected' : '' ?>>admin</option>
+                                        <option value="ticketing" <?= ($u['role'] ?? '')      === 'ticketing' ? 'selected' : '' ?>>ticketing</option>
+                                    </select>
+                                    <button type="submit" class="adm-btn-sm adm-btn-mail">✓</button>
+                                </form>
+                            <?php endif; ?>
                         </td>
                         <td><?= date('d M Y H:i', strtotime($u['created_at'])) ?></td>
                         <td class="col-aksi">

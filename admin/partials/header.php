@@ -30,7 +30,9 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
         <nav class="adm-side-nav">
             <a href="index.php"   class="<?= $activeMenu === 'dashboard' ? 'active' : '' ?>"><span class="ico">📊</span> <span class="side-txt">Dashboard</span></a>
             <a href="checkin.php" class="<?= $activeMenu === 'checkin'   ? 'active' : '' ?>"><span class="ico">🎫</span> <span class="side-txt">Check-in Tiket</span></a>
+            <?php if (function_exists('adminRole') && adminRole() === 'admin'): ?>
             <a href="ppt.php"     class="<?= $activeMenu === 'ppt'       ? 'active' : '' ?>" onclick="return checkPptAccess()"><span class="ico">📑</span> <span class="side-txt">PPT Generator</span></a>
+            <?php endif; ?>
         </nav>
         <a href="logout.php" class="adm-side-logout">🚪 <span class="side-txt">Keluar</span></a>
         <div class="adm-side-footer">

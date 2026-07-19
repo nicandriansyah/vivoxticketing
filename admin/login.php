@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_user']      = $u;
+        $_SESSION['admin_role']      = getAdminRole($pdo ?? null, $u);
         header('Location: index.php');
         exit;
     }
