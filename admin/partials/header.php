@@ -78,6 +78,11 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
             btn.textContent = on ? '»' : '«';
             localStorage.setItem('admSideCollapsed', on ? '1' : '0');
         }
+        /* Auto-collapse: 1 menit setelah halaman dibuka, sidebar mengecil sendiri (desktop) */
+        setTimeout(function () {
+            if (window.innerWidth <= 720) return;
+            if (!document.getElementById('admSidebar').classList.contains('collapsed')) toggleCollapse();
+        }, 60000);
         /* PPT Generator hanya untuk layar laptop/komputer/tablet */
         function checkPptAccess() {
             if (window.innerWidth <= 720) {
