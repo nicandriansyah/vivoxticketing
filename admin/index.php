@@ -96,39 +96,6 @@ $cancelledMap = $dbReady ? getCancelledMap($pdo, $regIds) : [];
 $arwahMap     = $dbReady ? getArwahMap($pdo, $regIds) : [];
 
 
-// Data untuk modal detail
-$regJson = [];
-foreach ($rows as $r) {
-    $id        = (int)$r['id'];
-    $codes     = deriveCodes($r['kode_tiket'], (int)$r['jumlah_tiket']);
-    $checked   = $checkedMap[$id] ?? [];
-    $cancelled = $cancelledMap[$id] ?? [];
-    $regJson[$id] = [
-        'nama'         => $r['nama'],
-        'no_hp'        => phoneDisplay($r['no_hp']),
-        'email'        => $r['email'],
-        'url'          => adminTicketUrl($r['kode_tiket']),
-        'jumlah'       => (int)$r['jumlah_tiket'],
-        'aktif'        => (int)$r['jumlah_tiket'] - count($cancelled),
-        'sumbangan'    => (float)$r['sumbangan_amount'] > 0 ? rp($r['sumbangan_amount']) : '—',
-        'email_sent'   => (int)$r['email_sent'],
-        'created'      => date('d M Y H:i', strtotime($r['created_at'])),
-        'codes'        => $codes,
-        'checked'      => array_values($checked),
-        'cancelled'    => array_values($cancelled),
-        'upload_arwah' => (int)($r['upload_arwah'] || !empty($arwahMap[$id])),
-        'arwah'        => array_map(fn($a) => [
-            'id'          => (int)$a['id'],
-            'foto'        => $a['foto_arwah'] ? adminUploadUrl($a['foto_arwah']) : '',
-            'nama_arwah'  => $a['nama_arwah'] ?? '',
-            'tahun_lahir' => $a['tahun_lahir'] ?? '',
-            'tahun_wafat' => $a['tahun_wafat'] ?? '',
-            'hubungan'    => hubunganLabel($a['hubungan_arwah']),
-            'hub_key'     => $a['hubungan_arwah'] ?? '',
-        ], $arwahMap[$id] ?? []),
-    ];
-}
-
 $pageTitle  = 'Dashboard';
 $activeMenu = 'dashboard';
 $mainClass  = 'adm-main-full';
@@ -315,7 +282,7 @@ require __DIR__ . '/partials/header.php';
                             <td style="text-align:center;"><?= $r['email_sent'] ? '<span class="badge-ok">✓</span>' : '<span class="badge-no">✗</span>' ?></td>
                             <td class="col-aksi">
                                 <div class="aksi-stack">
-                                    <button type="button" class="adm-btn-sm adm-btn-detail" onclick="openDetail(<?= $id ?>)">Detail</button>
+                                    <a href="edit.php?id=<?= $id ?>" class="adm-btn-sm adm-btn-detail" style="text-align:center;">✎ Edit</a>
                                     <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="adm-btn-sm adm-btn-wa-sm">Resend link ke WA</a>
                                     <form method="POST" action="resend.php">
                                         <input type="hidden" name="id" value="<?= $id ?>">
@@ -389,14 +356,6 @@ require __DIR__ . '/partials/header.php';
     </div>
     <?php endif; ?>
 
-    <!-- Modal Detail -->
-    <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeDetail()">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeDetail()">✕</button>
-            <div id="modalContent"></div>
-        </div>
-    </div>
-
     <!-- Modal konfirmasi penjualan -->
     <div id="confirmModal" class="modal-overlay" onclick="if(event.target===this)closeConfirm()">
         <div class="modal-box" style="max-width:380px;text-align:center;">
@@ -409,24 +368,7 @@ require __DIR__ . '/partials/header.php';
         </div>
     </div>
 
-    <!-- Lightbox gambar tiket -->
-    <div id="imgLightbox" class="img-lightbox" onclick="if(event.target===this)closeLightbox()">
-        <div class="img-lightbox-inner">
-            <button class="modal-close" onclick="closeLightbox()">✕</button>
-            <div id="lightboxBody"></div>
-            <button type="button" class="adm-btn-wa" style="margin-top:0.9rem;" onclick="shareTicketWA(lbCode)">↗ Share ke WhatsApp</button>
-        </div>
-    </div>
-
     <script>
-    var REG = <?= json_encode($regJson, JSON_UNESCAPED_UNICODE) ?>;
-    var HUB_OPTS = <?= json_encode(hubunganOptions(), JSON_UNESCAPED_UNICODE) ?>;
-
-    function esc(s) {
-        return String(s == null ? '' : s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
     function enableQuotaEdit() {
         document.getElementById('quotaInput').disabled = false;
         document.getElementById('quotaInput').focus();
@@ -450,220 +392,6 @@ require __DIR__ . '/partials/header.php';
         openConfirm(label + ' Penjualan Tiket', label + ' penjualan tiket sekarang?', function () {
             document.getElementById('salesForm').submit();
         });
-    }
-
-    var currentDetailId = null;   // id registrasi yang sedang dibuka di modal
-
-    function openDetail(id) {
-        var d = REG[id];
-        if (!d) return;
-        currentDetailId = id;
-        var checkedSet = {}, cancelSet = {};
-        (d.checked   || []).forEach(function(c){ checkedSet[c] = true; });
-        (d.cancelled || []).forEach(function(c){ cancelSet[c]  = true; });
-
-        var ticketsHtml = d.codes.map(function(c, i) {
-            var status, cancelBtn = '';
-            if (cancelSet[c]) {
-                status = '<span class="badge-no">Dibatalkan</span>';
-            } else if (checkedSet[c]) {
-                status = '<span class="badge-ok">✓ Check-in</span>';
-            } else {
-                status = '<span class="m-badge-active">Aktif</span>';
-                cancelBtn = '<button type="button" class="m-cancel-btn" onclick="cancelTicket(\'' + esc(c) + '\')">Batalkan</button>';
-            }
-            var actions =
-                '<div class="m-ticket-actions">' +
-                    '<button type="button" class="m-view-btn" onclick="viewTicket(\'' + esc(c) + '\')">👁 Lihat Tiket</button>' +
-                    '<button type="button" class="m-wa-btn" onclick="shareTicketWA(\'' + esc(c) + '\')">↗ Share WA</button>' +
-                '</div>';
-            return '<div class="m-ticket' + (cancelSet[c] ? ' cancelled' : '') + '">' +
-                       '<div class="m-ticket-head"><span class="tt-n">' + (i+1) + '</span><code>' + esc(c) + '</code></div>' +
-                       '<div class="m-ticket-foot">' + status + cancelBtn + '</div>' +
-                       actions +
-                   '</div>';
-        }).join('');
-
-        var arwahArr = d.arwah || [];
-        var hasArwah = !!d.upload_arwah && arwahArr.length > 0;
-        var arwahHtml = '';
-        if (hasArwah) {
-            arwahHtml = '<h4 class="m-sub">🕊️ Data Arwah (' + arwahArr.length + ')</h4><div class="m-arwah-list">';
-            arwahArr.forEach(function (a, i) {
-                var uid = a.id;
-                var hubSelect = '<select id="arwahHub-' + uid + '" class="m-link-input" style="width:100%;">' +
-                    '<option value="">— Pilih Hubungan —</option>';
-                Object.keys(HUB_OPTS).forEach(function (k) {
-                    hubSelect += '<option value="' + esc(k) + '"' + (a.hub_key === k ? ' selected' : '') + '>' + esc(HUB_OPTS[k]) + '</option>';
-                });
-                hubSelect += '</select>';
-
-                var lbl = 'display:block;font-size:.75rem;color:#888;margin:.45rem 0 .15rem;';
-                arwahHtml +=
-                    '<div class="m-arwah-unit">' +
-                    (arwahArr.length > 1 ? '<div class="m-arwah-no" style="font-weight:600;color:#8a6d1a;margin:.4rem 0 .2rem;">Arwah #' + (i + 1) + '</div>' : '') +
-                    // --- Tampilan ---
-                    '<div id="arwahView-' + uid + '">' +
-                        (a.foto ? '<div style="text-align:center;margin-bottom:.5rem;"><img class="m-arwah-foto" src="' + esc(a.foto) + '"></div>' : '') +
-                        '<div class="m-section">' +
-                        row('Nama Arwah', esc(a.nama_arwah) || '—') +
-                        row('Tahun Lahir', esc(a.tahun_lahir) || '—') +
-                        row('Tahun Wafat', esc(a.tahun_wafat) || '—') +
-                        row('Hubungan', esc(a.hubungan) || '—') +
-                        '</div>' +
-                        '<button type="button" class="m-copy-btn" style="width:auto;padding:.15rem .55rem;font-size:.78rem;margin-top:.4rem;" onclick="startEditArwah(' + uid + ')">✎ Edit</button>' +
-                    '</div>' +
-                    // --- Form edit ---
-                    '<div id="arwahEdit-' + uid + '" style="display:none;">' +
-                        (a.foto ? '<div style="text-align:center;margin-bottom:.4rem;"><img class="m-arwah-foto" src="' + esc(a.foto) + '"></div>' : '') +
-                        '<label style="' + lbl + '">Upload Ulang Foto (JPG/PNG, maks 2MB)</label>' +
-                        '<input type="file" id="arwahFoto-' + uid + '" accept="image/jpeg,image/png" style="width:100%;font-size:.8rem;">' +
-                        '<label style="' + lbl + '">Nama Arwah</label>' +
-                        '<input type="text" id="arwahNama-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.nama_arwah) + '">' +
-                        '<div style="display:flex;gap:.5rem;">' +
-                            '<div style="flex:1;"><label style="' + lbl + '">Tahun Lahir</label>' +
-                            '<input type="number" id="arwahLahir-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.tahun_lahir) + '"></div>' +
-                            '<div style="flex:1;"><label style="' + lbl + '">Tahun Wafat</label>' +
-                            '<input type="number" id="arwahWafat-' + uid + '" class="m-link-input" style="width:100%;" value="' + esc(a.tahun_wafat) + '"></div>' +
-                        '</div>' +
-                        '<label style="' + lbl + '">Hubungan</label>' + hubSelect +
-                        '<div style="display:flex;align-items:center;gap:.5rem;margin-top:.6rem;flex-wrap:wrap;">' +
-                            '<button type="button" class="m-view-btn" onclick="saveArwah(' + uid + ')">💾 Simpan</button>' +
-                            '<button type="button" class="m-cancel-btn" onclick="cancelEditArwah(' + uid + ')">Batal</button>' +
-                            '<span id="arwahStatus-' + uid + '" style="font-size:.8rem;font-weight:600;"></span>' +
-                        '</div>' +
-                    '</div>' +
-                    '</div>';
-            });
-            arwahHtml += '</div>';
-        }
-
-        var linkRow =
-            '<div class="m-linkrow">' +
-                '<input class="m-link-input" value="' + esc(d.url) + '" readonly onclick="this.select()">' +
-                '<button type="button" class="m-copy-btn" onclick="copyUrl(this)" title="Salin link tiket">📋</button>' +
-            '</div>';
-
-        var ticketsCol =
-            '<div class="m-col-left">' +
-                '<h4 class="m-sub">Tiket Terbentuk (' + d.aktif + ' aktif / ' + d.jumlah + ')</h4>' +
-                '<div class="m-tickets">' + ticketsHtml + '</div>' +
-            '</div>';
-        var arwahCol = hasArwah ? '<div class="m-col-right">' + arwahHtml + '</div>' : '';
-
-        // Kontak (bisa di-edit: no. WhatsApp & email)
-        var contactHtml =
-            '<div id="mContactView" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem;">' +
-                '<p class="m-contact" style="margin:0;">' + esc(d.no_hp) + ' &middot; ' + esc(d.email) + '</p>' +
-                '<button type="button" class="m-copy-btn" style="width:auto;padding:.15rem .55rem;font-size:.78rem;" onclick="startEditContact()">✎ Edit</button>' +
-            '</div>' +
-            '<div id="mContactEdit" style="display:none;margin:.1rem 0 .7rem;">' +
-                '<div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end;">' +
-                    '<div style="flex:1 1 170px;min-width:160px;">' +
-                        '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">No. WhatsApp</label>' +
-                        '<input type="text" id="mEditPhone" class="m-link-input" style="width:100%;" value="' + esc(d.no_hp) + '">' +
-                    '</div>' +
-                    '<div style="flex:1.4 1 220px;min-width:200px;">' +
-                        '<label style="display:block;font-size:.75rem;color:#888;margin-bottom:.15rem;">Email</label>' +
-                        '<input type="email" id="mEditEmail" class="m-link-input" style="width:100%;" value="' + esc(d.email) + '">' +
-                    '</div>' +
-                    '<div style="display:flex;align-items:center;gap:.5rem;flex:0 0 auto;">' +
-                        '<button type="button" class="m-view-btn" onclick="saveContact()">💾 Simpan</button>' +
-                        '<button type="button" class="m-cancel-btn" onclick="cancelEditContact()">Batal</button>' +
-                        '<span id="mContactStatus" style="font-size:.8rem;font-weight:600;"></span>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-
-        document.getElementById('modalContent').innerHTML =
-            '<h3 class="m-title">' + esc(d.nama) + '</h3>' +
-            contactHtml +
-            linkRow +
-            '<div class="m-cols' + (hasArwah ? ' two' : '') + '">' + ticketsCol + arwahCol + '</div>';
-
-        // Modal detail selalu lebar penuh (konten tiket/arwah 2 kolom butuh ruang)
-        document.querySelector('#detailModal .modal-box').classList.add('modal-box-wide');
-
-        document.getElementById('detailModal').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function copyUrl(btn) {
-        var input = btn.parentElement.querySelector('.m-link-input');
-        var done = function () {
-            var o = btn.textContent;
-            btn.textContent = '✓';
-            btn.classList.add('copied');
-            setTimeout(function () { btn.textContent = o; btn.classList.remove('copied'); }, 1500);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(input.value).then(done).catch(function () { input.select(); document.execCommand('copy'); done(); });
-        } else {
-            input.select(); document.execCommand('copy'); done();
-        }
-    }
-
-    /* ---------- Edit kontak (no. WA & email) ---------- */
-    function startEditContact() {
-        document.getElementById('mContactView').style.display = 'none';
-        document.getElementById('mContactEdit').style.display = 'block';
-    }
-    function cancelEditContact() {
-        var ev = document.getElementById('mContactEdit');
-        var vw = document.getElementById('mContactView');
-        if (ev) ev.style.display = 'none';
-        if (vw) vw.style.display = 'flex';
-        var st = document.getElementById('mContactStatus'); if (st) st.textContent = '';
-    }
-    function saveContact() {
-        if (!currentDetailId) return;
-        var st    = document.getElementById('mContactStatus');
-        var phone = document.getElementById('mEditPhone').value.trim();
-        var email = document.getElementById('mEditEmail').value.trim();
-        st.style.color = '#666'; st.textContent = 'Menyimpan...';
-        var fd = new FormData();
-        fd.append('id', currentDetailId);
-        fd.append('no_hp', phone);
-        fd.append('email', email);
-        fetch('update_contact.php', { method: 'POST', body: fd })
-            .then(function (r) { return r.json(); })
-            .then(function (res) {
-                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
-                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
-                setTimeout(function () { location.reload(); }, 600);  // sinkron tabel & link WA
-            })
-            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
-    }
-
-    /* ---------- Edit data arwah (foto + isian, sinkron ke PPT Generator) ---------- */
-    function startEditArwah(id) {
-        document.getElementById('arwahView-' + id).style.display = 'none';
-        document.getElementById('arwahEdit-' + id).style.display = 'block';
-    }
-    function cancelEditArwah(id) {
-        document.getElementById('arwahEdit-' + id).style.display = 'none';
-        document.getElementById('arwahView-' + id).style.display = 'block';
-        var st = document.getElementById('arwahStatus-' + id); if (st) st.textContent = '';
-    }
-    function saveArwah(id) {
-        var st = document.getElementById('arwahStatus-' + id);
-        var fd = new FormData();
-        fd.append('id', id);
-        fd.append('nama_arwah',     document.getElementById('arwahNama-'  + id).value.trim());
-        fd.append('tahun_lahir',    document.getElementById('arwahLahir-' + id).value.trim());
-        fd.append('tahun_wafat',    document.getElementById('arwahWafat-' + id).value.trim());
-        fd.append('hubungan_arwah', document.getElementById('arwahHub-'   + id).value);
-        var f = document.getElementById('arwahFoto-' + id).files[0];
-        if (f) fd.append('foto', f);
-        st.style.color = '#666'; st.textContent = 'Menyimpan...';
-        fetch('arwah_update.php', { method: 'POST', body: fd })
-            .then(function (r) { return r.json(); })
-            .then(function (res) {
-                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
-                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
-                setTimeout(function () { location.reload(); }, 600);   // sinkron modal, tabel & PPT
-            })
-            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
     }
 
     /* ---------- Modal kuota & penjualan ---------- */
@@ -721,76 +449,9 @@ require __DIR__ . '/partials/header.php';
             .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
     }
 
-    function cancelTicket(code) {
-        if (!confirm('Batalkan tiket ' + code + '?\nTiket tidak dihapus, hanya mengurangi total tiket aktif.')) return;
-        var fd = new FormData();
-        fd.append('code', code);
-        fetch('cancel_ticket.php', { method: 'POST', body: fd })
-            .then(function(r){ return r.json(); })
-            .then(function(res){
-                if (res.ok) { location.reload(); }
-                else { alert(res.error || 'Gagal membatalkan tiket.'); }
-            })
-            .catch(function(){ alert('Koneksi gagal.'); });
-    }
-
-    function row(label, value) {
-        return '<div class="m-row"><span>' + label + '</span><strong>' + value + '</strong></div>';
-    }
-
-    /* ---------- Lihat & share gambar tiket ---------- */
-    var lbCode = null;
-
-    function viewTicket(code) {
-        lbCode = code;
-        document.getElementById('lightboxBody').innerHTML =
-            '<p class="lb-loading">Memuat gambar tiket…</p>' +
-            '<img class="lb-img" src="ticket_image.php?code=' + encodeURIComponent(code) + '&t=' + Date.now() + '" ' +
-                 'onload="this.previousElementSibling.style.display=\'none\';" ' +
-                 'onerror="this.style.display=\'none\';this.previousElementSibling.innerHTML=\'Gambar tiket belum tersedia.<br><small>Tiket tersimpan otomatis saat peserta membuka link tiketnya.</small>\';">';
-        document.getElementById('imgLightbox').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLightbox() {
-        document.getElementById('imgLightbox').classList.remove('open');
-        if (!document.getElementById('detailModal').classList.contains('open')) {
-            document.body.style.overflow = '';
-        }
-    }
-
-    async function shareTicketWA(code) {
-        if (!code) return;
-        try {
-            var resp = await fetch('ticket_image.php?code=' + encodeURIComponent(code));
-            if (!resp.ok) throw new Error('no-image');
-            var blob = await resp.blob();
-            var file = new File([blob], code + '.jpg', { type: 'image/jpeg' });
-
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: 'Tiket FOAS 14' });
-            } else {
-                // Fallback (desktop): buka gambar di tab baru untuk dibagikan manual
-                var url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-            }
-        } catch (e) {
-            if (e && e.name === 'AbortError') return;
-            alert('Gambar tiket belum tersedia untuk dibagikan.');
-        }
-    }
-
-    function closeDetail() {
-        document.getElementById('detailModal').classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
     document.addEventListener('keydown', function(e) {
         if (e.key !== 'Escape') return;
         if (document.getElementById('confirmModal').classList.contains('open')) closeConfirm();
-        else if (document.getElementById('imgLightbox').classList.contains('open')) closeLightbox();
-        else closeDetail();
     });
     </script>
 

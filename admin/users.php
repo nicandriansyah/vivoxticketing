@@ -123,8 +123,8 @@ require __DIR__ . '/partials/header.php';
                 <input type="password" name="password" id="fPassword" class="adm-input" autocomplete="new-password" required>
                 <label class="adm-label">Role</label>
                 <select name="role" id="fRole" class="adm-input">
-                    <option value="admin">Admin — akses penuh</option>
-                    <option value="ticketing">Ticketing — dashboard &amp; check-in saja</option>
+                    <option value="admin">Admin</option>
+                    <option value="ticketing">Ticketing</option>
                 </select>
                 <div style="display:flex;gap:0.6rem;margin-top:1rem;">
                     <button type="submit" class="adm-btn-primary" id="fSubmit">Save</button>

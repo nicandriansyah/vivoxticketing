@@ -12,8 +12,12 @@ if (!$pdo)                                 out(['ok' => false, 'error' => 'Datab
 $id       = (int)($_POST['id'] ?? 0);
 $phoneRaw = $_POST['no_hp'] ?? '';
 $email    = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
+// Nama opsional (kompatibel pemanggil lama): hanya diupdate bila field dikirim
+$hasNama  = array_key_exists('nama', $_POST);
+$nama     = trim($_POST['nama'] ?? '');
 
 if (!$id) out(['ok' => false, 'error' => 'ID tidak valid']);
+if ($hasNama && $nama === '') out(['ok' => false, 'error' => 'Nama wajib diisi']);
 
 // Normalisasi no HP → murni lokal (sama seperti process.php)
 $no_hp = preg_replace('/\D/', '', $phoneRaw);
@@ -25,8 +29,13 @@ if ($no_hp === '')                                   out(['ok' => false, 'error'
 if (!filter_var($email, FILTER_VALIDATE_EMAIL))      out(['ok' => false, 'error' => 'Email tidak valid']);
 
 try {
-    $stmt = $pdo->prepare("UPDATE registrations SET no_hp = ?, email = ? WHERE id = ?");
-    $stmt->execute([$no_hp, $email, $id]);
+    if ($hasNama) {
+        $stmt = $pdo->prepare("UPDATE registrations SET nama = ?, no_hp = ?, email = ? WHERE id = ?");
+        $stmt->execute([$nama, $no_hp, $email, $id]);
+    } else {
+        $stmt = $pdo->prepare("UPDATE registrations SET no_hp = ?, email = ? WHERE id = ?");
+        $stmt->execute([$no_hp, $email, $id]);
+    }
     if ($stmt->rowCount() === 0) {
         // Cek apakah id memang ada (rowCount 0 bisa berarti nilai sama)
         $chk = $pdo->prepare("SELECT COUNT(*) FROM registrations WHERE id = ?");
