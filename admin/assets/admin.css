@@ -1083,7 +1083,9 @@ thead .col-aksi { background: #fafbfc; z-index: 3; }
     font-size: 0.9rem;
 }
 .ci-ticket-badge {
-    display: inline-block;
+    display: block;
+    width: 100%;               /* selebar tombol Scan Berikutnya */
+    text-align: center;
     background: #1a0800;
     color: #e8c66e;
     font-family: 'Consolas', monospace;
