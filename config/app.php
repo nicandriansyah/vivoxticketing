@@ -55,7 +55,7 @@ function appVersion(): string {
     static $ver = null;
     if ($ver !== null) return $ver;
 
-    $fallback = 'v.1.054';   // dibump saat rilis bila git tak tersedia
+    $fallback = 'v.1.055';   // dibump saat rilis bila git tak tersedia
     $root = dirname(__DIR__);
     if (function_exists('shell_exec') && is_dir($root . '/.git')) {
         $out = @shell_exec('git -C ' . escapeshellarg($root) . ' log -1 --pretty=%s 2>&1');

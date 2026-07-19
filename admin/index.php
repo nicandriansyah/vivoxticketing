@@ -240,7 +240,7 @@ require __DIR__ . '/partials/header.php';
                         <th>Nama</th>
                         <th>No. WhatsApp</th>
                         <th>Email</th>
-                        <th>Sumbangan</th>
+                        <?php if (!$isTicketing): ?><th>Sumbangan</th><?php endif; ?>
                         <th>Arwah</th>
                         <th>Email</th>
                         <th class="col-aksi">Aksi</th>
@@ -248,7 +248,7 @@ require __DIR__ . '/partials/header.php';
                 </thead>
                 <tbody>
                     <?php if (!$rows): ?>
-                        <tr><td colspan="9" class="adm-empty"><?= $q !== '' ? 'Tidak ada hasil untuk "' . htmlspecialchars($q) . '"' : 'Belum ada registrasi.' ?></td></tr>
+                        <tr><td colspan="<?= $isTicketing ? 8 : 9 ?>" class="adm-empty"><?= $q !== '' ? 'Tidak ada hasil untuk "' . htmlspecialchars($q) . '"' : 'Belum ada registrasi.' ?></td></tr>
                     <?php else: foreach ($rows as $r):
                         $id        = (int)$r['id'];
                         $codes     = deriveCodes($r['kode_tiket'], (int)$r['jumlah_tiket']);
@@ -277,7 +277,7 @@ require __DIR__ . '/partials/header.php';
                             <td class="adm-strong"><?= htmlspecialchars($r['nama']) ?></td>
                             <td><?= htmlspecialchars(phoneDisplay($r['no_hp'])) ?></td>
                             <td><?= htmlspecialchars($r['email']) ?></td>
-                            <td><?= (float)$r['sumbangan_amount'] > 0 ? rp($r['sumbangan_amount']) : '—' ?></td>
+                            <?php if (!$isTicketing): ?><td><?= (float)$r['sumbangan_amount'] > 0 ? rp($r['sumbangan_amount']) : '—' ?></td><?php endif; ?>
                             <td style="text-align:center;"><?= $r['upload_arwah'] ? '🕊️' : '—' ?></td>
                             <td style="text-align:center;"><?= $r['email_sent'] ? '<span class="badge-ok">✓</span>' : '<span class="badge-no">✗</span>' ?></td>
                             <td class="col-aksi">
