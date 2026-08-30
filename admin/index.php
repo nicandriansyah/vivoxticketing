@@ -282,7 +282,7 @@ require __DIR__ . '/partials/header.php';
                             <td style="text-align:center;"><?= $r['email_sent'] ? '<span class="badge-ok">✓</span>' : '<span class="badge-no">✗</span>' ?></td>
                             <td class="col-aksi">
                                 <div class="aksi-stack">
-                                    <a href="edit.php?id=<?= $id ?>" class="adm-btn-sm adm-btn-detail" style="text-align:center;">✎ Edit</a>
+                                    <a href="edit.php?id=<?= $id ?>" class="adm-btn-sm adm-btn-detail" style="text-align:center;">Detail</a>
                                     <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="adm-btn-sm adm-btn-wa-sm">Resend link ke WA</a>
                                     <form method="POST" action="resend.php">
                                         <input type="hidden" name="id" value="<?= $id ?>">

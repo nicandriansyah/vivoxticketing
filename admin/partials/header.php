@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
 
     <aside class="adm-sidebar" id="admSidebar">
         <button type="button" class="adm-collapse-btn" id="admCollapseBtn" onclick="toggleCollapse()" title="Kecilkan / besarkan sidebar">«</button>
-        <div class="adm-side-brand"><span class="side-txt">Ticketing </span><span class="brand-gold">Admin</span>
+        <div class="adm-side-brand"><span class="side-txt">Ticketing </span><span class="brand-gold">Admin</span><img src="../icon.png" alt="Admin" class="adm-side-icon" draggable="false" oncontextmenu="return false">
             <div class="adm-side-version side-txt"><?= htmlspecialchars(function_exists('appVersion') ? appVersion() : '') ?></div>
             <div class="adm-side-user side-txt">
                 <span class="adm-side-welcome">Selamat Datang,</span>
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
         </nav>
         <a href="logout.php" class="adm-side-logout">🚪 <span class="side-txt">Keluar</span></a>
         <div class="adm-side-footer">
-            ©2026 Powered by KonserKoe<br>
+            ©2026 Powered by Ticker<br>
             Pejuang Mencari Pundi | <a href="https://nirdev.web.id" target="_blank" rel="noopener">Website</a>
         </div>
     </aside>
