@@ -166,19 +166,20 @@ function buildTicketEmailHtml(string $nama, array $ticketCodes, int $jumlah, str
                . '<td style="padding:6px 14px;border:1px solid #e0d8c4;font-family:Consolas,monospace;font-weight:700;letter-spacing:1px;color:#1a0800;">' . htmlspecialchars($kode) . '</td></tr>';
     }
 
+    $logoUrl = preg_replace('#ticket\.php(\?.*)?$#', 'foas-logo.png', $ticketUrl);
+
     return '
 <div style="background:#f4efe4;padding:24px;font-family:Arial,Helvetica,sans-serif;color:#2c1500;">
   <div style="max-width:560px;margin:0 auto;background:#fffdf8;border:1px solid #e0d8c4;border-radius:8px;overflow:hidden;">
     <div style="background:#1a0800;padding:24px;text-align:center;">
-      <div style="color:#e8c66e;font-size:13px;letter-spacing:3px;">VITA VOXA CHOIR &middot; JAKARTA</div>
-      <div style="color:#fff;font-size:30px;font-weight:900;letter-spacing:1px;margin-top:6px;">FOAS 14</div>
-      <div style="color:#c9a84c;font-size:11px;letter-spacing:2px;margin-top:4px;">MENSANA IN CORPORE SANO</div>
+      <div style="color:#e8c66e;font-size:13px;letter-spacing:3px;">VITA VOXA CHOIR</div>
+      <img src="' . htmlspecialchars($logoUrl) . '" alt="FOAS 14" width="220" style="max-width:220px;width:60%;height:auto;margin-top:10px;">
     </div>
     <div style="padding:28px 26px;">
       <p style="font-size:16px;margin:0 0 14px;">Halo <strong>' . htmlspecialchars($nama) . '</strong>,</p>
       <p style="font-size:15px;line-height:1.6;margin:0 0 18px;">Reservasi tiket Anda untuk <strong>FOAS 14</strong> telah <strong style="color:#1a7a40;">berhasil</strong>. Berikut detail tiket Anda:</p>
       <table style="border-collapse:collapse;width:100%;margin-bottom:20px;">' . $rows . '</table>
-      <p style="font-size:14px;line-height:1.6;margin:0 0 6px;"><strong>Acara:</strong> Sabtu, 7 November 2026 &middot; 19.00 WIB</p>
+      <p style="font-size:14px;line-height:1.6;margin:0 0 6px;"><strong>Acara:</strong> Sabtu, 7 November 2026 &middot; 19.30 WIB</p>
       <p style="font-size:14px;line-height:1.6;margin:0 0 22px;"><strong>Jumlah:</strong> ' . $jumlah . ' tiket</p>
       <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin:24px auto;">
         <tr>
@@ -191,7 +192,7 @@ function buildTicketEmailHtml(string $nama, array $ticketCodes, int $jumlah, str
       <p style="font-size:13px;color:#888;line-height:1.6;margin:18px 0 0;">Simpan email ini. Anda bisa membuka tiket kapan saja melalui tautan di atas, lalu menyimpannya sebagai gambar/PDF atau membagikannya ke WhatsApp.</p>
       <p style="font-size:13px;color:#888;line-height:1.6;margin:14px 0 0;">Tunjukkan QR code tiket saat memasuki venue.</p>
     </div>
-    <div style="background:#f4efe4;padding:16px;text-align:center;font-size:12px;color:#9a7a55;">Sampai jumpa di FOAS 14!<br>&mdash; Vita Voxa Choir</div>
+    <div style="background:#f4efe4;padding:16px;text-align:center;font-size:12px;color:#9a7a55;">Sampai jumpa di FOAS 14!<br>Vita Voxa Choir</div>
   </div>
 </div>';
 }

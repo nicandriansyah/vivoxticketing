@@ -31,7 +31,7 @@ if ($pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FOAS 14 — Vita Voxa Choir</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=5" rel="stylesheet">
+    <link href="assets/css/style.css?v=8" rel="stylesheet">
 </head>
 <body class="welcome-page">
 
@@ -43,12 +43,12 @@ if ($pdo) {
         <p class="choir-name">Vita Voxa Choir</p>
         <p class="presents-text">Presents</p>
 
-        <h1 class="event-title">FOAS 14</h1>
-        <p class="event-tagline">"mensana on corpore sano"</p>
+        <h1 class="event-title"><img src="foas-logo.png" alt="FOAS 14" class="event-title-img"></h1>
+        <p class="event-tagline">"I Know My Redeemer Lives"</p>
 
         <div class="event-details">
             <p class="event-date">Sabtu, 7 November</p>
-            <p class="event-time">19.00 WIB</p>
+            <p class="event-time">19.30 WIB</p>
         </div>
 
         <?php if ($salesOpen): ?>
