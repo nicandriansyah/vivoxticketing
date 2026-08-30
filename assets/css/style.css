@@ -119,7 +119,7 @@ body {
 }
 
 .event-title {
-    margin-bottom: 2.5rem;
+    margin-bottom: 0.2rem;
 }
 .event-title-img {
     width: min(90vw, 480px);
@@ -134,11 +134,11 @@ body {
 .event-tagline {
     font-family: 'Playfair Display', serif;
     font-style: italic;
-    font-size: 1.05rem;
-    color: rgba(232, 198, 110, 0.75);
+    font-size: 1.27rem;
+    color: #ffffff;
     letter-spacing: 1px;
     margin-bottom: 2rem;
-    margin-top: -1rem;
+    margin-top: -0.5rem;
 }
 
 .event-details {
