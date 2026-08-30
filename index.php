@@ -31,19 +31,19 @@ if ($pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FOAS 14 — Vita Voxa Choir</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=8" rel="stylesheet">
+    <link href="assets/css/style.css?v=9" rel="stylesheet">
 </head>
 <body class="welcome-page">
 
     <div class="welcome-container">
         <div class="choir-logo">
-            <img src="logo.png" alt="Vita Voxa Choir" class="choir-logo-img">
+            <img src="logo.png" alt="Vita Voxa Choir" class="choir-logo-img" draggable="false" oncontextmenu="return false">
         </div>
 
         <p class="choir-name">Vita Voxa Choir</p>
         <p class="presents-text">Presents</p>
 
-        <h1 class="event-title"><img src="foas-logo.png" alt="FOAS 14" class="event-title-img"></h1>
+        <h1 class="event-title"><img src="foas-logo.png" alt="FOAS 14" class="event-title-img" draggable="false" oncontextmenu="return false"></h1>
         <p class="event-tagline">"I Know My Redeemer Lives"</p>
 
         <div class="event-details">

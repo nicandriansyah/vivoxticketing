@@ -33,12 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=48" rel="stylesheet">
+    <link href="assets/admin.css?v=49" rel="stylesheet">
 </head>
 <body class="admin-login-page">
     <div class="login-card">
         <div class="login-brand">
-            <img src="../tiker.png" alt="ticker" class="login-logo-img">
+            <img src="../tiker.png" alt="ticker" class="login-logo-img" draggable="false" oncontextmenu="return false">
         </div>
         <?php if ($error): ?>
             <div class="login-error"><?= htmlspecialchars($error) ?></div>

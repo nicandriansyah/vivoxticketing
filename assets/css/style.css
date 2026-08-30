@@ -95,6 +95,9 @@ body {
     object-fit: contain;
     filter: drop-shadow(0 4px 16px rgba(201,168,76,0.4));
     animation: fadeInUp 0.6s ease both;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .choir-name {
@@ -123,6 +126,9 @@ body {
     height: auto;
     filter: drop-shadow(0 4px 16px rgba(201,168,76,0.4));
     animation: fadeInUp 0.6s ease both;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .event-tagline {
@@ -1340,6 +1346,9 @@ body {
     width: 60px;
     height: 60px;
     object-fit: contain;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 .tc-choir-text {
     display: flex;
@@ -1382,6 +1391,9 @@ body {
     width: 90%;
     max-width: 280px;
     height: auto;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 .tc-subtitle {
     font-size: 0.65rem;
