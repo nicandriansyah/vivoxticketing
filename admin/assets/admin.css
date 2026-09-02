@@ -147,6 +147,14 @@ body {
     height: 100vh;
     z-index: 110;   /* agar tombol collapse di tepi tidak ketiban konten */
 }
+.adm-side-scroll {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;   /* wajib agar flex child ini bisa scroll, bukan malah mendorong tinggi */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 .adm-side-brand {
     font-weight: 700;
     font-size: 1.2rem;

@@ -13,13 +13,14 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> — Admin Ticketing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=49" rel="stylesheet">
+    <link href="assets/admin.css?v=50" rel="stylesheet">
 </head>
 <body class="admin-page">
 <div class="adm-layout">
 
     <aside class="adm-sidebar" id="admSidebar">
         <button type="button" class="adm-collapse-btn" id="admCollapseBtn" onclick="toggleCollapse()" title="Kecilkan / besarkan sidebar">«</button>
+        <div class="adm-side-scroll">
         <div class="adm-side-brand"><span class="side-txt">Ticketing </span><span class="brand-gold">Admin</span><img src="../icon.png" alt="Admin" class="adm-side-icon" draggable="false" oncontextmenu="return false">
             <div class="adm-side-version side-txt"><?= htmlspecialchars(function_exists('appVersion') ? appVersion() : '') ?></div>
             <div class="adm-side-user side-txt">
@@ -38,6 +39,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
         <div class="adm-side-footer">
             ©2026 Powered by Ticker<br>
             Pejuang Mencari Pundi | <a href="https://nirdev.web.id" target="_blank" rel="noopener">Website</a>
+        </div>
         </div>
     </aside>
     <script>
