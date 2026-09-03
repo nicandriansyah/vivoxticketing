@@ -38,12 +38,14 @@ body {
 
 .welcome-page {
     display: flex;
-    align-items: center;
+    align-items: safe center;
     justify-content: center;
     min-height: 100vh;
     background: #0d0d0d;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
+    padding: 2.5rem 0;
 }
 
 .welcome-page::before {
