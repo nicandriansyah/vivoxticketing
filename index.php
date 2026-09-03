@@ -67,6 +67,13 @@ if ($pdo) {
             <span class="btn-reserve btn-coming-soon">Coming Soon</span>
         <?php endif; ?>
         <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     </div>
 
 
