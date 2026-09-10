@@ -125,7 +125,8 @@ function validateArwahPhoto(array $file): ?string {
         return ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE)
              ? 'foto_besar' : 'foto_gagal';
     }
-    if ($file['size'] > 2 * 1024 * 1024) return 'foto_besar';
+    // Ukuran tidak dibatasi di sini — file besar tetap diterima, lalu
+    // dikompres di saveArwahPhoto() sebelum disimpan permanen.
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime  = finfo_file($finfo, $file['tmp_name']);
@@ -168,7 +169,7 @@ function saveArwahPhoto(array $file, string $kodeUtama, int $urutan, ?string $hu
     $finfo   = finfo_open(FILEINFO_MIME_TYPE);
     $mime    = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
-    if (!isset($allowed[$mime]) || $file['size'] > 2 * 1024 * 1024) return null;
+    if (!isset($allowed[$mime])) return null;
 
     $folder    = ($hubKey && array_key_exists($hubKey, hubunganOptions())) ? $hubKey : 'lainnya';
     $label     = hubunganLabel($hubKey);
@@ -188,10 +189,62 @@ function saveArwahPhoto(array $file, string $kodeUtama, int $urutan, ?string $hu
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
 
     $filename = $name . '.' . $allowed[$mime];
-    if (@move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+    if (compressUploadedImage($file['tmp_name'], $mime, $dir . $filename)) {
         return $folder . '/' . $filename;
     }
     return null;
+}
+
+/**
+ * Kompres & simpan gambar hasil upload: dikecilkan bila sisi terpanjangnya
+ * melebihi $maxDim, lalu di-re-encode (JPEG dengan $jpegQuality, PNG dengan
+ * kompresi maksimal). Dipakai supaya ukuran file tidak dibatasi saat upload
+ * (lihat validateArwahPhoto) tapi tetap hemat storage di server.
+ */
+function compressUploadedImage(string $srcPath, string $mime, string $destPath, int $maxDim = 1600, int $jpegQuality = 78): bool {
+    // Fallback jaga-jaga bila ekstensi GD tidak aktif di server: simpan apa
+    // adanya (tanpa kompresi) ketimbang gagal total.
+    if (!extension_loaded('gd')) {
+        return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
+    }
+
+    $src = $mime === 'image/png' ? @imagecreatefrompng($srcPath) : @imagecreatefromjpeg($srcPath);
+    if (!$src) return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
+
+    // Foto JPEG dari HP sering disimpan "tegak" cuma lewat flag EXIF, bukan
+    // piksel aslinya — re-encode lewat GD membuang EXIF itu, jadi diputer
+    // manual dulu di sini supaya orientasinya tidak berubah jadi miring.
+    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
+        $exif = @exif_read_data($srcPath);
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 3: $src = imagerotate($src, 180, 0); break;
+                case 6: $src = imagerotate($src, -90, 0); break;
+                case 8: $src = imagerotate($src, 90, 0); break;
+            }
+        }
+    }
+
+    $w = imagesx($src);
+    $h = imagesy($src);
+    $ratio = min(1, $maxDim / max($w, $h));
+    $newW  = max(1, (int)round($w * $ratio));
+    $newH  = max(1, (int)round($h * $ratio));
+
+    $out = imagecreatetruecolor($newW, $newH);
+    if ($mime === 'image/png') {
+        imagealphablending($out, false);
+        imagesavealpha($out, true);
+    }
+    imagecopyresampled($out, $src, 0, 0, 0, 0, $newW, $newH, $w, $h);
+    imagedestroy($src);
+
+    $ok = $mime === 'image/png'
+        ? imagepng($out, $destPath, 9)
+        : imagejpeg($out, $destPath, $jpegQuality);
+    imagedestroy($out);
+
+    return $ok;
 }
 
 /* ---------- Generate Ticket Codes ---------- */

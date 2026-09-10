@@ -60,7 +60,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
         <?php elseif ($err === 'foto_format'): ?>
             <strong>Format foto tidak didukung.</strong><br>Foto arwah harus berupa file JPG atau PNG.
         <?php elseif ($err === 'foto_besar'): ?>
-            <strong>Ukuran foto terlalu besar.</strong><br>Maksimal 2 MB. Silakan perkecil ukuran file.
+            <strong>Ukuran foto terlalu besar untuk diproses server.</strong><br>Silakan coba unggah file yang lebih kecil.
         <?php else: ?>
             <strong>Gagal mengunggah foto arwah.</strong><br>Silakan coba lagi.
         <?php endif; ?>
@@ -151,9 +151,11 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                                     <button type="button" class="arwah-remove" title="Hapus arwah ini" style="display:none;background:none;border:none;color:#c0392b;font-size:1.1rem;cursor:pointer;line-height:1;">✕</button>
                                 </div>
 
+                                <p style="color:#1a1a1a; font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1rem;">Isi data diri di bawah ini dan upload foto arwah yang ingin ditayangkan. Apabila tidak ada, foto dapat dilewati.</p>
+
                                 <div class="form-group mb-3">
-                                    <label class="form-label">Foto Arwah <small style="color:#666;">(opsional)</small></label>
-                                    <div class="upload-warning">⚠ Hanya file <strong>JPG</strong> atau <strong>PNG</strong>, maksimal <strong>2 MB</strong>.</div>
+                                    <label class="form-label" style="color:#888;">Foto Arwah <small style="color:#999;">(opsional)</small></label>
+                                    <div class="upload-warning">⚠ Hanya file <strong>JPG</strong> atau <strong>PNG</strong></div>
                                     <div class="upload-area arwah-uploadarea">
                                         <input type="file" name="foto_arwah[]" class="arwah-foto" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
                                         <div class="upload-placeholder arwah-ph">
@@ -161,7 +163,6 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                                             <p>Drag &amp; drop foto di sini</p>
                                             <p class="upload-or">atau</p>
                                             <button type="button" class="btn-browse">Browse File</button>
-                                            <small class="upload-hint">Format JPG / PNG &middot; Maksimal 2 MB</small>
                                         </div>
                                         <div class="upload-preview arwah-pv" style="display:none;">
                                             <img class="arwah-previmg" src="" alt="Preview">

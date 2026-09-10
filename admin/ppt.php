@@ -122,7 +122,7 @@ require __DIR__ . '/partials/header.php';
             <div class="rib-group">
                 <span class="rib-label">Slide</span>
                 <div class="rib-row">
-                    <label class="rib-color" title="Warna latar slide"><input type="color" id="bgColor" value="#1a0e00"><span>▦</span></label>
+                    <label class="rib-color" id="bgColorSwatch" title="Warna latar semua slide" style="background:#1a0e00;"><input type="color" id="bgColor" value="#1a0e00"><span>🪣</span></label>
                     <button type="button" class="rib-btn" id="btnReset" title="Kembalikan posisi default slide ini">↺ Reset</button>
                 </div>
             </div>
@@ -298,7 +298,10 @@ require __DIR__ . '/partials/header.php';
         var slide = document.querySelector('.ppt-slide.active');
         if (slide) {
             var bg = rgbToHex(getComputedStyle(slide).backgroundColor);
-            if (bg) document.getElementById('bgColor').value = bg;
+            if (bg) {
+                document.getElementById('bgColor').value = bg;
+                document.getElementById('bgColorSwatch').style.background = bg;
+            }
         }
     }
 
@@ -322,9 +325,10 @@ require __DIR__ . '/partials/header.php';
         });
     });
 
+    // Warna latar langsung diterapkan ke SEMUA slide sekaligus, bukan cuma yang aktif
     document.getElementById('bgColor').addEventListener('input', function () {
-        var slide = document.querySelector('.ppt-slide.active');
-        if (slide) slide.style.background = this.value;
+        document.getElementById('bgColorSwatch').style.background = this.value;
+        document.querySelectorAll('.ppt-slide').forEach(function (s) { s.style.background = this.value; }.bind(this));
     });
 
     // Reset semua unit di slide aktif ke posisi default masing-masing

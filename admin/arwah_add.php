@@ -26,11 +26,11 @@ $stmt->execute([$regId]);
 $reg = $stmt->fetch();
 if (!$reg) out(['ok' => false, 'error' => 'Registrasi tidak ditemukan']);
 
-// Batas slot: 1 arwah per tiket, maksimal 5
+// Batas slot: maksimal 5 arwah per registrasi, tidak terikat jumlah tiket
 $cnt = $pdo->prepare("SELECT COUNT(*), COALESCE(MAX(urutan), 0) FROM arwah WHERE registration_id = ?");
 $cnt->execute([$regId]);
 list($count, $maxUrut) = $cnt->fetch(PDO::FETCH_NUM);
-$maxSlots = min((int)$reg['jumlah_tiket'], 5);
+$maxSlots = 5;
 if ((int)$count >= $maxSlots) out(['ok' => false, 'error' => 'Slot arwah sudah penuh (' . $maxSlots . ')']);
 
 $urutan = (int)$maxUrut + 1;

@@ -206,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const entry  = inp.closest('.arwah-entry');
         const okType = ['image/jpeg', 'image/png'].indexOf(file.type) !== -1 || /\.(jpe?g|png)$/i.test(file.name);
         if (!okType) { alert('Format tidak didukung. Hanya file JPG atau PNG yang diperbolehkan.'); resetPhoto(entry); return; }
-        if (file.size > 2 * 1024 * 1024) { alert('Ukuran file terlalu besar. Maksimal 2 MB.'); resetPhoto(entry); return; }
         const reader = new FileReader();
         reader.onload = function (e) {
             entry.querySelector('.arwah-previmg').src = e.target.result;

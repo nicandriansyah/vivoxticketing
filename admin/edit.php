@@ -21,7 +21,7 @@ $aktif     = $jumlah - count($cancelled);
 $ticketUrl = adminTicketUrl($row['kode_tiket']);
 
 $arwahRows = getArwahForReg($pdo, $id);
-$maxSlots  = min($jumlah, 5);
+$maxSlots  = 5;
 $canAdd    = count($arwahRows) < $maxSlots;
 $hubOpts   = hubunganOptions();
 
