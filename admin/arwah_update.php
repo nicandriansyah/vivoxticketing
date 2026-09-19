@@ -40,7 +40,6 @@ if (!empty($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) 
     $mime    = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
     if (!isset($allowed[$mime]))          out(['ok' => false, 'error' => 'Foto harus JPG atau PNG']);
-    if ($file['size'] > 2 * 1024 * 1024)  out(['ok' => false, 'error' => 'Ukuran foto maksimal 2MB']);
 
     $folder    = ($hub !== '') ? $hub : 'lainnya';
     $label     = hubunganLabel($hub !== '' ? $hub : null);
@@ -59,7 +58,7 @@ if (!empty($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) 
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
 
     $filename = $name . '.' . $allowed[$mime];
-    if (!@move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+    if (!compressUploadedImage($file['tmp_name'], $mime, $dir . $filename)) {
         out(['ok' => false, 'error' => 'Gagal menyimpan file foto']);
     }
     $newPath = $folder . '/' . $filename;

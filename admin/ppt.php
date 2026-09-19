@@ -36,9 +36,10 @@ if ($dbReady) {
 
         // Ambil arwah kategori terpilih. ORDER BY id ASC → arwah terbaru selalu di
         // akhir (urutan stabil, isi kiri→kanan, ganjil terakhir di tengah).
+        // Tidak perlu JOIN registrations: arwah bisa juga berdiri sendiri
+        // (diupload langsung dari sini, tanpa tiket).
         $stmt = $pdo->prepare("SELECT a.id, a.nama_arwah, a.tahun_lahir, a.tahun_wafat, a.foto_arwah, a.hubungan_arwah, a.slide_layout
                                FROM arwah a
-                               JOIN registrations r ON r.id = a.registration_id
                                WHERE a.nama_arwah IS NOT NULL AND a.nama_arwah <> '' AND a.hubungan_arwah = ?
                                ORDER BY a.id ASC");
         $stmt->execute([$cat]);
@@ -97,7 +98,44 @@ require __DIR__ . '/partials/header.php';
                        href="?cat=<?= urlencode($k) ?>"><?= htmlspecialchars($label) ?><?= $isEmpty ? ' (kosong)' : '' ?></a>
                 <?php endforeach; ?>
             </div>
-            <button type="button" class="adm-btn-secondary" id="btnPptx" onclick="downloadPptx()" <?= $rows ? '' : 'disabled' ?>>⬇ Download PPTX (<?= count($slides) ?> slide)</button>
+            <div style="display:flex;gap:.5rem;">
+                <button type="button" class="adm-btn-secondary" id="btnUploadFoto" onclick="openUploadModal()">⬆ Upload Foto</button>
+                <button type="button" class="adm-btn-secondary" id="btnPptx" onclick="downloadPptx()" <?= $rows ? '' : 'disabled' ?>>⬇ Download PPTX (<?= count($slides) ?> slide)</button>
+            </div>
+        </div>
+
+        <!-- Modal: upload foto arwah langsung, tanpa perlu tiket/registrasi -->
+        <div id="uploadModal" class="modal-overlay" onclick="if(event.target===this)closeUploadModal()">
+            <div class="modal-box modal-box-wide ppt-upload-box">
+                <div class="ppt-upload-inner">
+                    <h3 style="margin-bottom:1rem;">⬆ Upload Foto Arwah</h3>
+                    <label class="hc-label">Nama Arwah</label>
+                    <input type="text" id="uNama" class="m-link-input" style="width:100%;margin-bottom:.6rem;" placeholder="Nama lengkap almarhum/almarhumah">
+                    <div style="display:flex;gap:.6rem;">
+                        <div style="flex:1;">
+                            <label class="hc-label">Tahun Lahir</label>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="uLahir" class="m-link-input" style="width:100%;margin-bottom:.6rem;" placeholder="1950" maxlength="4">
+                        </div>
+                        <div style="flex:1;">
+                            <label class="hc-label">Tahun Wafat</label>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="uWafat" class="m-link-input" style="width:100%;margin-bottom:.6rem;" placeholder="2023" maxlength="4">
+                        </div>
+                    </div>
+                    <label class="hc-label">Kategori</label>
+                    <select id="uHub" class="m-link-input" style="width:100%;margin-bottom:.6rem;">
+                        <?php foreach ($opts as $k => $label): ?>
+                        <option value="<?= htmlspecialchars($k) ?>" <?= $cat === $k ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label class="hc-label">Foto (JPG/PNG — opsional)</label>
+                    <input type="file" id="uFoto" accept="image/jpeg,image/png" style="width:100%;margin-bottom:.6rem;">
+                    <div style="display:flex;gap:.5rem;margin-top:.8rem;">
+                        <button type="button" class="m-view-btn" onclick="submitUpload()">💾 Simpan</button>
+                        <button type="button" class="m-cancel-btn" onclick="closeUploadModal()">Batal</button>
+                    </div>
+                    <span id="uStatus" style="font-size:.8rem;font-weight:600;display:block;margin-top:.5rem;"></span>
+                </div>
+            </div>
         </div>
 
         <?php if (!$rows): ?>
@@ -189,6 +227,7 @@ require __DIR__ . '/partials/header.php';
                             <?php endif; ?>
                             <span class="ppt-move" title="Geser">✥</span>
                             <span class="ppt-resize" title="Ubah ukuran"></span>
+                            <button type="button" class="ppt-delete" title="Hapus arwah ini" onclick="deleteArwahUnit(<?= (int)$r['id'] ?>, event)">🗑</button>
                         </div>
 
                         <div class="ppt-item ppt-tbox ppt-t-nama" style="left:<?= $f($na,'x',$def['na']['x']) ?>px;top:<?= $f($na,'y',$def['na']['y']) ?>px;width:<?= $f($na,'w',$def['na']['w']) ?>px;">
@@ -492,6 +531,61 @@ require __DIR__ . '/partials/header.php';
             alert('Gagal membuat PPTX: ' + e.message);
         }
         btn.disabled = false; btn.textContent = orig;
+    }
+
+    /* ---------- Upload foto langsung (tanpa tiket) ---------- */
+    function openUploadModal() {
+        document.getElementById('uNama').value  = '';
+        document.getElementById('uLahir').value = '';
+        document.getElementById('uWafat').value = '';
+        document.getElementById('uFoto').value  = '';
+        document.getElementById('uStatus').textContent = '';
+        document.getElementById('uploadModal').classList.add('open');
+    }
+    function closeUploadModal() {
+        document.getElementById('uploadModal').classList.remove('open');
+    }
+    function submitUpload() {
+        var st = document.getElementById('uStatus');
+        var nama = document.getElementById('uNama').value.trim();
+        if (!nama) { st.style.color = '#c0392b'; st.textContent = 'Nama arwah wajib diisi'; return; }
+
+        var fd = new FormData();
+        fd.append('registration_id', '0');
+        fd.append('nama_arwah', nama);
+        fd.append('tahun_lahir', document.getElementById('uLahir').value.trim());
+        fd.append('tahun_wafat', document.getElementById('uWafat').value.trim());
+        fd.append('hubungan_arwah', document.getElementById('uHub').value);
+        var fotoFile = document.getElementById('uFoto').files[0];
+        if (fotoFile) fd.append('foto', fotoFile);
+
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        fetch('arwah_add.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.ok) {
+                    st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+                    setTimeout(function () { location.href = '?cat=' + encodeURIComponent(document.getElementById('uHub').value); }, 500);
+                } else {
+                    st.style.color = '#c0392b'; st.textContent = 'Gagal: ' + (res.error || '');
+                }
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
+
+    /* ---------- Hapus 1 arwah (foto + teks) dari slide ---------- */
+    function deleteArwahUnit(id, ev) {
+        if (ev) ev.stopPropagation();
+        if (!confirm('Hapus data arwah ini? Foto yang diupload juga akan ikut terhapus.')) return;
+        var fd = new FormData();
+        fd.append('id', id);
+        fetch('arwah_delete.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.ok) location.reload();
+                else alert('Gagal menghapus: ' + (res.error || ''));
+            })
+            .catch(function () { alert('Koneksi gagal'); });
     }
 
     updateRibbon();

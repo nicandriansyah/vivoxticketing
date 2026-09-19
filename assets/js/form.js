@@ -45,6 +45,8 @@ function prevStep(from) {
 
 function validateStep1() {
     let valid = true;
+    let firstInvalid = null;
+    const markInvalid = (el) => { valid = false; if (!firstInvalid) firstInvalid = el; };
 
     const fields = [
         { id: 'nama',         msg: 'Nama lengkap wajib diisi' },
@@ -57,17 +59,17 @@ function validateStep1() {
         clearError(el);
         if (!el.value.trim()) {
             showError(el, msg);
-            valid = false;
+            markInvalid(el);
         }
     });
 
     const email = document.querySelector('[name="email"]');
     if (email.value.trim() && !isValidEmail(email.value)) {
         showError(email, 'Format email tidak valid');
-        valid = false;
+        markInvalid(email);
     }
 
-    // Arwah validation (per-entri, sampai 5 arwah)
+    // Arwah validation (per-entri, jumlah bebas)
     if (document.getElementById('uploadArwah').checked) {
         const thisYear = new Date().getFullYear();
         document.querySelectorAll('#arwahEntries .arwah-entry').forEach((entry) => {
@@ -77,25 +79,29 @@ function validateStep1() {
             const hub   = entry.querySelector('[name="hubungan_arwah[]"]');
             [nama, lahir, wafat, hub].forEach(clearError);
 
-            if (!nama.value.trim())  { showError(nama, 'Nama arwah wajib diisi'); valid = false; }
+            if (!nama.value.trim())  { showError(nama, 'Nama arwah wajib diisi'); markInvalid(nama); }
 
             const lv = parseInt(lahir.value, 10), wv = parseInt(wafat.value, 10);
             if (!lahir.value.trim() || lv < 1900 || lv > thisYear) {
-                showError(lahir, 'Tahun lahir tidak valid'); valid = false;
+                showError(lahir, 'Tahun lahir tidak valid'); markInvalid(lahir);
             }
             if (!wafat.value.trim() || wv < 1900 || wv > thisYear) {
-                showError(wafat, 'Tahun wafat tidak valid'); valid = false;
+                showError(wafat, 'Tahun wafat tidak valid'); markInvalid(wafat);
             }
             if (lahir.value.trim() && wafat.value.trim() && wv < lv) {
-                showError(wafat, 'Tahun wafat sebelum lahir'); valid = false;
+                showError(wafat, 'Tahun wafat sebelum lahir'); markInvalid(wafat);
             }
-            if (!hub.value.trim())   { showError(hub, 'Hubungan wajib dipilih'); valid = false; }
+            if (!hub.value.trim())   { showError(hub, 'Hubungan wajib dipilih'); markInvalid(hub); }
         });
     }
 
     if (!valid) {
         document.querySelector('#step-1 .form-card').classList.add('shake');
         setTimeout(() => document.querySelector('#step-1 .form-card').classList.remove('shake'), 400);
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus({ preventScroll: true });
+        }
     }
     return valid;
 }
@@ -147,14 +153,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (parseInt(cnt.value) > 1) cnt.value = parseInt(cnt.value) - 1;
     });
     inc.addEventListener('click', () => {
-        if (parseInt(cnt.value) < 5) cnt.value = parseInt(cnt.value) + 1;
+        cnt.value = parseInt(cnt.value) + 1;
     });
 });
 
-/* ---------- Arwah: toggle + multi-entri (maks 5) + upload per-entri ---------- */
+/* ---------- Arwah: toggle + multi-entri + upload per-entri ---------- */
 
 document.addEventListener('DOMContentLoaded', function () {
-    const MAX      = 5;
     const checkbox = document.getElementById('uploadArwah');
     const wrap     = document.getElementById('arwahForm');
     const list     = document.getElementById('arwahEntries');
@@ -176,7 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const rm = el.querySelector('.arwah-remove');
             if (rm) rm.style.display = els.length > 1 ? '' : 'none';
         });
-        addBtn.style.display = els.length >= MAX ? 'none' : '';
     }
 
     function resetPhoto(entry) {
@@ -218,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Tambah arwah (clone entri pertama)
     addBtn.addEventListener('click', function () {
         const els = entries();
-        if (els.length >= MAX) return;
         const clone = els[0].cloneNode(true);
         clearEntry(clone);
         list.appendChild(clone);

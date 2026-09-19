@@ -54,7 +54,67 @@ function ensureTicketTables(PDO $pdo): void {
             if (!$col) $pdo->exec("ALTER TABLE registrations ADD COLUMN slide_layout TEXT NULL");
             setSetting($pdo, 'schema_version', '3');
         }
+        if ((int)getSetting($pdo, 'schema_version', '1') < 4) {
+            // registration_id jadi nullable → arwah bisa diupload langsung dari
+            // PPT Generator tanpa terikat registrasi/tiket manapun.
+            $pdo->exec("ALTER TABLE arwah MODIFY registration_id INT NULL");
+            setSetting($pdo, 'schema_version', '4');
+        }
     } catch (Exception $e) { /* abaikan bila tak ada akses ALTER */ }
+}
+
+/**
+ * Kompres & simpan gambar hasil upload (foto arwah): dikecilkan bila sisi
+ * terpanjangnya melebihi $maxDim, lalu di-re-encode (JPEG dengan
+ * $jpegQuality, PNG dengan kompresi maksimal). Ukuran file upload sengaja
+ * tidak dibatasi di sisi validasi — fungsi inilah yang menjaga storage
+ * server tetap hemat. Dipakai bersama oleh process.php (form publik) &
+ * admin/arwah_add.php + admin/arwah_update.php (back office).
+ */
+function compressUploadedImage(string $srcPath, string $mime, string $destPath, int $maxDim = 1600, int $jpegQuality = 78): bool {
+    // Fallback jaga-jaga bila ekstensi GD tidak aktif di server: simpan apa
+    // adanya (tanpa kompresi) ketimbang gagal total.
+    if (!extension_loaded('gd')) {
+        return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
+    }
+
+    $src = $mime === 'image/png' ? @imagecreatefrompng($srcPath) : @imagecreatefromjpeg($srcPath);
+    if (!$src) return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
+
+    // Foto JPEG dari HP sering disimpan "tegak" cuma lewat flag EXIF, bukan
+    // piksel aslinya — re-encode lewat GD membuang EXIF itu, jadi diputer
+    // manual dulu di sini supaya orientasinya tidak berubah jadi miring.
+    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
+        $exif = @exif_read_data($srcPath);
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 3: $src = imagerotate($src, 180, 0); break;
+                case 6: $src = imagerotate($src, -90, 0); break;
+                case 8: $src = imagerotate($src, 90, 0); break;
+            }
+        }
+    }
+
+    $w = imagesx($src);
+    $h = imagesy($src);
+    $ratio = min(1, $maxDim / max($w, $h));
+    $newW  = max(1, (int)round($w * $ratio));
+    $newH  = max(1, (int)round($h * $ratio));
+
+    $out = imagecreatetruecolor($newW, $newH);
+    if ($mime === 'image/png') {
+        imagealphablending($out, false);
+        imagesavealpha($out, true);
+    }
+    imagecopyresampled($out, $src, 0, 0, 0, 0, $newW, $newH, $w, $h);
+    imagedestroy($src);
+
+    $ok = $mime === 'image/png'
+        ? imagepng($out, $destPath, 9)
+        : imagejpeg($out, $destPath, $jpegQuality);
+    imagedestroy($out);
+
+    return $ok;
 }
 
 /** Pilihan hubungan arwah: key => label tampilan. */

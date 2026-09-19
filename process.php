@@ -38,7 +38,7 @@ $no_hp          = preg_replace('/\D/', '', $_POST['no_hp'] ?? '');
 $no_hp          = preg_replace('/^0+/', '', $no_hp);
 if (strpos($no_hp, '62') === 0) $no_hp = substr($no_hp, 2);
 $email          = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
-$jumlah_tiket   = max(1, min(5, (int)($_POST['jumlah_tiket']  ?? 1)));
+$jumlah_tiket   = max(1, (int)($_POST['jumlah_tiket']  ?? 1));
 $upload_arwah   = isset($_POST['upload_arwah']) ? 1 : 0;
 $sumbangan      = max(0, (float)preg_replace('/[^0-9]/', '', $_POST['sumbangan_amount'] ?? '0'));
 
@@ -48,11 +48,10 @@ if (!$nama || !$no_hp || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-/* ---------- Parse & validasi data arwah (server-side, maks 5 arwah) ---------- */
+/* ---------- Parse & validasi data arwah (server-side) ---------- */
 // Field dikirim sebagai array paralel: nama_arwah[], tahun_lahir[], tahun_wafat[],
 // hubungan_arwah[], dan file foto_arwah[]. Client (form.js) memvalidasi hal yang
 // sama, tapi server tetap jadi sumber kebenaran (bisa dilewati).
-const MAX_ARWAH = 5;
 $arwahList = []; // entri tervalidasi: ['nama','lahir','wafat','hubungan','file']
 
 if ($upload_arwah) {
@@ -66,7 +65,7 @@ if ($upload_arwah) {
     if (!is_array($wafats)) $wafats = [$wafats];
     if (!is_array($hubs))   $hubs   = [$hubs];
 
-    $count    = min(MAX_ARWAH, max(count($names), count($lahirs), count($wafats), count($hubs)));
+    $count    = max(count($names), count($lahirs), count($wafats), count($hubs));
     $thisYear = (int)date('Y');
 
     for ($i = 0; $i < $count; $i++) {
@@ -193,58 +192,6 @@ function saveArwahPhoto(array $file, string $kodeUtama, int $urutan, ?string $hu
         return $folder . '/' . $filename;
     }
     return null;
-}
-
-/**
- * Kompres & simpan gambar hasil upload: dikecilkan bila sisi terpanjangnya
- * melebihi $maxDim, lalu di-re-encode (JPEG dengan $jpegQuality, PNG dengan
- * kompresi maksimal). Dipakai supaya ukuran file tidak dibatasi saat upload
- * (lihat validateArwahPhoto) tapi tetap hemat storage di server.
- */
-function compressUploadedImage(string $srcPath, string $mime, string $destPath, int $maxDim = 1600, int $jpegQuality = 78): bool {
-    // Fallback jaga-jaga bila ekstensi GD tidak aktif di server: simpan apa
-    // adanya (tanpa kompresi) ketimbang gagal total.
-    if (!extension_loaded('gd')) {
-        return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
-    }
-
-    $src = $mime === 'image/png' ? @imagecreatefrompng($srcPath) : @imagecreatefromjpeg($srcPath);
-    if (!$src) return @move_uploaded_file($srcPath, $destPath) || @copy($srcPath, $destPath);
-
-    // Foto JPEG dari HP sering disimpan "tegak" cuma lewat flag EXIF, bukan
-    // piksel aslinya — re-encode lewat GD membuang EXIF itu, jadi diputer
-    // manual dulu di sini supaya orientasinya tidak berubah jadi miring.
-    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
-        $exif = @exif_read_data($srcPath);
-        if (!empty($exif['Orientation'])) {
-            switch ($exif['Orientation']) {
-                case 3: $src = imagerotate($src, 180, 0); break;
-                case 6: $src = imagerotate($src, -90, 0); break;
-                case 8: $src = imagerotate($src, 90, 0); break;
-            }
-        }
-    }
-
-    $w = imagesx($src);
-    $h = imagesy($src);
-    $ratio = min(1, $maxDim / max($w, $h));
-    $newW  = max(1, (int)round($w * $ratio));
-    $newH  = max(1, (int)round($h * $ratio));
-
-    $out = imagecreatetruecolor($newW, $newH);
-    if ($mime === 'image/png') {
-        imagealphablending($out, false);
-        imagesavealpha($out, true);
-    }
-    imagecopyresampled($out, $src, 0, 0, 0, 0, $newW, $newH, $w, $h);
-    imagedestroy($src);
-
-    $ok = $mime === 'image/png'
-        ? imagepng($out, $destPath, 9)
-        : imagejpeg($out, $destPath, $jpegQuality);
-    imagedestroy($out);
-
-    return $ok;
 }
 
 /* ---------- Generate Ticket Codes ---------- */

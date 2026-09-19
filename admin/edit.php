@@ -21,8 +21,7 @@ $aktif     = $jumlah - count($cancelled);
 $ticketUrl = adminTicketUrl($row['kode_tiket']);
 
 $arwahRows = getArwahForReg($pdo, $id);
-$maxSlots  = 5;
-$canAdd    = count($arwahRows) < $maxSlots;
+$canAdd    = true;
 $hubOpts   = hubunganOptions();
 
 $pageTitle  = 'Edit Registrasi';
@@ -102,7 +101,7 @@ require __DIR__ . '/partials/header.php';
             <!-- Kolom kanan: data arwah -->
             <?php if ($arwahRows || $canAdd): ?>
             <div class="m-col-right">
-                <h4 class="m-sub">🕊️ Data Arwah (<?= count($arwahRows) ?> dari maks. <?= $maxSlots ?>)</h4>
+                <h4 class="m-sub">🕊️ Data Arwah (<?= count($arwahRows) ?>)</h4>
                 <div class="m-arwah-list">
                 <?php foreach ($arwahRows as $i => $a): $uid = (int)$a['id'];
                     $fotoUrl = $a['foto_arwah'] ? adminUploadUrl($a['foto_arwah']) : ''; ?>
@@ -131,7 +130,7 @@ require __DIR__ . '/partials/header.php';
                             <?php if ($fotoUrl): ?>
                                 <div style="text-align:center;margin-bottom:.4rem;"><img class="m-arwah-foto" src="<?= htmlspecialchars($fotoUrl) ?>" alt=""></div>
                             <?php endif; ?>
-                            <label class="hc-label"><?= $fotoUrl ? 'Upload Ulang Foto' : 'Upload Foto' ?> (JPG/PNG, maks 2MB)</label>
+                            <label class="hc-label"><?= $fotoUrl ? 'Upload Ulang Foto' : 'Upload Foto' ?> (JPG/PNG)</label>
                             <input type="file" id="aFoto-<?= $uid ?>" accept="image/jpeg,image/png" style="width:100%;font-size:.8rem;">
                             <label class="hc-label">Nama Arwah</label>
                             <input type="text" id="aNama-<?= $uid ?>" class="m-link-input" style="width:100%;" value="<?= htmlspecialchars($a['nama_arwah']) ?>">
@@ -164,10 +163,10 @@ require __DIR__ . '/partials/header.php';
 
                 <?php if ($canAdd): ?>
                 <!-- Tambah arwah (form tertutup sampai tombol diklik) -->
-                <button type="button" class="adm-btn-secondary" id="btnShowAdd" style="margin-top:.6rem;" onclick="toggleAdd(true)">➕ Tambah Arwah (<?= $maxSlots - count($arwahRows) ?> slot tersisa)</button>
+                <button type="button" class="adm-btn-secondary" id="btnShowAdd" style="margin-top:.6rem;" onclick="toggleAdd(true)">➕ Tambah Arwah</button>
                 <div id="addArwahForm" style="display:none;border:1px solid var(--gold);border-radius:10px;padding:0.9rem 1rem;margin-top:.6rem;">
                     <div style="font-weight:600;color:#8a6d1a;margin-bottom:.3rem;">Tambah Arwah #<?= count($arwahRows) + 1 ?></div>
-                    <label class="hc-label">Foto (JPG/PNG, maks 2MB — opsional)</label>
+                    <label class="hc-label">Foto (JPG/PNG — opsional)</label>
                     <input type="file" id="nFoto" accept="image/jpeg,image/png" style="width:100%;font-size:.8rem;">
                     <label class="hc-label">Nama Arwah</label>
                     <input type="text" id="nNama" class="m-link-input" style="width:100%;">

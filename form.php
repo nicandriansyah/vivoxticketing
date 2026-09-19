@@ -124,10 +124,9 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                         <label class="form-label">Jumlah Tiket <span class="required">*</span></label>
                         <div class="ticket-counter">
                             <button type="button" class="counter-btn" id="decreaseBtn">−</button>
-                            <input type="number" name="jumlah_tiket" id="ticketCount" class="counter-input" value="1" min="1" max="5" readonly>
+                            <input type="number" name="jumlah_tiket" id="ticketCount" class="counter-input" value="1" min="1" readonly>
                             <button type="button" class="counter-btn" id="increaseBtn">+</button>
                         </div>
-                        <small class="text-muted-gold">Maksimal 5 tiket per transaksi</small>
                     </div>
 
                     <!-- Arwah Checkbox -->
@@ -199,7 +198,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                             </div>
                         </div>
 
-                        <button type="button" class="btn-browse arwah-add" id="arwahAddBtn" style="margin-top:.9rem;">＋ Tambah Arwah (maks 5)</button>
+                        <button type="button" class="btn-browse arwah-add" id="arwahAddBtn" style="margin-top:.9rem;">＋ Tambah Arwah</button>
                     </div>
 
                 </div>
@@ -298,7 +297,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
 </div>
 
 <script>var REKENING = '<?= htmlspecialchars($accDigits) ?>';</script>
-<script src="assets/js/form.js?v=6"></script>
+<script src="assets/js/form.js?v=8"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {
