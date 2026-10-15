@@ -141,6 +141,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+/* ---------- Cegah submit ganda (upload foto bisa makan waktu) ---------- */
+// process.php sekarang bisa lumayan lama (kompres foto, kirim email), tanpa
+// indikator visual user cenderung klik ulang & kesubmit berkali-kali.
+// Blokir submit kedua & tampilkan overlay proses biar jelas ada progres.
+document.addEventListener('DOMContentLoaded', function () {
+    const form    = document.getElementById('registrasiForm');
+    const overlay = document.getElementById('submitOverlay');
+    if (!form) return;
+    let submitting = false;
+    form.addEventListener('submit', function (e) {
+        if (submitting) { e.preventDefault(); return; }
+        submitting = true;
+        const btn = form.querySelector('.btn-submit-custom');
+        if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
+        if (overlay) overlay.classList.add('open');
+    });
+});
+
 /* ---------- Ticket Counter ---------- */
 
 document.addEventListener('DOMContentLoaded', function () {

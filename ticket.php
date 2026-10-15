@@ -84,7 +84,7 @@ if ($regId && $pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tiket FOAS 14 — <?= htmlspecialchars($t['nama']) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=15" rel="stylesheet">
+    <link href="assets/css/style.css?v=16" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -277,7 +277,7 @@ if ($regId && $pdo) {
             var card   = document.querySelectorAll('.ticket-card')[idx];
             var canvas = await html2canvas(card, captureOpts());
 
-            var fileName = 'tiket-foas13-' + (idx + 1) + '.jpg';
+            var fileName = 'tiket-foas14-' + (idx + 1) + '.jpg';
             var blob = await new Promise(function(resolve) {
                 canvas.toBlob(resolve, 'image/jpeg', 0.92);
             });
@@ -352,7 +352,7 @@ if ($regId && $pdo) {
 
                 pdf.addImage(imgData, 'JPEG', xOff, yOff, imgW, imgH);
             }
-            pdf.save('tiket-foas13-<?= addslashes($t['nama']) ?>.pdf');
+            pdf.save('tiket-foas14-<?= addslashes($t['nama']) ?>.pdf');
         } catch (e) {
             alert('Gagal membuat PDF: ' + e.message);
         }

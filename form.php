@@ -19,7 +19,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reservasi Tiket — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css?v=15" rel="stylesheet">
+    <link href="assets/css/style.css?v=16" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -290,6 +290,16 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
     </form>
 </div>
 
+<!-- Overlay proses submit: cegah submit ganda & kasih feedback visual -->
+<div id="submitOverlay" class="submit-overlay">
+    <div class="submit-overlay-box">
+        <div class="submit-spinner"></div>
+        <p class="submit-overlay-title">Memproses Reservasi Anda…</p>
+        <p class="submit-overlay-sub">Mohon tunggu, jangan tutup atau refresh halaman ini.</p>
+        <div class="submit-progress"><div class="submit-progress-bar"></div></div>
+    </div>
+</div>
+
 <!-- Photo Preview Modal -->
 <div id="photoModal" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:1.5rem;">
     <img id="photoModalImg" src="" style="max-width:90vw;max-height:88vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
@@ -297,7 +307,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
 </div>
 
 <script>var REKENING = '<?= htmlspecialchars($accDigits) ?>';</script>
-<script src="assets/js/form.js?v=8"></script>
+<script src="assets/js/form.js?v=9"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {
