@@ -84,9 +84,26 @@ $mainClass  = 'adm-main-full adm-main-ppt';
 require __DIR__ . '/partials/header.php';
 ?>
 
+        <!-- Font pilihan buat teks slide (Google Fonts) -->
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+        <!-- Overlay loading foto: transparan, cuma blok interaksi sampai semua foto kelar dimuat -->
+        <div id="pptLoadingOverlay" class="ppt-loading-overlay">
+            <div class="ppt-loading-spinner"></div>
+            <p>Memuat foto…</p>
+        </div>
+
         <?php if (!$dbReady): ?>
             <div class="adm-alert">Koneksi database gagal<?= isset($dbErr) ? ': ' . htmlspecialchars($dbErr) : '' ?>.</div>
         <?php else: ?>
+
+        <!-- Card: cari nama arwah lintas SEMUA kategori (sebelum pilih tab) -->
+        <div class="ppt-card ppt-toolbar">
+            <div class="ci-search-wrap" style="flex:1;min-width:260px;position:relative;">
+                <input type="text" id="pptSearchArwah" class="adm-input" placeholder="🔍 Cari nama arwah (semua kategori)...">
+                <div id="pptSearchResults" class="ci-search-results" style="display:none;"></div>
+            </div>
+        </div>
 
         <!-- Card: kategori + jumlah/slide + judul + download -->
         <div class="ppt-card ppt-toolbar">
@@ -148,6 +165,17 @@ require __DIR__ . '/partials/header.php';
             <div class="rib-group">
                 <span class="rib-label">Teks</span>
                 <div class="rib-row">
+                    <select class="rib-select" data-act="font" title="Font" style="font-family:Georgia,serif;">
+                        <option value="Georgia, serif" style="font-family:Georgia, serif;">Georgia</option>
+                        <option value="'Playfair Display', serif" style="font-family:'Playfair Display', serif;">Playfair Display</option>
+                        <option value="'Merriweather', serif" style="font-family:'Merriweather', serif;">Merriweather</option>
+                        <option value="'Lora', serif" style="font-family:'Lora', serif;">Lora</option>
+                        <option value="'Cormorant Garamond', serif" style="font-family:'Cormorant Garamond', serif;">Cormorant Garamond</option>
+                        <option value="'Montserrat', sans-serif" style="font-family:'Montserrat', sans-serif;">Montserrat</option>
+                        <option value="'Open Sans', sans-serif" style="font-family:'Open Sans', sans-serif;">Open Sans</option>
+                        <option value="'Roboto', sans-serif" style="font-family:'Roboto', sans-serif;">Roboto</option>
+                        <option value="'Poppins', sans-serif" style="font-family:'Poppins', sans-serif;">Poppins</option>
+                    </select>
                     <button type="button" class="rib-btn" data-act="fs-" title="Perkecil">A−</button>
                     <button type="button" class="rib-btn" data-act="fs+" title="Perbesar">A+</button>
                     <button type="button" class="rib-btn" data-act="bold" title="Tebal"><b>B</b></button>
@@ -212,6 +240,7 @@ require __DIR__ . '/partials/header.php';
                         $sv = fn($a,$k,$d) => isset($a[$k]) && $a[$k] !== '' ? $a[$k] : $d;
                         $naFs = $f($na,'fs',$def['naFs']); $naColor = $sv($na,'color','#ffffff'); $naAlign = $sv($na,'align','center'); $naBold = isset($na['bold']) ? ($na['bold'] ? 700 : 400) : 700;
                         $yrFs = $f($yp,'fs',$def['yrFs']); $yrColor = $sv($yp,'color','#c9a84c'); $yrAlign = $sv($yp,'align','center'); $yrBold = isset($yp['bold']) ? ($yp['bold'] ? 700 : 400) : 400;
+                        $naFont = $sv($na,'font','Georgia, serif'); $yrFont = $sv($yp,'font','Georgia, serif');
                         $defPh = "{$def['ph']['x']},{$def['ph']['y']},{$def['ph']['w']},{$def['ph']['h']}";
                         $defNa = "{$def['na']['x']},{$def['na']['y']},{$def['na']['w']}";
                         $defYr = "{$def['yr']['x']},{$def['yr']['y']},{$def['yr']['w']}";
@@ -233,13 +262,13 @@ require __DIR__ . '/partials/header.php';
                         <div class="ppt-item ppt-tbox ppt-t-nama" style="left:<?= $f($na,'x',$def['na']['x']) ?>px;top:<?= $f($na,'y',$def['na']['y']) ?>px;width:<?= $f($na,'w',$def['na']['w']) ?>px;">
                             <span class="ppt-move" title="Geser">✥</span>
                             <span class="ppt-edit ppt-nama" contenteditable="true" spellcheck="false"
-                                  style="font-size:<?= $naFs ?>px;font-weight:<?= $naBold ?>;color:<?= htmlspecialchars($naColor) ?>;text-align:<?= htmlspecialchars($naAlign) ?>;"><?= htmlspecialchars($namaT) ?></span>
+                                  style="font-size:<?= $naFs ?>px;font-weight:<?= $naBold ?>;color:<?= htmlspecialchars($naColor) ?>;text-align:<?= htmlspecialchars($naAlign) ?>;font-family:<?= htmlspecialchars($naFont) ?>;"><?= htmlspecialchars($namaT) ?></span>
                         </div>
 
                         <div class="ppt-item ppt-tbox ppt-t-years" style="left:<?= $f($yp,'x',$def['yr']['x']) ?>px;top:<?= $f($yp,'y',$def['yr']['y']) ?>px;width:<?= $f($yp,'w',$def['yr']['w']) ?>px;">
                             <span class="ppt-move" title="Geser">✥</span>
                             <span class="ppt-edit ppt-years" contenteditable="true" spellcheck="false"
-                                  style="font-size:<?= $yrFs ?>px;font-weight:<?= $yrBold ?>;color:<?= htmlspecialchars($yrColor) ?>;text-align:<?= htmlspecialchars($yrAlign) ?>;"><?= htmlspecialchars($yrT) ?></span>
+                                  style="font-size:<?= $yrFs ?>px;font-weight:<?= $yrBold ?>;color:<?= htmlspecialchars($yrColor) ?>;text-align:<?= htmlspecialchars($yrAlign) ?>;font-family:<?= htmlspecialchars($yrFont) ?>;"><?= htmlspecialchars($yrT) ?></span>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -333,6 +362,16 @@ require __DIR__ . '/partials/header.php';
         document.querySelectorAll('.ppt-ribbon [data-act]').forEach(function (b) {
             if (b.getAttribute('data-act') !== null) b.disabled = !ed;
         });
+        // sync font dropdown ke teks yang dipilih
+        var fontSel = document.querySelector('.ppt-ribbon [data-act="font"]');
+        if (fontSel) {
+            var fam = ed ? getComputedStyle(ed).fontFamily.replace(/"/g, "'") : '';
+            var idx = 0;
+            for (var i = 0; i < fontSel.options.length; i++) {
+                if (fontSel.options[i].value.replace(/"/g, "'") === fam) { idx = i; break; }
+            }
+            fontSel.selectedIndex = idx;
+        }
         // sync warna slide aktif
         var slide = document.querySelector('.ppt-slide.active');
         if (slide) {
@@ -346,7 +385,7 @@ require __DIR__ . '/partials/header.php';
 
     document.querySelectorAll('.ppt-ribbon [data-act]').forEach(function (btn) {
         var act = btn.getAttribute('data-act');
-        var ev  = (btn.tagName === 'INPUT') ? 'input' : 'click';
+        var ev  = (btn.tagName === 'SELECT') ? 'change' : (btn.tagName === 'INPUT') ? 'input' : 'click';
         btn.addEventListener(ev, function () {
             var ed = selectedEdit();
             if (!ed) return;
@@ -358,6 +397,8 @@ require __DIR__ . '/partials/header.php';
                 ed.style.fontWeight = b ? '400' : '700';
             } else if (act === 'color') {
                 ed.style.color = btn.value;
+            } else if (act === 'font') {
+                ed.style.fontFamily = btn.value;
             } else if (act === 'al-left')   { ed.style.textAlign = 'left'; }
             else if (act === 'al-center') { ed.style.textAlign = 'center'; }
             else if (act === 'al-right')  { ed.style.textAlign = 'right'; }
@@ -397,6 +438,76 @@ require __DIR__ . '/partials/header.php';
     }
     window.selectSlide = selectSlide;
 
+    /* ---------- Cari nama arwah lintas SEMUA kategori → lompat ke slide ---------- */
+    (function () {
+        var input = document.getElementById('pptSearchArwah');
+        var box   = document.getElementById('pptSearchResults');
+        if (!input || !box) return;
+
+        function escPpt(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        var searchTimer = null;
+        input.addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            var q = this.value.trim();
+            if (q.length < 1) { box.style.display = 'none'; box.innerHTML = ''; return; }
+            searchTimer = setTimeout(function () { doPptSearch(q); }, 300);
+        });
+
+        function doPptSearch(q) {
+            fetch('ppt_search.php?q=' + encodeURIComponent(q))
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (!d.ok || !d.results.length) {
+                        box.innerHTML = '<div class="ci-search-empty">Tidak ditemukan</div>';
+                        box.style.display = 'block';
+                        return;
+                    }
+                    box.innerHTML = d.results.map(function (r) {
+                        return '<div class="ci-search-item" onclick="pptGoToArwah(' + r.id + ',\'' + r.cat + '\')">' +
+                            '<strong>' + escPpt(r.nama) + '</strong>' +
+                            '<span>' + escPpt(r.cat_label) + '</span>' +
+                        '</div>';
+                    }).join('');
+                    box.style.display = 'block';
+                })
+                .catch(function () {});
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.ci-search-wrap')) box.style.display = 'none';
+        });
+
+        // Klik hasil: kalau kategorinya beda dari tab aktif, reload ke tab itu
+        // dulu (bawa ?goto=<id arwah>) — penanganan lompat-ke-slide ada di
+        // bawah (cek ?goto= saat halaman dimuat).
+        window.pptGoToArwah = function (id, cat) {
+            var current = <?= json_encode($cat) ?>;
+            if (cat !== current) {
+                location.href = '?cat=' + encodeURIComponent(cat) + '&goto=' + id;
+                return;
+            }
+            box.style.display = 'none';
+            input.value = '';
+            pptJumpToArwahId(id);
+        };
+
+        function pptJumpToArwahId(id) {
+            var unit = document.querySelector('.ppt-unit[data-id="' + id + '"]');
+            if (!unit) return;
+            var slide = unit.closest('.ppt-slide');
+            if (!slide) return;
+            var idx = parseInt(slide.dataset.idx, 10);
+            selectSlide(idx);
+            var thumb = document.querySelector('.ppt-thumb[data-idx="' + idx + '"]');
+            if (thumb) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Datang dari pencarian di tab kategori lain → langsung lompat ke slide-nya
+        var gotoId = new URLSearchParams(location.search).get('goto');
+        if (gotoId) pptJumpToArwahId(parseInt(gotoId, 10));
+    })();
+
     // Sinkron nama ke thumbnail (gabungan semua nama di slide itu)
     document.querySelectorAll('.ppt-nama').forEach(function (el) {
         el.addEventListener('input', function () {
@@ -435,10 +546,10 @@ require __DIR__ . '/partials/header.php';
                     ph: { x: photo.offsetLeft, y: photo.offsetTop, w: photo.offsetWidth, h: photo.offsetHeight },
                     na: { x: naB.offsetLeft, y: naB.offsetTop, w: naB.offsetWidth,
                           fs: parseFloat(cs(naE,'fontSize')), bold: (cs(naE,'fontWeight')|0) >= 600,
-                          color: rgbToHex(cs(naE,'color')), align: cs(naE,'textAlign') },
+                          color: rgbToHex(cs(naE,'color')), align: cs(naE,'textAlign'), font: cs(naE,'fontFamily') },
                     yr: { x: yrB.offsetLeft, y: yrB.offsetTop, w: yrB.offsetWidth,
                           fs: parseFloat(cs(yrE,'fontSize')), bold: (cs(yrE,'fontWeight')|0) >= 600,
-                          color: rgbToHex(cs(yrE,'color')), align: cs(yrE,'textAlign') }
+                          color: rgbToHex(cs(yrE,'color')), align: cs(yrE,'textAlign'), font: cs(yrE,'fontFamily') }
                 });
             });
         });
@@ -495,6 +606,11 @@ require __DIR__ . '/partials/header.php';
                 var s = pptx.addSlide();
                 s.background = { color: (rgbToHex(cs(el,'backgroundColor')) || '#1A0E00').replace('#','') };
 
+                function pptFontName(ff) {
+                    var first = (ff || 'Georgia').split(',')[0].trim();
+                    return first.replace(/^["']|["']$/g, '') || 'Georgia';
+                }
+
                 function addTextEl(box, edit) {
                     var txt = edit.textContent.trim();
                     if (!txt) return;
@@ -504,7 +620,7 @@ require __DIR__ . '/partials/header.php';
                         color: (rgbToHex(cs(edit,'color')) || 'FFFFFF').replace('#',''),
                         bold: (cs(edit,'fontWeight')|0) >= 600,
                         fontSize: Math.round(parseFloat(cs(edit,'fontSize')) * ptScale),
-                        fontFace: 'Georgia'
+                        fontFace: pptFontName(cs(edit,'fontFamily'))
                     });
                 }
 
@@ -590,6 +706,31 @@ require __DIR__ . '/partials/header.php';
 
     updateRibbon();
     layoutSlides();
+
+    /* ---------- Overlay loading foto: tunggu semua foto kelar baru bisa diklik ---------- */
+    (function () {
+        var overlay = document.getElementById('pptLoadingOverlay');
+        if (!overlay) return;
+
+        var imgs = Array.prototype.slice.call(document.querySelectorAll('.ppt-photo img, .ppt-thumb-foto'))
+            .filter(function (el) { return el.tagName === 'IMG'; });
+
+        function hideOverlay() { overlay.classList.add('done'); }
+
+        if (!imgs.length) { hideOverlay(); return; }
+
+        var pending = imgs.length;
+        function settle() { pending--; if (pending <= 0) hideOverlay(); }
+
+        imgs.forEach(function (img) {
+            if (img.complete) { settle(); return; }
+            img.addEventListener('load', settle, { once: true });
+            img.addEventListener('error', settle, { once: true });
+        });
+
+        // Jaga-jaga: jangan sampai macet nahan admin kalau ada foto yang gagal/lambat total
+        setTimeout(hideOverlay, 15000);
+    })();
     </script>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>

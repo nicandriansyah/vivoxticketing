@@ -11,6 +11,11 @@ $donation = donationAccount($pdo ?? null);
 // Format nomor rekening per 4 digit untuk tampilan
 $accDigits  = preg_replace('/\D/', '', $donation['account']);
 $accDisplay = trim(chunk_split($accDigits, 4, ' '));
+// Upload Nama Arwah — diatur admin lewat dashboard (default tertutup)
+$arwahUploadOpen = false;
+if ($pdo) {
+    try { $arwahUploadOpen = ((int)getSetting($pdo, 'arwah_upload_open', '0') === 1); } catch (Exception $e) {}
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -129,8 +134,8 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                         </div>
                     </div>
 
-                    <!-- Arwah Checkbox -->
-                    <div class="arwah-toggle mb-3">
+                    <!-- Arwah Checkbox — tampil/sembunyi diatur admin lewat dashboard (card Kuota & Penjualan) -->
+                    <div class="arwah-toggle mb-3"<?= $arwahUploadOpen ? '' : ' style="display:none;"' ?>>
                         <label class="custom-checkbox-label">
                             <input type="checkbox" id="uploadArwah" name="upload_arwah" value="1" class="custom-checkbox">
                             <span class="checkmark"></span>
@@ -171,7 +176,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label class="form-label">Nama Arwah <span class="required">*</span></label>
+                                    <label class="form-label">Nama Arwah</label>
                                     <input type="text" name="nama_arwah[]" class="custom-input" style="width:100%; border-radius:8px; padding:.8rem 1rem; border:1px solid #2e2e2e; background:#181818; color:#f0f0f0; font-size:1rem;" placeholder="Nama lengkap almarhum/almarhumah" autocomplete="off">
                                 </div>
 
@@ -307,7 +312,7 @@ $accDisplay = trim(chunk_split($accDigits, 4, ' '));
 </div>
 
 <script>var REKENING = '<?= htmlspecialchars($accDigits) ?>';</script>
-<script src="assets/js/form.js?v=9"></script>
+<script src="assets/js/form.js?v=10"></script>
 <script>
 var _lt = 0;
 document.addEventListener('touchend', function(e) {

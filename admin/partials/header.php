@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> — Admin Ticketing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=50" rel="stylesheet">
+    <link href="assets/admin.css?v=54" rel="stylesheet">
 </head>
 <body class="admin-page">
 <div class="adm-layout">
@@ -31,6 +31,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
         <nav class="adm-side-nav">
             <a href="index.php"   class="<?= $activeMenu === 'dashboard' ? 'active' : '' ?>"><span class="ico">📊</span> <span class="side-txt">Dashboard</span></a>
             <a href="checkin.php" class="<?= $activeMenu === 'checkin'   ? 'active' : '' ?>"><span class="ico">🎫</span> <span class="side-txt">Check-in Tiket</span></a>
+            <a href="register_ots.php" class="<?= $activeMenu === 'register' ? 'active' : '' ?>"><span class="ico">🎟️</span> <span class="side-txt">Register Tiket</span></a>
             <?php if (function_exists('adminRole') && adminRole() === 'admin'): ?>
             <a href="ppt.php"     class="<?= $activeMenu === 'ppt'       ? 'active' : '' ?>" onclick="return checkPptAccess()"><span class="ico">📑</span> <span class="side-txt">PPT Generator</span></a>
             <?php endif; ?>

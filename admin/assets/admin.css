@@ -578,6 +578,17 @@ body {
 }
 .rib-btn:hover:not(:disabled) { border-color: var(--gold); background: #fffdf5; }
 .rib-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.rib-select {
+    height: 30px;
+    max-width: 150px;
+    border: 1px solid var(--border);
+    background: #fff; border-radius: 6px;
+    cursor: pointer; font-size: 0.8rem;
+    color: var(--ink);
+    padding: 0 0.4rem;
+}
+.rib-select:hover:not(:disabled) { border-color: var(--gold); background: #fffdf5; }
+.rib-select:disabled { opacity: 0.4; cursor: not-allowed; }
 .rib-color {
     position: relative; width: 30px; height: 30px;
     border: 1px solid var(--border); border-radius: 6px;
@@ -721,6 +732,39 @@ body {
     font-size: 10px; line-height: 18px; text-align: center; padding: 0;
     cursor: pointer; opacity: 0; transition: opacity 0.12s;
     z-index: 2;
+}
+
+/* Overlay loading foto PPT — transparan (slide tetap kelihatan di belakang),
+   cuma nahan interaksi sampai semua foto selesai dimuat. */
+.ppt-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(40,40,40,0.45);
+    backdrop-filter: blur(1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    cursor: wait;
+}
+.ppt-loading-overlay.done { display: none; }
+.ppt-loading-spinner {
+    width: 52px; height: 52px;
+    border: 5px solid rgba(201,168,76,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: pptLoadSpin 0.8s linear infinite;
+}
+@keyframes pptLoadSpin { to { transform: rotate(360deg); } }
+.ppt-loading-overlay p {
+    background: rgba(26,14,0,0.85);
+    color: #fff;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 /* Modal upload foto: fullscreen ala modal detail, konten form tetap di-center & tidak molor */
@@ -1186,6 +1230,67 @@ thead .col-aksi { background: #fafbfc; z-index: 3; }
 }
 .ci-result-icon.ok   { background: var(--ok); }
 .ci-result-icon.fail { background: var(--no); }
+
+/* ---------- Check-in: cari pemesan (nama/HP) ---------- */
+.ci-search-wrap { position: relative; }
+.ci-search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 50;
+}
+.ci-search-item {
+    padding: 0.7rem 0.9rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f1f3;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.ci-search-item:last-child { border-bottom: none; }
+.ci-search-item:hover { background: #f8f6ef; }
+.ci-search-item strong { color: var(--ink); font-size: 0.95rem; }
+.ci-search-item span { color: var(--muted); font-size: 0.82rem; }
+.ci-search-empty { padding: 0.9rem; color: var(--muted); text-align: center; font-size: 0.85rem; }
+
+.ci-ticket-list { margin-top: 0.4rem; }
+.ci-ticket-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.3rem;
+    border-bottom: 1px solid #eef0f2;
+    cursor: pointer;
+}
+.ci-ticket-row:last-child { border-bottom: none; }
+.ci-ticket-row input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--gold); }
+.ci-ticket-row span { font-family: 'Consolas', monospace; font-weight: 700; letter-spacing: 0.5px; }
+.ci-ticket-row small { font-family: inherit; font-weight: 400; color: var(--muted); }
+.ci-badge-ok-sm {
+    margin-left: auto;
+    background: #e8f5e9;
+    color: var(--ok);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+/* Font besar (venue mode) sejalan dengan .ci-* lain di .checkin-wrap */
+.checkin-wrap .ci-search-item strong { font-size: 1.15rem; }
+.checkin-wrap .ci-search-item span   { font-size: 1rem; }
+.checkin-wrap .ci-ticket-row { font-size: 1.1rem; }
+.checkin-wrap .ci-ticket-row input[type="checkbox"] { width: 26px; height: 26px; }
+.checkin-wrap .ci-badge-ok-sm { font-size: 0.78rem; }
 
 /* ---------- Detail ---------- */
 .adm-back { display: inline-block; color: var(--muted); text-decoration: none; margin-bottom: 1.25rem; font-weight: 500; }

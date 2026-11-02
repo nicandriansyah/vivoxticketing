@@ -79,8 +79,6 @@ function validateStep1() {
             const hub   = entry.querySelector('[name="hubungan_arwah[]"]');
             [nama, lahir, wafat, hub].forEach(clearError);
 
-            if (!nama.value.trim())  { showError(nama, 'Nama arwah wajib diisi'); markInvalid(nama); }
-
             const lv = parseInt(lahir.value, 10), wv = parseInt(wafat.value, 10);
             if (!lahir.value.trim() || lv < 1900 || lv > thisYear) {
                 showError(lahir, 'Tahun lahir tidak valid'); markInvalid(lahir);

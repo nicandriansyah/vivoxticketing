@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=50" rel="stylesheet">
+    <link href="assets/admin.css?v=54" rel="stylesheet">
 </head>
 <body class="admin-login-page">
     <div class="login-card">
@@ -50,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" class="adm-input" autocomplete="current-password" required>
             <button type="submit" class="adm-btn-primary" style="width:100%;margin-top:1rem;">Masuk</button>
         </form>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;">
+            <a href="checkin_staff.php" class="adm-btn-secondary" style="display:block;">🎫 Check-in Tiket (Petugas)</a>
+        </div>
     </div>
 </body>
 </html>

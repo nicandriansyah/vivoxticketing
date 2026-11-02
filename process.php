@@ -80,8 +80,6 @@ if ($upload_arwah) {
         // Baris kosong sepenuhnya → lewati (mis. entri sisa yang tak diisi)
         if ($nm === '' && $lh === null && $wf === null && $hb === null && !$hasFile) continue;
 
-        // Nama wajib
-        if ($nm === '') { header('Location: form.php?error=arwah_nama'); exit; }
         // Tahun lahir & wafat wajib dan dalam rentang wajar
         if ($lh === null || $wf === null
             || $lh < 1900 || $lh > $thisYear || $wf < 1900 || $wf > $thisYear) {

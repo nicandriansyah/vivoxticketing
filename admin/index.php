@@ -13,6 +13,8 @@ $isTicketing = adminRole() === 'ticketing';   // role terbatas: tanpa kartu/moda
 $helpContact = helpContact($dbReady ? $pdo : null);
 // Rekening sumbangan di form registrasi (editable via modal)
 $donation = donationAccount($dbReady ? $pdo : null);
+// PIN akses petugas check-in tanpa login admin (editable via modal)
+$checkinPin = $dbReady ? (string)getSetting($pdo, 'checkin_pin', '') : '';
 
 $stats = ['reg' => 0, 'tiket' => 0, 'sumbangan' => 0, 'email' => 0, 'checkin' => 0];
 $quota = 0; $sold = 0; $remaining = 0;
@@ -56,6 +58,10 @@ if ($dbReady) {
         $salesOpen      = ((int)getSetting($pdo, 'sales_open', '1') === 1);
         $quotaAvailable = ($quota <= 0) || ($sold < $quota);
         $isOpen         = $salesOpen && $quotaAvailable;
+        // Upload Nama Arwah di form registrasi — default tertutup (fitur sudah ditutup event ini)
+        $arwahOpen  = ((int)getSetting($pdo, 'arwah_upload_open', '0') === 1);
+        $arwahCount = 0;
+        try { $arwahCount = (int)$pdo->query("SELECT COUNT(*) FROM arwah")->fetchColumn(); } catch (Exception $e) {}
 
         $conds  = [];
         $params = [];
@@ -112,6 +118,10 @@ require __DIR__ . '/partials/header.php';
             <div class="adm-success adm-flash">✓ Penjualan tiket DIBUKA.</div>
         <?php elseif ($msg === 'closed'): ?>
             <div class="adm-success adm-flash">✓ Penjualan tiket DITUTUP.</div>
+        <?php elseif ($msg === 'arwah_opened'): ?>
+            <div class="adm-success adm-flash">✓ Upload Nama Arwah DIBUKA di form registrasi.</div>
+        <?php elseif ($msg === 'arwah_closed'): ?>
+            <div class="adm-success adm-flash">✓ Upload Nama Arwah DITUTUP di form registrasi.</div>
         <?php elseif ($msg === 'fail'): ?>
             <div class="adm-alert adm-flash">Gagal mengirim email: <?= htmlspecialchars($_SESSION['resend_error'] ?? 'unknown') ?><?php unset($_SESSION['resend_error']); ?></div>
         <?php elseif ($msg === 'err'): ?>
@@ -137,6 +147,12 @@ require __DIR__ . '/partials/header.php';
                     Booking <?= number_format($stats['tiket'], 0, ',', '.') ?> &middot;
                     Kuota <?= $quota > 0 ? number_format($quota, 0, ',', '.') : '∞' ?> &middot;
                     Sisa <?= $quota > 0 ? number_format($remaining, 0, ',', '.') : '∞' ?>
+                </div>
+            </button>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-quota <?= $arwahOpen ? 'q-open' : 'q-closed' ?>"<?= $isTicketing ? ' style="cursor:default;"' : ' onclick="openArwahModal()"' ?>>
+                <div class="stat-label">Upload Arwah <?= $arwahOpen ? 'DIBUKA' : 'DITUTUP' ?></div>
+                <div class="stat-quota-mini">
+                    <?= number_format($arwahCount, 0, ',', '.') ?> arwah diupload
                 </div>
             </button>
             <div class="stat-card">
@@ -177,6 +193,10 @@ require __DIR__ . '/partials/header.php';
                 <div class="stat-user-emoji">🏦</div>
                 <div class="stat-label">Rekening Sumbangan</div>
             </button>
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openCheckinPin()">
+                <div class="stat-user-emoji">🔑</div>
+                <div class="stat-label">PIN Check-in</div>
+            </button>
             <?php endif; ?>
         </div>
 
@@ -209,6 +229,29 @@ require __DIR__ . '/partials/header.php';
                     </button>
                 </form>
                 <p class="quota-hint" style="margin:0.9rem 0 0;">Kuota <strong>0</strong> = tanpa batas. Saat penjualan ditutup atau kuota penuh, tombol di halaman depan jadi "Coming Soon".</p>
+            </div>
+        </div>
+
+        <!-- Modal Upload Arwah (terpisah dari Kuota & Penjualan) -->
+        <div id="arwahModal" class="modal-overlay" onclick="if(event.target===this)closeArwahModal()">
+            <div class="modal-box" style="max-width:420px;">
+                <button class="modal-close" onclick="closeArwahModal()">✕</button>
+                <h3 class="m-title">Upload Nama Arwah</h3>
+                <div class="quota-modal-status <?= $arwahOpen ? '' : 'closed' ?>">
+                    <span class="quota-dot"></span>
+                    Upload Arwah <strong><?= $arwahOpen ? 'DIBUKA' : 'DITUTUP' ?></strong>
+                </div>
+                <div class="quota-numbers" style="margin:0.6rem 0 1.1rem;">
+                    <span>Sudah diupload <strong><?= number_format($arwahCount, 0, ',', '.') ?></strong> arwah</span>
+                </div>
+                <form method="POST" action="arwah_toggle.php" id="arwahToggleForm">
+                    <input type="hidden" name="open" value="<?= $arwahOpen ? '0' : '1' ?>">
+                    <button type="button" style="width:100%;" class="<?= $arwahOpen ? 'adm-btn-danger' : 'adm-btn-secondary' ?>"
+                            onclick="document.getElementById('arwahToggleForm').submit();">
+                        <?= $arwahOpen ? '⏸ Tutup Upload Arwah' : '▶ Buka Upload Arwah' ?>
+                    </button>
+                </form>
+                <p class="quota-hint" style="margin:0.9rem 0 0;">Kalau dibuka, opsi "Upload Nama Arwah" muncul lagi di form registrasi tiket (langkah Data Peserta).</p>
             </div>
         </div>
         <?php endif; ?>
@@ -354,6 +397,28 @@ require __DIR__ . '/partials/header.php';
             </div>
         </div>
     </div>
+
+    <!-- Modal PIN akses petugas check-in (tanpa login admin) -->
+    <div id="checkinPinModal" class="modal-overlay" onclick="if(event.target===this)closeCheckinPin()">
+        <div class="modal-box" style="max-width:420px;">
+            <button class="modal-close" onclick="closeCheckinPin()">✕</button>
+            <h3 class="m-title">PIN Check-in</h3>
+            <p style="font-size:.85rem;color:#888;margin:-.5rem 0 .75rem;line-height:1.5;">
+                Petugas pintu bisa scan/checkin tiket lewat link di bawah tanpa perlu login admin — cukup masukkan PIN ini sekali. Jangan sebar PIN ke luar panitia.
+            </p>
+            <label class="hc-label">PIN (bebas, minimal 4 karakter)</label>
+            <input type="text" id="cpPin" class="hc-input" value="<?= htmlspecialchars($checkinPin) ?>" placeholder="mis. 240711" autocomplete="off">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-top:.9rem;">
+                <button type="button" class="m-view-btn" onclick="saveCheckinPin()">💾 Simpan</button>
+                <span id="cpStatus" style="font-size:.8rem;font-weight:600;"></span>
+            </div>
+            <label class="hc-label" style="margin-top:1.1rem;">Link untuk petugas</label>
+            <div style="display:flex;gap:.4rem;">
+                <input type="text" id="cpLink" class="hc-input" readonly style="flex:1;">
+                <button type="button" class="adm-btn-ghost" style="white-space:nowrap;" onclick="copyCheckinLink()">📋 Salin</button>
+            </div>
+        </div>
+    </div>
     <?php endif; ?>
 
     <!-- Modal konfirmasi penjualan -->
@@ -397,6 +462,8 @@ require __DIR__ . '/partials/header.php';
     /* ---------- Modal kuota & penjualan ---------- */
     function openQuotaModal()  { document.getElementById('quotaModal').classList.add('open'); }
     function closeQuotaModal() { document.getElementById('quotaModal').classList.remove('open'); }
+    function openArwahModal()  { document.getElementById('arwahModal').classList.add('open'); }
+    function closeArwahModal() { document.getElementById('arwahModal').classList.remove('open'); }
 
     /* ---------- Rekening sumbangan ---------- */
     function openDonation()  { document.getElementById('donationModal').classList.add('open'); }
@@ -421,6 +488,39 @@ require __DIR__ . '/partials/header.php';
                 setTimeout(closeDonation, 900);
             })
             .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
+
+    /* ---------- PIN check-in petugas ---------- */
+    function openCheckinPin() {
+        document.getElementById('cpLink').value = location.origin + location.pathname.replace(/[^\/]*$/, 'checkin_staff.php');
+        document.getElementById('checkinPinModal').classList.add('open');
+    }
+    function closeCheckinPin() {
+        document.getElementById('checkinPinModal').classList.remove('open');
+        var st = document.getElementById('cpStatus'); if (st) st.textContent = '';
+    }
+    function saveCheckinPin() {
+        var st  = document.getElementById('cpStatus');
+        var pin = document.getElementById('cpPin').value.trim();
+        if (pin && pin.length < 4) { st.style.color = '#c0392b'; st.textContent = 'Minimal 4 karakter'; return; }
+        var fd = new FormData();
+        fd.append('pin', pin);
+        st.style.color = '#666'; st.textContent = 'Menyimpan...';
+        fetch('checkin_pin_save.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) { st.style.color = '#c0392b'; st.textContent = res.error || 'Gagal menyimpan'; return; }
+                st.style.color = '#1a7a40'; st.textContent = '✓ Tersimpan';
+            })
+            .catch(function () { st.style.color = '#c0392b'; st.textContent = 'Koneksi gagal'; });
+    }
+    function copyCheckinLink() {
+        var el = document.getElementById('cpLink');
+        el.select(); el.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(el.value).catch(function () { document.execCommand('copy'); });
+        var st = document.getElementById('cpStatus');
+        st.style.color = '#1a7a40'; st.textContent = '✓ Link disalin';
+        setTimeout(function () { st.textContent = ''; }, 1500);
     }
 
     /* ---------- Kontak bantuan 404 ---------- */

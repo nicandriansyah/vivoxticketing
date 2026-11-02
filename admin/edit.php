@@ -32,6 +32,12 @@ require __DIR__ . '/partials/header.php';
 
         <a href="index.php" class="adm-btn-ghost" style="display:inline-flex;margin-bottom:1rem;">← Kembali ke Dashboard</a>
 
+        <?php if (($_GET['msg'] ?? '') === 'ots'): ?>
+        <div class="adm-alert" style="background:#e8f5e9;border-color:#a5d6a7;color:#1a7a40;margin-bottom:1rem;">
+            ✓ Registrasi OTS berhasil dibuat & tiket sudah dikirim ke email.
+        </div>
+        <?php endif; ?>
+
         <h2 style="margin-bottom:0.2rem;"><?= htmlspecialchars($row['nama']) ?></h2>
 
         <!-- Kontak: tampilan default, form terbuka saat klik Edit -->
