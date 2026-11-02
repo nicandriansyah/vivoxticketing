@@ -38,7 +38,7 @@ $unlocked = !empty($_SESSION['checkin_pin_ok']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-in Tiket</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="assets/admin.css?v=54" rel="stylesheet">
+    <link href="assets/admin.css?v=55" rel="stylesheet">
 </head>
 <body class="<?= $unlocked ? 'admin-page' : 'admin-login-page' ?>">
 <?php if (!$unlocked): ?>

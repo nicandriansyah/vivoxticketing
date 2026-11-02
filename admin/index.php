@@ -181,19 +181,19 @@ require __DIR__ . '/partials/header.php';
                 </div>
             </div>
             <?php if (!$isTicketing): ?>
-            <a href="users.php" class="stat-card stat-card-link stat-card-user">
+            <a href="users.php" class="stat-card stat-card-link stat-card-user stat-card-half">
                 <div class="stat-user-emoji">👥</div>
                 <div class="stat-label">Setting User</div>
             </a>
-            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openHelpContact()">
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-half" onclick="openHelpContact()">
                 <div class="stat-user-emoji">☎️</div>
                 <div class="stat-label">Kontak Bantuan</div>
             </button>
-            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openDonation()">
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-half" onclick="openDonation()">
                 <div class="stat-user-emoji">🏦</div>
                 <div class="stat-label">Rekening Sumbangan</div>
             </button>
-            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn" onclick="openCheckinPin()">
+            <button type="button" class="stat-card stat-card-link stat-card-user stat-card-btn stat-card-half" onclick="openCheckinPin()">
                 <div class="stat-user-emoji">🔑</div>
                 <div class="stat-label">PIN Check-in</div>
             </button>

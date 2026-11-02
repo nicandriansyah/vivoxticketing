@@ -393,9 +393,13 @@ body {
     gap: 1rem;
     margin-bottom: 1.75rem;
 }
-/* Desktop: fix 4 kartu per baris */
+/* Desktop: fix 4 kartu per baris. Grid dibagi 8 kolom supaya kartu "half"
+   (Setting User, Kontak Bantuan, Rekening Sumbangan, PIN Check-in) bisa
+   setengah lebar kartu biasa — 2 kartu half muat di slot 1 kartu normal. */
 @media (min-width: 721px) {
-    .stat-grid { grid-template-columns: repeat(4, 1fr); }
+    .stat-grid { grid-template-columns: repeat(8, 1fr); }
+    .stat-grid > .stat-card { grid-column: span 2; }
+    .stat-grid > .stat-card.stat-card-half { grid-column: span 1; }
 }
 .stat-card {
     background: var(--card);
