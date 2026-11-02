@@ -55,6 +55,9 @@ $unlocked = !empty($_SESSION['checkin_pin_ok']);
             <input type="password" inputmode="numeric" name="pin" class="adm-input" style="text-align:center;letter-spacing:6px;font-size:1.3rem;" autofocus required>
             <button type="submit" class="adm-btn-primary" style="width:100%;margin-top:1rem;">Masuk</button>
         </form>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;">
+            <a href="login.php" class="adm-btn-ghost" style="display:block;">← Kembali ke Login Admin</a>
+        </div>
     </div>
 <?php else: ?>
     <div class="adm-main" style="max-width:480px;">
