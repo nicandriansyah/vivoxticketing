@@ -14,21 +14,17 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>Buku Program — FOAS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <?php if ($hasBook): ?>
-    <link href="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/src/Style/stPageFlip.css" rel="stylesheet">
-    <?php endif; ?>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            height: 100%;
+            min-height: 100%;
             background: #0d0d0d;
-            overflow: hidden;
             font-family: 'Inter', sans-serif;
             color: #f0f0f0;
             touch-action: manipulation;
         }
         .empty-state {
-            height: 100%;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -45,8 +41,7 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 1rem; z-index: 20; background: #0d0d0d;
         }
-        /* ID selector di atas ngalahin default UA [hidden]{display:none} kalau nggak ditegaskan lagi di sini */
-        #loadingScreen[hidden], #bookShell[hidden] { display: none; }
+        #loadingScreen[hidden] { display: none; }
         .loading-spinner {
             width: 48px; height: 48px;
             border: 4px solid rgba(201,168,76,0.25);
@@ -58,16 +53,14 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
         #loadingText { font-size: 0.85rem; color: #ccc; text-align: center; padding: 0 1.5rem; }
         .loading-hint { font-size: 0.75rem; color: #777; margin-top: 0.3rem; }
 
-        #bookShell {
-            position: fixed; inset: 0;
-            display: flex; flex-direction: column;
-        }
         .book-topbar {
-            flex-shrink: 0;
+            position: fixed; top: 0; left: 0; right: 0;
             display: flex; align-items: center; justify-content: space-between;
             padding: max(0.7rem, env(safe-area-inset-top)) 1rem 0.7rem;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-            position: relative; z-index: 10;
+            background: rgba(13,13,13,0.92);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 10;
         }
         #pageIndicator { font-size: 0.8rem; color: #e8c66e; letter-spacing: 1px; font-weight: 600; }
         .topbar-logo {
@@ -86,34 +79,33 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
             font-size: 1rem;
             cursor: pointer;
         }
-        .book-area {
-            flex: 1; min-height: 0;
-            position: relative;
-            display: flex; align-items: center; justify-content: center;
-            padding: 0.5rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+        #readerShell[hidden] { display: none; }
+        #readerPad {
+            height: calc(3rem + env(safe-area-inset-top));
         }
-        #book { width: 100%; height: 100%; }
-        .navzone {
-            position: absolute; top: 0; bottom: 0;
-            width: 22%;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            z-index: 5;
+        #reader {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
         }
-        .navzone-left  { left: 0; }
-        .navzone-right { right: 0; }
-        .swipe-hint {
-            position: fixed;
-            bottom: calc(1rem + env(safe-area-inset-bottom));
-            left: 50%; transform: translateX(-50%);
-            font-size: 0.72rem; color: #888;
-            background: rgba(0,0,0,0.5);
-            padding: 0.35rem 0.9rem;
-            border-radius: 999px;
-            z-index: 6;
-            pointer-events: none;
-            transition: opacity 0.6s ease;
+        #reader img {
+            display: block;
+            width: 100%;
+            height: auto;
+            -webkit-user-drag: none;
+        }
+        #bottomLoader {
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 1.2rem 1rem;
+            font-size: 0.8rem; color: #999;
+        }
+        #bottomLoader[hidden] { display: none; }
+        .mini-spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(201,168,76,0.25);
+            border-top-color: #c9a84c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
     </style>
 </head>
@@ -133,91 +125,82 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
         <div class="loading-hint">Mohon tunggu, lebih cepat kalau sinyal bagus</div>
     </div>
 
-    <div id="bookShell" hidden>
+    <div id="readerShell" hidden>
         <div class="book-topbar">
             <img src="foas-logo.png" alt="FOAS 14" class="topbar-logo" draggable="false" oncontextmenu="return false">
             <span id="pageIndicator">1 / 1</span>
             <button type="button" id="btnFullscreen" title="Layar Penuh">⛶</button>
         </div>
-        <div class="book-area">
-            <div id="book"></div>
-            <button type="button" class="navzone navzone-left" id="btnPrev" aria-label="Halaman sebelumnya"></button>
-            <button type="button" class="navzone navzone-right" id="btnNext" aria-label="Halaman berikutnya"></button>
+        <div id="readerPad"></div>
+        <div id="reader"></div>
+        <div id="bottomLoader" hidden>
+            <div class="mini-spinner"></div>
+            <span id="bottomLoaderText">Memuat halaman…</span>
         </div>
     </div>
-    <div class="swipe-hint" id="swipeHint">👆 Geser buat buka halaman</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
     <script>
     var PDF_URL = <?= json_encode($pdfUrl) ?>;
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    var loadingScreen = document.getElementById('loadingScreen');
-    var loadingText   = document.getElementById('loadingText');
-    var bookShell     = document.getElementById('bookShell');
-    var bookEl        = document.getElementById('book');
-    var pageIndicator = document.getElementById('pageIndicator');
-    var btnFullscreen = document.getElementById('btnFullscreen');
-    var swipeHint     = document.getElementById('swipeHint');
+    var loadingScreen   = document.getElementById('loadingScreen');
+    var loadingText     = document.getElementById('loadingText');
+    var readerShell      = document.getElementById('readerShell');
+    var readerEl         = document.getElementById('reader');
+    var pageIndicator    = document.getElementById('pageIndicator');
+    var btnFullscreen    = document.getElementById('btnFullscreen');
+    var bottomLoader     = document.getElementById('bottomLoader');
+    var bottomLoaderText = document.getElementById('bottomLoaderText');
 
-    var pageFlip = null;
-
-    function updateIndicator() {
-        if (!pageFlip) return;
-        pageIndicator.textContent = (pageFlip.getCurrentPageIndex() + 1) + ' / ' + pageFlip.getPageCount();
-    }
-
-    function buildFlipbook(images, w, h) {
-        loadingScreen.hidden = true;
-        bookShell.hidden = false;
-
-        pageFlip = new St.PageFlip(bookEl, {
-            width: w, height: h,
-            size: 'stretch',
-            minWidth: 240, maxWidth: 1600,
-            minHeight: 320, maxHeight: 2200,
-            showCover: false,
-            usePortrait: true,
-            mobileScrollSupport: false,
-            maxShadowOpacity: 0.5,
-            drawShadow: true,
-            flippingTime: 650
+    var totalPages = 0;
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                pageIndicator.textContent = entry.target.dataset.page + ' / ' + totalPages;
+            }
         });
-        pageFlip.loadFromImages(images);
-        updateIndicator();
-        pageFlip.on('flip', updateIndicator);
-
-        setTimeout(function () { swipeHint.style.opacity = '0'; }, 3500);
-    }
+    }, { threshold: 0.5 });
 
     async function init() {
         try {
             var pdf = await pdfjsLib.getDocument(PDF_URL).promise;
-            var total = pdf.numPages;
-            var images = [];
-            var w = 0, h = 0;
+            totalPages = pdf.numPages;
             var scale = Math.min(4, Math.max(2.5, (window.devicePixelRatio || 1) * 2.5));
 
-            for (var i = 1; i <= total; i++) {
-                loadingText.textContent = 'Memuat halaman ' + i + ' dari ' + total + '…';
+            for (var i = 1; i <= totalPages; i++) {
+                loadingText.textContent = 'Memuat halaman ' + i + ' dari ' + totalPages + '…';
+                bottomLoaderText.textContent = 'Memuat halaman ' + i + ' dari ' + totalPages + '…';
+
                 var page = await pdf.getPage(i);
                 var viewport = page.getViewport({ scale: scale });
                 var canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
-                if (i === 1) { w = viewport.width; h = viewport.height; }
-                images.push(canvas.toDataURL('image/png'));
+
+                var img = document.createElement('img');
+                img.src = canvas.toDataURL('image/png');
+                img.alt = 'Halaman ' + i;
+                img.loading = i <= 2 ? 'eager' : 'lazy';
+                img.decoding = 'async';
+                img.dataset.page = i;
+                readerEl.appendChild(img);
+                observer.observe(img);
+
+                if (i === 1) {
+                    pageIndicator.textContent = '1 / ' + totalPages;
+                    loadingScreen.hidden = true;
+                    readerShell.hidden = false;
+                    if (totalPages > 1) bottomLoader.hidden = false;
+                }
             }
-            buildFlipbook(images, w, h);
+            bottomLoader.hidden = true;
         } catch (e) {
             loadingText.textContent = 'Gagal memuat buku program. Coba muat ulang halaman.';
+            bottomLoaderText.textContent = 'Gagal memuat halaman berikutnya.';
         }
     }
-
-    document.getElementById('btnPrev').addEventListener('click', function () { if (pageFlip) pageFlip.flipPrev(); });
-    document.getElementById('btnNext').addEventListener('click', function () { if (pageFlip) pageFlip.flipNext(); });
 
     if (document.documentElement.requestFullscreen) {
         btnFullscreen.addEventListener('click', function () {
