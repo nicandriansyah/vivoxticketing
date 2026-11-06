@@ -88,6 +88,25 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
             margin: 0 auto;
             padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
         }
+        .page-block {
+            margin-bottom: 1.1rem;
+        }
+        .page-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1rem 0.5rem;
+            font-size: 0.72rem;
+            color: #a08a4e;
+            letter-spacing: 1px;
+        }
+        .page-label::before,
+        .page-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(201,168,76,0.25);
+        }
         #reader img {
             display: block;
             width: 100%;
@@ -179,13 +198,23 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
                 canvas.height = viewport.height;
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
 
+                var block = document.createElement('div');
+                block.className = 'page-block';
+
+                var label = document.createElement('div');
+                label.className = 'page-label';
+                label.textContent = 'Halaman ' + i;
+                block.appendChild(label);
+
                 var img = document.createElement('img');
                 img.src = canvas.toDataURL('image/png');
                 img.alt = 'Halaman ' + i;
                 img.loading = i <= 2 ? 'eager' : 'lazy';
                 img.decoding = 'async';
                 img.dataset.page = i;
-                readerEl.appendChild(img);
+                block.appendChild(img);
+
+                readerEl.appendChild(block);
                 observer.observe(img);
 
                 if (i === 1) {
