@@ -34,6 +34,7 @@ require_once __DIR__ . '/../../config/app.php';   // appVersion() untuk badge ve
             <a href="register_ots.php" class="<?= $activeMenu === 'register' ? 'active' : '' ?>"><span class="ico">🎟️</span> <span class="side-txt">Register Tiket</span></a>
             <?php if (function_exists('adminRole') && adminRole() === 'admin'): ?>
             <a href="ppt.php"     class="<?= $activeMenu === 'ppt'       ? 'active' : '' ?>" onclick="return checkPptAccess()"><span class="ico">📑</span> <span class="side-txt">PPT Generator</span></a>
+            <a href="program_book.php" class="<?= $activeMenu === 'program_book' ? 'active' : '' ?>"><span class="ico">📖</span> <span class="side-txt">Buku Program</span></a>
             <?php endif; ?>
         </nav>
         <a href="logout.php" class="adm-side-logout">🚪 <span class="side-txt">Keluar</span></a>
