@@ -197,7 +197,7 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
             var total = pdf.numPages;
             var images = [];
             var w = 0, h = 0;
-            var scale = Math.min(2.2, Math.max(1.3, (window.devicePixelRatio || 1) * 1.3));
+            var scale = Math.min(4, Math.max(2.5, (window.devicePixelRatio || 1) * 2.5));
 
             for (var i = 1; i <= total; i++) {
                 loadingText.textContent = 'Memuat halaman ' + i + ' dari ' + total + '…';
@@ -208,7 +208,7 @@ $pdfUrl   = 'uploads/program-book/book.pdf?t=' . ($hasBook ? filemtime($pdfPath)
                 canvas.height = viewport.height;
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
                 if (i === 1) { w = viewport.width; h = viewport.height; }
-                images.push(canvas.toDataURL('image/jpeg', 0.85));
+                images.push(canvas.toDataURL('image/png'));
             }
             buildFlipbook(images, w, h);
         } catch (e) {
